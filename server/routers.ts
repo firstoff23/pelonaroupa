@@ -334,7 +334,7 @@ function mapDbEvent(e: any) {
 
 const MINDI_DEFAULT_MODEL = "google/gemini-3.5-flash";
 const MINDI_BASE_PROMPT =
-  "És a Mindi, assistente de bem-estar animal do Pawra. Tens acesso ao perfil do animal [nome, espécie, raça] e ao histórico de classificações recentes. Responde sempre em português de Portugal. Sê precisa, empática e recomenda sempre consulta veterinária para situações de saúde sérias. Nunca substituas um diagnóstico médico.";
+  "És a Mindi, assistente de bem-estar animal do PeloNaRoupa. Tens acesso ao perfil do animal [nome, espécie, raça] e ao histórico de classificações recentes. Responde sempre em português de Portugal. Sê precisa, empática e recomenda sempre consulta veterinária para situações de saúde sérias. Nunca substituas um diagnóstico médico.";
 
 const SPECIES_LABELS: Record<string, string> = {
   dog: "cão",
@@ -378,7 +378,7 @@ function buildMindiSystemPrompt(
 ) {
   return `${MINDI_BASE_PROMPT}
 
-Contexto automático do Pawra:
+Contexto automático do PeloNaRoupa:
 ${formatAnimalContext(animal)}
 
 Últimas 5 classificações do histórico:
@@ -743,8 +743,8 @@ export const appRouter = router({
         });
       }
 
-      const email = ctx.user.email ?? `user-${userId}@pawra`;
-      const issuer = "Pawra";
+      const email = ctx.user.email ?? `user-${userId}@pelonaroupa`;
+      const issuer = "PeloNaRoupa";
       const otpAuthUri = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(email)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`;
 
       return { secret, otpAuthUri };
@@ -996,7 +996,7 @@ export const appRouter = router({
             const stateLabel = result.state === "distress" ? "angústia" : "alerta";
             
             sendPushNotification(userId, {
-              title: `Pawra - Alerta de ${stateLabel}!`,
+              title: `PeloNaRoupa - Alerta de ${stateLabel}!`,
               body: `${animalName} está a mostrar sinais de ${stateLabel} (${Math.round(result.confidence * 100)}% de confiança).`,
               data: { eventId: String(eventId), animalId: String(targetAnimalId) }
             }).catch(err => console.error("[Push] Erro ao enviar notificação após classify:", err));

@@ -48,9 +48,14 @@ async def get_current_user(
     api_key_env = os.environ.get("API_KEY")
     jwt_secret_env = os.environ.get("SUPABASE_JWT_SECRET")
 
-    # Bypass authentication if no secret or API key is set in environment (Dev Mode)
+    # Bypass authentication only in explicit development mode
     if not api_key_env and not jwt_secret_env:
-        return {"user": "anonymous_dev"}
+        if os.environ.get("ENVIRONMENT", "production") == "development":
+            return {"user": "anonymous_dev"}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server misconfiguration: no authentication secrets configured. Set API_KEY or SUPABASE_JWT_SECRET.",
+        )
 
     # 1. Check API Key
     if x_api_key and verify_api_key(x_api_key):

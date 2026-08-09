@@ -5,14 +5,24 @@
 // Reutiliza Badge, Skeleton, STATE_COLORS/EMOJIS/LABELS e o estilo de
 // card já usado no painel de filtros do HistoryPage.
 
-import { Handshake, Info, MessageSquareText, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Handshake,
+  Info,
+  MessageSquareText,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/hooks/useLanguage";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import type { EmotionalState } from "../../../shared/types";
-import { STATE_COLORS, STATE_EMOJIS, STATE_LABELS } from "../../../shared/types";
+import {
+  STATE_COLORS,
+  STATE_EMOJIS,
+  STATE_LABELS,
+} from "../../../shared/types";
 
 const PERIOD_LABELS_PT: Record<string, string> = {
   manha: "Manhã",
@@ -26,7 +36,11 @@ const PERIOD_LABELS_EN: Record<string, string> = {
 };
 
 function stateLabel(state: string, t: (key: any) => string) {
-  return t(`states.${state}` as any) || STATE_LABELS[state as EmotionalState] || state;
+  return (
+    t(`states.${state}` as any) ||
+    STATE_LABELS[state as EmotionalState] ||
+    state
+  );
 }
 
 export function InsightsPanel({ animalId }: { animalId: number }) {
@@ -45,9 +59,17 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
 
   if (!data) return null;
 
-  const { feedbackRate, periodOfDay, topContextByState, trend, modelAgreement } = data;
+  const {
+    feedbackRate,
+    periodOfDay,
+    topContextByState,
+    trend,
+    modelAgreement,
+  } = data;
 
-  const hasPeriodData = Object.values(periodOfDay).some((p) => p.dominantState !== null);
+  const hasPeriodData = Object.values(periodOfDay).some(
+    (p) => p.dominantState !== null,
+  );
   const isEmpty =
     !feedbackRate &&
     !hasPeriodData &&
@@ -78,7 +100,10 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
           {/* 1. Taxa de feedback */}
           {feedbackRate && (
             <div className="flex items-center gap-3">
-              <MessageSquareText size={14} className="text-muted-foreground flex-shrink-0" />
+              <MessageSquareText
+                size={14}
+                className="text-muted-foreground flex-shrink-0"
+              />
               <div className="flex-1">
                 <p className="text-xs text-foreground">
                   {language === "pt"
@@ -99,7 +124,9 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
           {hasPeriodData && (
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
-                {language === "pt" ? "Padrão por período" : "Pattern by time of day"}
+                {language === "pt"
+                  ? "Padrão por período"
+                  : "Pattern by time of day"}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {(["manha", "tarde", "noite"] as const).map((period) => {
@@ -115,7 +142,9 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                       </p>
                       {state ? (
                         <>
-                          <span className="text-lg block">{STATE_EMOJIS[state]}</span>
+                          <span className="text-lg block">
+                            {STATE_EMOJIS[state]}
+                          </span>
                           <span
                             className="text-[10px] font-semibold"
                             style={{ color: STATE_COLORS[state] }}
@@ -124,7 +153,9 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                           </span>
                         </>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground">—</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          —
+                        </span>
                       )}
                     </div>
                   );
@@ -137,17 +168,28 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
           {topContextByState.length > 0 && (
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
-                {language === "pt" ? "Contexto mais comum por estado" : "Most common context by state"}
+                {language === "pt"
+                  ? "Contexto mais comum por estado"
+                  : "Most common context by state"}
               </p>
               <div className="space-y-1.5">
                 {topContextByState.map((item) => (
-                  <div key={item.state} className="flex items-center gap-2 text-xs">
-                    <span style={{ color: STATE_COLORS[item.state as EmotionalState] }}>
+                  <div
+                    key={item.state}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <span
+                      style={{
+                        color: STATE_COLORS[item.state as EmotionalState],
+                      }}
+                    >
                       {STATE_EMOJIS[item.state as EmotionalState]}
                     </span>
                     <span className="text-foreground">
                       {stateLabel(item.state, t)}
-                      {language === "pt" ? " → mais comum: " : " → most common: "}
+                      {language === "pt"
+                        ? " → mais comum: "
+                        : " → most common: "}
                     </span>
                     <Badge
                       variant="outline"
@@ -168,7 +210,9 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
           {trend.length > 0 && (
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">
-                {language === "pt" ? "Tendência (últimas 4 semanas)" : "Trend (last 4 weeks)"}
+                {language === "pt"
+                  ? "Tendência (últimas 4 semanas)"
+                  : "Trend (last 4 weeks)"}
               </p>
               <div className="space-y-1.5">
                 {trend.slice(0, 3).map((item) => {
@@ -184,13 +228,21 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                       }
                     >
                       {isUp ? (
-                        <TrendingUp size={12} className="text-amber-400 flex-shrink-0" />
+                        <TrendingUp
+                          size={12}
+                          className="text-amber-400 flex-shrink-0"
+                        />
                       ) : (
-                        <TrendingDown size={12} className="text-emerald-400 flex-shrink-0" />
+                        <TrendingDown
+                          size={12}
+                          className="text-emerald-400 flex-shrink-0"
+                        />
                       )}
                       <span
                         className="font-semibold"
-                        style={{ color: STATE_COLORS[item.state as EmotionalState] }}
+                        style={{
+                          color: STATE_COLORS[item.state as EmotionalState],
+                        }}
                       >
                         {stateLabel(item.state, t)}
                       </span>
@@ -213,7 +265,10 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
           {/* 5. Concordância modelo-tutor */}
           {modelAgreement && (
             <div className="flex items-center gap-3">
-              <Handshake size={14} className="text-muted-foreground flex-shrink-0" />
+              <Handshake
+                size={14}
+                className="text-muted-foreground flex-shrink-0"
+              />
               <div className="flex-1">
                 <p className="text-xs text-foreground">
                   {language === "pt"
@@ -223,7 +278,9 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                 <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden mt-1">
                   <div
                     className="h-full rounded-full bg-primary"
-                    style={{ width: `${Math.round(modelAgreement.rate * 100)}%` }}
+                    style={{
+                      width: `${Math.round(modelAgreement.rate * 100)}%`,
+                    }}
                   />
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-1">

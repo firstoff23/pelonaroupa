@@ -46,9 +46,18 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, name: string, ageConfirmed: boolean) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    ageConfirmed: boolean,
+  ) => Promise<void>;
   signOut: () => Promise<void>;
-  verifyOtp: (email: string, token: string, type?: "signup" | "recovery") => Promise<void>;
+  verifyOtp: (
+    email: string,
+    token: string,
+    type?: "signup" | "recovery",
+  ) => Promise<void>;
   isAuthenticated: boolean;
   isEmailVerified: boolean;
   resendVerificationEmail: (email: string) => Promise<void>;
@@ -91,7 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (event === "TOKEN_REFRESHED") {
-        console.debug("[AuthContext] Token refreshed automatically by Supabase");
+        console.debug(
+          "[AuthContext] Token refreshed automatically by Supabase",
+        );
       }
       setSession(newSession);
       setUser(newSession?.user ?? null);
@@ -111,7 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, name: string, ageConfirmed: boolean) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    name: string,
+    ageConfirmed: boolean,
+  ) => {
     const { error } = await requireSupabase().auth.signUp({
       email,
       password,
@@ -125,8 +141,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (error) throw error;
   };
-  
-  const verifyOtp = async (email: string, token: string, type: "signup" | "recovery" = "signup") => {
+
+  const verifyOtp = async (
+    email: string,
+    token: string,
+    type: "signup" | "recovery" = "signup",
+  ) => {
     const { error } = await requireSupabase().auth.verifyOtp({
       email,
       token,

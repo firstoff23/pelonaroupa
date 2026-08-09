@@ -10,16 +10,20 @@ import {
   Users,
   Wifi,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { GlowingButton } from "@/components/ui/GlowingButton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Logo } from "@/components/ui/Logo";
 import { Card } from "@/components/ui/card";
+import { GlowingButton } from "@/components/ui/GlowingButton";
+import { Logo } from "@/components/ui/Logo";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 export default function LandingPage() {
   const [, setLocation] = useLocation();
@@ -27,11 +31,7 @@ export default function LandingPage() {
   const { t, language, setLanguage } = useLanguage();
 
   return (
-    <div
-      className="relative min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden font-sans"
-    >
-
-
+    <div className="relative min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden font-sans">
       {/* ── NAVBAR ── */}
       <header className="sticky top-0 z-20 w-full border-b border-border bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
@@ -54,7 +54,9 @@ export default function LandingPage() {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{language === "pt" ? "Alterar idioma" : "Change language"}</p>
+                <p>
+                  {language === "pt" ? "Alterar idioma" : "Change language"}
+                </p>
               </TooltipContent>
             </Tooltip>
             {isAuthenticated ? (
@@ -82,7 +84,6 @@ export default function LandingPage() {
       <main id="main-content" className="flex-1">
         <section className="w-full max-w-7xl mx-auto px-8 lg:px-12 pt-24 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col items-start text-left gap-6">
-
             {/* Headline */}
             <h1
               className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05]"
@@ -147,17 +148,13 @@ export default function LandingPage() {
                   key={label}
                   className="flex items-center gap-2 text-xs text-muted-foreground font-medium"
                 >
-                  <Icon
-                    size={14}
-                    className="text-primary"
-                    aria-hidden="true"
-                  />
+                  <Icon size={14} className="text-primary" aria-hidden="true" />
                   {label}
                 </span>
               ))}
             </div>
           </div>
-          
+
           <div className="hidden lg:block relative w-full h-[500px] rounded-3xl overflow-hidden bg-secondary">
             <img
               src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=1200"
@@ -329,7 +326,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-5 py-10 flex flex-col lg:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
           <div className="flex flex-col lg:flex-row items-center gap-6">
             <p className="font-medium">
-              © {new Date().getFullYear()} PeloNaRoupa. Todos os direitos reservados.
+              © {new Date().getFullYear()} PeloNaRoupa. Todos os direitos
+              reservados.
             </p>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2">
               <button
@@ -338,28 +336,36 @@ export default function LandingPage() {
               >
                 Política de Privacidade
               </button>
-              <span aria-hidden="true" className="text-border">·</span>
+              <span aria-hidden="true" className="text-border">
+                ·
+              </span>
               <button
                 onClick={() => setLocation("/termos")}
                 className="hover:text-foreground transition-colors font-medium focus-visible:outline-none focus-visible:underline"
               >
                 Termos de Uso
               </button>
-              <span aria-hidden="true" className="text-border">·</span>
+              <span aria-hidden="true" className="text-border">
+                ·
+              </span>
               <button
                 onClick={() => setLocation("/cookies")}
                 className="hover:text-foreground transition-colors font-medium focus-visible:outline-none focus-visible:underline"
               >
                 Política de Cookies
               </button>
-              <span aria-hidden="true" className="text-border">·</span>
+              <span aria-hidden="true" className="text-border">
+                ·
+              </span>
               <button
                 onClick={() => setLocation("/reembolsos")}
                 className="hover:text-slate-300 transition-colors font-medium focus-visible:outline-none focus-visible:underline"
               >
                 Política de Reembolso
               </button>
-              <span aria-hidden="true" className="text-slate-700">·</span>
+              <span aria-hidden="true" className="text-slate-700">
+                ·
+              </span>
               <button
                 onClick={() => {
                   const w = window as any;
@@ -375,7 +381,9 @@ export default function LandingPage() {
               >
                 Preferências de Consentimento
               </button>
-              <span aria-hidden="true" className="text-border">·</span>
+              <span aria-hidden="true" className="text-border">
+                ·
+              </span>
               <a
                 href="mailto:suporte@pawra.app"
                 className="hover:text-foreground transition-colors font-medium focus-visible:outline-none focus-visible:underline"

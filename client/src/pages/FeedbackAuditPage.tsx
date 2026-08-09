@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/hooks/useLanguage";
-import { ArrowLeft, Filter, Check, CheckCircle, ClipboardList, Loader2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "wouter";
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle,
+  ClipboardList,
+  Filter,
+  Loader2,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { type EmotionalState } from "../../../shared/types";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/hooks/useLanguage";
+import { trpc } from "@/lib/trpc";
+import type { EmotionalState } from "../../../shared/types";
 
 // Emotion state translations (for displaying them nicely)
 const STATE_TRANSLATIONS: Record<string, string> = {
@@ -20,7 +28,7 @@ const STATE_TRANSLATIONS: Record<string, string> = {
 
 export default function FeedbackAuditPage() {
   const { t, language } = useLanguage();
-  
+
   const PAGE_SIZE = 20;
   const [page, setPage] = useState(1);
 
@@ -28,8 +36,12 @@ export default function FeedbackAuditPage() {
   const [animalTypeInput, setAnimalTypeInput] = useState<string>("all");
   const [fromInput, setFromInput] = useState<string>("");
   const [toInput, setToInput] = useState<string>("");
-  const [reviewedInput, setReviewedInput] = useState<"all" | "pending" | "reviewed">("all");
-  const [predictedStateInput, setPredictedStateInput] = useState<EmotionalState | "all">("all");
+  const [reviewedInput, setReviewedInput] = useState<
+    "all" | "pending" | "reviewed"
+  >("all");
+  const [predictedStateInput, setPredictedStateInput] = useState<
+    EmotionalState | "all"
+  >("all");
 
   // State for active query filters (only updated when clicking "Filtrar")
   const [activeFilters, setActiveFilters] = useState<{
@@ -48,11 +60,17 @@ export default function FeedbackAuditPage() {
 
   // tRPC query to fetch the list of feedback annotations
   const { data, isLoading, error, refetch } = trpc.feedback.list.useQuery({
-    animal_type: activeFilters.animal_type !== "all" ? activeFilters.animal_type : undefined,
+    animal_type:
+      activeFilters.animal_type !== "all"
+        ? activeFilters.animal_type
+        : undefined,
     from: activeFilters.from || undefined,
     to: activeFilters.to || undefined,
     reviewed: activeFilters.reviewed,
-    predicted_state: activeFilters.predicted_state !== "all" ? activeFilters.predicted_state : undefined,
+    predicted_state:
+      activeFilters.predicted_state !== "all"
+        ? activeFilters.predicted_state
+        : undefined,
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
   });
@@ -137,25 +155,34 @@ export default function FeedbackAuditPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Auditoria de Feedback</h1>
+            <h1 className="text-xl font-bold text-foreground">
+              Auditoria de Feedback
+            </h1>
             <p className="text-xs text-muted-foreground">
-              Monitoriza e audita os desvios e correções dos modelos de IA do PeloNaRoupa
+              Monitoriza e audita os desvios e correções dos modelos de IA do
+              PeloNaRoupa
             </p>
           </div>
         </div>
       </div>
 
       {/* Filter panel */}
-      <form onSubmit={handleFilter} className="bg-card border border-border rounded-2xl p-4 md:p-5 space-y-4 shadow-sm">
+      <form
+        onSubmit={handleFilter}
+        className="bg-card border border-border rounded-2xl p-4 md:p-5 space-y-4 shadow-sm"
+      >
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border/30 pb-2">
           <Filter className="h-4 w-4 text-primary" />
           <span>Filtros de Pesquisa</span>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Animal Type dropdown */}
           <div className="space-y-1">
-            <label htmlFor="animal-type-select" className="text-xs font-semibold text-muted-foreground block">
+            <label
+              htmlFor="animal-type-select"
+              className="text-xs font-semibold text-muted-foreground block"
+            >
               Tipo de Animal
             </label>
             <select
@@ -172,7 +199,10 @@ export default function FeedbackAuditPage() {
 
           {/* Date pickers */}
           <div className="space-y-1">
-            <label htmlFor="date-from" className="text-xs font-semibold text-muted-foreground block">
+            <label
+              htmlFor="date-from"
+              className="text-xs font-semibold text-muted-foreground block"
+            >
               De
             </label>
             <input
@@ -185,7 +215,10 @@ export default function FeedbackAuditPage() {
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="date-to" className="text-xs font-semibold text-muted-foreground block">
+            <label
+              htmlFor="date-to"
+              className="text-xs font-semibold text-muted-foreground block"
+            >
               Até
             </label>
             <input
@@ -198,30 +231,44 @@ export default function FeedbackAuditPage() {
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="predicted-state-select" className="text-xs font-semibold text-muted-foreground block">
+            <label
+              htmlFor="predicted-state-select"
+              className="text-xs font-semibold text-muted-foreground block"
+            >
               Estado previsto
             </label>
             <select
               id="predicted-state-select"
               value={predictedStateInput}
-              onChange={(e) => setPredictedStateInput(e.target.value as EmotionalState | "all")}
+              onChange={(e) =>
+                setPredictedStateInput(e.target.value as EmotionalState | "all")
+              }
               className="w-full bg-secondary/40 border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             >
               <option value="all">Todos</option>
               {Object.entries(STATE_TRANSLATIONS).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
+                <option key={key} value={key}>
+                  {label}
+                </option>
               ))}
             </select>
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="reviewed-select" className="text-xs font-semibold text-muted-foreground block">
+            <label
+              htmlFor="reviewed-select"
+              className="text-xs font-semibold text-muted-foreground block"
+            >
               Estado de revisão
             </label>
             <select
               id="reviewed-select"
               value={reviewedInput}
-              onChange={(e) => setReviewedInput(e.target.value as "all" | "pending" | "reviewed")}
+              onChange={(e) =>
+                setReviewedInput(
+                  e.target.value as "all" | "pending" | "reviewed",
+                )
+              }
               className="w-full bg-secondary/40 border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             >
               <option value="all">Todos</option>
@@ -243,8 +290,11 @@ export default function FeedbackAuditPage() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-4 space-y-3">
-            {[1,2,3,4].map(n => (
-              <div key={n} className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0">
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0"
+              >
                 <Skeleton className="h-4 w-8 rounded" />
                 <Skeleton className="h-4 w-16 rounded" />
                 <Skeleton className="h-4 flex-1 rounded" />
@@ -254,7 +304,9 @@ export default function FeedbackAuditPage() {
           </div>
         ) : error ? (
           <div className="p-8 text-center space-y-3">
-            <p className="text-sm font-semibold text-destructive">Erro ao carregar auditorias.</p>
+            <p className="text-sm font-semibold text-destructive">
+              Erro ao carregar auditorias.
+            </p>
             <p className="text-xs text-muted-foreground">{error.message}</p>
             <Button size="sm" variant="outline" onClick={() => refetch()}>
               Tentar novamente
@@ -266,7 +318,11 @@ export default function FeedbackAuditPage() {
             <p className="text-sm font-semibold text-muted-foreground">
               {t("auditPage.emptyTitle") || "Nenhuma anotação encontrada."}
             </p>
-            {(activeFilters.animal_type !== "all" || activeFilters.from || activeFilters.to || activeFilters.reviewed !== "all" || activeFilters.predicted_state !== "all") && (
+            {(activeFilters.animal_type !== "all" ||
+              activeFilters.from ||
+              activeFilters.to ||
+              activeFilters.reviewed !== "all" ||
+              activeFilters.predicted_state !== "all") && (
               <div className="space-y-3 flex flex-col items-center">
                 <p className="text-xs text-muted-foreground/60">
                   Tenta limpar os filtros para ver todos os registos.
@@ -284,7 +340,9 @@ export default function FeedbackAuditPage() {
               {feedbackList.map((item: any) => (
                 <div key={item.id} className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-muted-foreground">#{item.id}</span>
+                    <span className="text-xs font-mono text-muted-foreground">
+                      #{item.id}
+                    </span>
                     {item.reviewed_by ? (
                       <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-semibold">
                         <CheckCircle size={10} />
@@ -312,7 +370,8 @@ export default function FeedbackAuditPage() {
                     <p>
                       Previsto:{" "}
                       {item.predicted_state
-                        ? STATE_TRANSLATIONS[item.predicted_state] || item.predicted_state
+                        ? STATE_TRANSLATIONS[item.predicted_state] ||
+                          item.predicted_state
                         : "—"}
                       {item.predicted_breed ? ` · ${item.predicted_breed}` : ""}
                     </p>
@@ -328,14 +387,19 @@ export default function FeedbackAuditPage() {
                         }
                       >
                         {item.confirmed_state
-                          ? STATE_TRANSLATIONS[item.confirmed_state] || item.confirmed_state
+                          ? STATE_TRANSLATIONS[item.confirmed_state] ||
+                            item.confirmed_state
                           : "—"}
                       </span>
                     </p>
                     {item.comment && <p className="italic">"{item.comment}"</p>}
                     <p>{item.created_at ? formatDate(item.created_at) : "—"}</p>
                     {item.audioUrl && (
-                      <audio controls src={item.audioUrl} className="w-full h-8 mt-2" />
+                      <audio
+                        controls
+                        src={item.audioUrl}
+                        className="w-full h-8 mt-2"
+                      />
                     )}
                   </div>
 
@@ -351,7 +415,8 @@ export default function FeedbackAuditPage() {
                       }}
                       disabled={reviewMutation.isPending}
                     >
-                      {reviewMutation.isPending && reviewMutation.variables?.feedbackId === item.id ? (
+                      {reviewMutation.isPending &&
+                      reviewMutation.variables?.feedbackId === item.id ? (
                         <>
                           <Loader2 size={14} className="animate-spin" />
                           <span>A rever...</span>
@@ -366,7 +431,9 @@ export default function FeedbackAuditPage() {
                   ) : (
                     <p className="text-muted-foreground/60 text-[10px] font-medium text-right">
                       Por ID #{item.reviewed_by}
-                      {item.reviewed_at ? ` · ${formatDate(item.reviewed_at)}` : ""}
+                      {item.reviewed_at
+                        ? ` · ${formatDate(item.reviewed_at)}`
+                        : ""}
                     </p>
                   )}
                 </div>
@@ -378,23 +445,50 @@ export default function FeedbackAuditPage() {
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">ID</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Animal</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Raça Prevista</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Estado Previsto</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Estado Confirmado</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground text-right">Confiança</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Observações</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Áudio</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Data</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Status</th>
-                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">Ações</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      ID
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Animal
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Raça Prevista
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Estado Previsto
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Estado Confirmado
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground text-right">
+                      Confiança
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Observações
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Áudio
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Data
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {feedbackList.map((item: any) => (
-                    <tr key={item.id} className="border-b border-border/40 hover:bg-muted/5 last:border-0 transition-colors">
-                      <td className="px-4 py-3 text-xs font-mono text-muted-foreground">#{item.id}</td>
+                    <tr
+                      key={item.id}
+                      className="border-b border-border/40 hover:bg-muted/5 last:border-0 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-xs font-mono text-muted-foreground">
+                        #{item.id}
+                      </td>
                       <td className="px-4 py-3 text-xs font-medium">
                         {item.animal_type === "dog" ? "🐶 Cão" : "🐱 Gato"}
                       </td>
@@ -402,7 +496,10 @@ export default function FeedbackAuditPage() {
                         {item.predicted_breed || "—"}
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {item.predicted_state ? (STATE_TRANSLATIONS[item.predicted_state] || item.predicted_state) : "—"}
+                        {item.predicted_state
+                          ? STATE_TRANSLATIONS[item.predicted_state] ||
+                            item.predicted_state
+                          : "—"}
                       </td>
                       <td className="px-4 py-3 text-xs font-semibold">
                         <span
@@ -414,17 +511,24 @@ export default function FeedbackAuditPage() {
                               : ""
                           }
                         >
-                          {item.confirmed_state ? (STATE_TRANSLATIONS[item.confirmed_state] || item.confirmed_state) : "—"}
+                          {item.confirmed_state
+                            ? STATE_TRANSLATIONS[item.confirmed_state] ||
+                              item.confirmed_state
+                            : "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-right font-mono font-semibold">
-                        {item.confidence !== null && item.confidence !== undefined
+                        {item.confidence !== null &&
+                        item.confidence !== undefined
                           ? `${Math.round(item.confidence * 100)}%`
                           : "—"}
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {item.comment ? (
-                          <span className="text-muted-foreground truncate max-w-[150px] block" title={item.comment}>
+                          <span
+                            className="text-muted-foreground truncate max-w-[150px] block"
+                            title={item.comment}
+                          >
                             {item.comment}
                           </span>
                         ) : (
@@ -433,7 +537,11 @@ export default function FeedbackAuditPage() {
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {item.audioUrl ? (
-                          <audio controls src={item.audioUrl} className="h-8 w-44" />
+                          <audio
+                            controls
+                            src={item.audioUrl}
+                            className="h-8 w-44"
+                          />
                         ) : (
                           <span className="text-muted-foreground/40">—</span>
                         )}
@@ -466,7 +574,8 @@ export default function FeedbackAuditPage() {
                             }}
                             disabled={reviewMutation.isPending}
                           >
-                            {reviewMutation.isPending && reviewMutation.variables?.feedbackId === item.id ? (
+                            {reviewMutation.isPending &&
+                            reviewMutation.variables?.feedbackId === item.id ? (
                               <>
                                 <Loader2 size={10} className="animate-spin" />
                                 <span>A rever...</span>
@@ -481,7 +590,9 @@ export default function FeedbackAuditPage() {
                         ) : (
                           <span className="text-muted-foreground/60 text-[10px] font-medium">
                             Por ID #{item.reviewed_by}
-                            {item.reviewed_at ? ` · ${formatDate(item.reviewed_at)}` : ""}
+                            {item.reviewed_at
+                              ? ` · ${formatDate(item.reviewed_at)}`
+                              : ""}
                           </span>
                         )}
                       </td>
@@ -497,13 +608,14 @@ export default function FeedbackAuditPage() {
         {!isLoading && !error && (
           <div className="bg-muted/20 border-t border-border px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
-              Total: <strong>{total}</strong> anotações · Página <strong>{page}</strong> de <strong>{totalPages}</strong>
+              Total: <strong>{total}</strong> anotações · Página{" "}
+              <strong>{page}</strong> de <strong>{totalPages}</strong>
             </span>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 Anterior
@@ -511,7 +623,7 @@ export default function FeedbackAuditPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage(p => p + 1)}
+                onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages}
               >
                 Próxima

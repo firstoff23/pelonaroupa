@@ -35,7 +35,6 @@ export default function PrivacyPolicyPage() {
 
   return (
     <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans">
-      
       {/* Decorative top lights */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
       <div className="absolute top-10 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
@@ -75,11 +74,11 @@ export default function PrivacyPolicyPage() {
             Política de Privacidade
           </h1>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Na <strong>PeloNaRoupa</strong>, a proteção da sua privacidade e dos dados
-            do seu animal de estimação é a nossa prioridade número um. Esta
-            Política de Privacidade explica de forma clara e transparente como
-            recolhemos, tratamos e protegemos os seus dados pessoais, em total
-            conformidade com o Regulamento Geral sobre a Proteção de Dados
+            Na <strong>PeloNaRoupa</strong>, a proteção da sua privacidade e dos
+            dados do seu animal de estimação é a nossa prioridade número um.
+            Esta Política de Privacidade explica de forma clara e transparente
+            como recolhemos, tratamos e protegemos os seus dados pessoais, em
+            total conformidade com o Regulamento Geral sobre a Proteção de Dados
             (RGPD).
           </p>
         </div>
@@ -109,7 +108,8 @@ export default function PrivacyPolicyPage() {
                   <strong>Responsável pelo Tratamento:</strong> PeloNaRoupa
                 </p>
                 <p>
-                  <strong>Contacto do Encarregado:</strong> alexinacio2006@gmail.com
+                  <strong>Contacto do Encarregado:</strong>{" "}
+                  alexinacio2006@gmail.com
                 </p>
               </div>
             </AccordionContent>
@@ -390,7 +390,8 @@ export default function PrivacyPolicyPage() {
       <footer className="w-full border-t border-slate-900 z-10 bg-slate-950/80 backdrop-blur-md mt-12">
         <div className="max-w-4xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
-            © {new Date().getFullYear()} PeloNaRoupa. Todos os direitos reservados.
+            © {new Date().getFullYear()} PeloNaRoupa. Todos os direitos
+            reservados.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
@@ -399,14 +400,18 @@ export default function PrivacyPolicyPage() {
             >
               Termos de Uso
             </button>
-            <span aria-hidden="true" className="text-slate-700">·</span>
+            <span aria-hidden="true" className="text-slate-700">
+              ·
+            </span>
             <button
               onClick={() => setLocation("/cookies")}
               className="hover:text-slate-300 transition-colors font-medium focus-visible:outline-none focus-visible:underline"
             >
               Política de Cookies
             </button>
-            <span aria-hidden="true" className="text-slate-700">·</span>
+            <span aria-hidden="true" className="text-slate-700">
+              ·
+            </span>
             <button
               onClick={() => {
                 const w = window as any;
@@ -420,7 +425,9 @@ export default function PrivacyPolicyPage() {
             >
               Consentimento
             </button>
-            <span aria-hidden="true" className="text-slate-700">·</span>
+            <span aria-hidden="true" className="text-slate-700">
+              ·
+            </span>
             <span className="text-[10px] text-muted-foreground">
               Última atualização: Junho de 2026
             </span>

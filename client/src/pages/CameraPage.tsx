@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   Camera,
@@ -6,6 +5,7 @@ import {
   RefreshCw as LoopIcon,
   RefreshCw,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -134,10 +134,10 @@ export default function CameraPage() {
     // Cap the longest side at MAX_CAPTURE_SIDE to keep base64 payloads small.
     // A 1080p frame at q=0.85 can be ~500 KB in base64; at 800px q=0.75 it's ~60-80 KB.
     const MAX_CAPTURE_SIDE = 800;
-    const srcW = video.videoWidth  || 640;
+    const srcW = video.videoWidth || 640;
     const srcH = video.videoHeight || 480;
     const scale = Math.min(1, MAX_CAPTURE_SIDE / Math.max(srcW, srcH));
-    canvas.width  = Math.round(srcW * scale);
+    canvas.width = Math.round(srcW * scale);
     canvas.height = Math.round(srcH * scale);
 
     const ctx = canvas.getContext("2d");

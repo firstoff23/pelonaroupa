@@ -1,11 +1,12 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import type { FallbackProps } from "react-error-boundary";
 import { cn } from "@/lib/utils";
-import { FallbackProps } from "react-error-boundary";
 
 export function GlobalFallback({ error, resetErrorBoundary }: FallbackProps) {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const isNetwork = errorMessage.toLowerCase().includes("network") || 
-                    errorMessage.toLowerCase().includes("fetch");
+  const isNetwork =
+    errorMessage.toLowerCase().includes("network") ||
+    errorMessage.toLowerCase().includes("fetch");
 
   return (
     <div className="flex items-center justify-center min-h-screen p-8 bg-background">
@@ -47,7 +48,7 @@ export function GlobalFallback({ error, resetErrorBoundary }: FallbackProps) {
 
         <div className="flex gap-3 w-full">
           <button
-             onClick={resetErrorBoundary}
+            onClick={resetErrorBoundary}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium",
               "bg-primary text-primary-foreground",

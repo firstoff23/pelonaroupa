@@ -1,5 +1,5 @@
-﻿import { motion } from "motion/react";
-import { Camera, CheckCircle2, Mic, XCircle } from "lucide-react";
+﻿import { Camera, CheckCircle2, Mic, XCircle } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,10 @@ export default function CapturePortalPage() {
     if (cameraPerm === "prompt") {
       return (
         <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" aria-hidden="true" />
+          <span
+            className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+            aria-hidden="true"
+          />
           {language === "pt" ? "Conceder acesso" : "Grant access"}
         </span>
       );
@@ -104,11 +107,20 @@ export default function CapturePortalPage() {
       <div className="grid grid-cols-1 gap-4">
         {/* Audio Card — uses Link for navigation (a11y) */}
         <motion.div variants={cardVariants}>
-          <Link href="/gravar" className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl">
+          <Link
+            href="/gravar"
+            className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
+          >
             <Card className="bg-card hover:bg-card/90 border-primary/20 overflow-hidden shadow-lg transition-colors duration-300 relative h-52 flex flex-col justify-between p-4 rounded-2xl">
-              <div className="absolute top-0 right-0 w-36 h-36 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/15 transition-all duration-300" aria-hidden="true" />
+              <div
+                className="absolute top-0 right-0 w-36 h-36 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/15 transition-all duration-300"
+                aria-hidden="true"
+              />
               <div className="space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300" aria-hidden="true">
+                <div
+                  className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
+                  aria-hidden="true"
+                >
                   <Mic size={24} />
                 </div>
                 <div>
@@ -123,7 +135,10 @@ export default function CapturePortalPage() {
                 </div>
               </div>
               <div className="flex justify-end pt-2">
-                <span className="h-8 px-3 rounded-xl text-xs font-semibold bg-primary text-primary-foreground inline-flex items-center" aria-hidden="true">
+                <span
+                  className="h-8 px-3 rounded-xl text-xs font-semibold bg-primary text-primary-foreground inline-flex items-center"
+                  aria-hidden="true"
+                >
                   {language === "pt" ? "Gravar agora" : "Record now"}
                 </span>
               </div>
@@ -133,11 +148,20 @@ export default function CapturePortalPage() {
 
         {/* Camera Card — uses Link for navigation (a11y) */}
         <motion.div variants={cardVariants}>
-          <Link href="/camera" className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl">
+          <Link
+            href="/camera"
+            className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
+          >
             <Card className="bg-card hover:bg-card/90 border-border overflow-hidden shadow-md transition-colors duration-300 relative h-32 flex items-center justify-between p-4 rounded-2xl">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-300" aria-hidden="true" />
+              <div
+                className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-300"
+                aria-hidden="true"
+              />
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-11 h-11 shrink-0 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300" aria-hidden="true">
+                <div
+                  className="w-11 h-11 shrink-0 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300"
+                  aria-hidden="true"
+                >
                   <Camera size={20} />
                 </div>
                 <div className="min-w-0">

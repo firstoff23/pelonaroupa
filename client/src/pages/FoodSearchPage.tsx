@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   Apple,
@@ -9,6 +8,7 @@ import {
   ShieldAlert,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import {

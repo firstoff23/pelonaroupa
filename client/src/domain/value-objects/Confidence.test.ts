@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { Confidence } from "./Confidence";
+import { describe, expect, it } from "vitest";
 import { InvalidConfidenceError } from "../errors/InvalidConfidenceError";
+import { Confidence } from "./Confidence";
 
 describe("Confidence Value Object", () => {
   it("should create a valid confidence", () => {

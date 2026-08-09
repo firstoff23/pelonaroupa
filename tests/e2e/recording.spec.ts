@@ -14,14 +14,20 @@ test.describe("recording", () => {
     await page.waitForTimeout(100);
     await page.getByTestId("record-button").dispatchEvent("pointerup");
     // Ensure recording started (status should be visible)
-    await expect(page.getByText(/A gravar|Frequência/i).first()).toBeVisible({ timeout: 2000 });
+    await expect(page.getByText(/A gravar|Frequência/i).first()).toBeVisible({
+      timeout: 2000,
+    });
 
     // After 3s recording, the confirm button appears
-    const confirmBtn = page.getByRole("button", { name: /Confirmar|Confirm/i }).first();
+    const confirmBtn = page
+      .getByRole("button", { name: /Confirmar|Confirm/i })
+      .first();
     await expect(confirmBtn).toBeVisible({ timeout: 10_000 });
     await confirmBtn.click();
 
-    await expect(page.getByText(/92%/).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/92%/).first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText(/yamnet-e2e/i).first()).toBeVisible();
 
     await page.goto("/historico");

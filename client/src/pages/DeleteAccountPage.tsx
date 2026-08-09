@@ -1,4 +1,4 @@
-import { ShieldAlert, Mail } from "lucide-react";
+import { Mail, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DeleteAccountPage() {
@@ -10,11 +10,14 @@ export default function DeleteAccountPage() {
             <ShieldAlert size={32} />
           </div>
         </div>
-        
+
         <h1 className="text-2xl font-bold mb-2">Eliminação de Conta e Dados</h1>
-        
+
         <p className="text-slate-600 dark:text-slate-400 mb-6 text-sm">
-          A sua privacidade é importante para nós. Se desejar eliminar a sua conta e todos os dados associados (fotografias, gravações áudio, histórico e perfis dos seus animais), por favor envie-nos um pedido por email.
+          A sua privacidade é importante para nós. Se desejar eliminar a sua
+          conta e todos os dados associados (fotografias, gravações áudio,
+          histórico e perfis dos seus animais), por favor envie-nos um pedido
+          por email.
         </p>
 
         <div className="space-y-4">
@@ -26,7 +29,8 @@ export default function DeleteAccountPage() {
           </Button>
 
           <p className="text-xs text-slate-500 dark:text-slate-500 text-center">
-            Processaremos o seu pedido num prazo máximo de 72 horas úteis de acordo com o RGPD.
+            Processaremos o seu pedido num prazo máximo de 72 horas úteis de
+            acordo com o RGPD.
           </p>
         </div>
       </div>

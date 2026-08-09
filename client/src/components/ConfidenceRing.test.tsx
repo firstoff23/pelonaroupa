@@ -14,7 +14,7 @@ describe("ConfidenceRing", () => {
     );
 
     expect(markup).toContain('role="progressbar"');
-    expect(markup).toContain('Confiança');
+    expect(markup).toContain("Confiança");
     expect(markup).toContain("Média</");
   });
 });

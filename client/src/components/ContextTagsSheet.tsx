@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cn } from "@/lib/utils";
 
@@ -21,14 +28,18 @@ interface ContextTagsSheetProps {
   onSave: (selectedTags: string[]) => void;
 }
 
-export function ContextTagsSheet({ open, onOpenChange, onSave }: ContextTagsSheetProps) {
+export function ContextTagsSheet({
+  open,
+  onOpenChange,
+  onSave,
+}: ContextTagsSheetProps) {
   const { language } = useLanguage();
   const isPt = language === "pt";
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const toggleTag = (id: string) => {
     setSelectedTags((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
     );
   };
 
@@ -44,11 +55,18 @@ export function ContextTagsSheet({ open, onOpenChange, onSave }: ContextTagsShee
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-6 pt-4 h-auto max-h-[80vh] flex flex-col">
+      <SheetContent
+        side="bottom"
+        className="rounded-t-2xl px-4 pb-6 pt-4 h-auto max-h-[80vh] flex flex-col"
+      >
         <SheetHeader className="text-left mb-4">
-          <SheetTitle>{isPt ? "O que aconteceu antes?" : "What happened before?"}</SheetTitle>
+          <SheetTitle>
+            {isPt ? "O que aconteceu antes?" : "What happened before?"}
+          </SheetTitle>
           <SheetDescription>
-            {isPt ? "Adiciona contexto para melhorar a análise futura." : "Add context to improve future analysis."}
+            {isPt
+              ? "Adiciona contexto para melhorar a análise futura."
+              : "Add context to improve future analysis."}
           </SheetDescription>
         </SheetHeader>
 
@@ -66,7 +84,7 @@ export function ContextTagsSheet({ open, onOpenChange, onSave }: ContextTagsShee
                     "text-sm px-4 py-2 rounded-full font-medium transition-all",
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border",
                   )}
                 >
                   {label}

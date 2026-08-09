@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS public.feedback_annotations (
   confidence FLOAT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
+
+NOTIFY pgrst, 'reload schema';

@@ -8,3 +8,5 @@ CREATE INDEX IF NOT EXISTS idx_feedback_annotations_created_at
 
 CREATE INDEX IF NOT EXISTS idx_feedback_annotations_animal_type
   ON public.feedback_annotations (animal_type);
+
+NOTIFY pgrst, 'reload schema';

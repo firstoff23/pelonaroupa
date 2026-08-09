@@ -160,3 +160,5 @@ USING (
       )
   )
 );
+
+NOTIFY pgrst, 'reload schema';

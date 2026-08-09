@@ -192,3 +192,5 @@ USING (
       AND private.is_family_member(fa.family_id)
   )
 );
+
+NOTIFY pgrst, 'reload schema';

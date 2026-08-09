@@ -47,3 +47,5 @@ CREATE POLICY "Users can update own settings" ON public.settings
   FOR UPDATE TO authenticated
   USING (user_id = private.current_app_user_id())
   WITH CHECK (user_id = private.current_app_user_id());
+
+NOTIFY pgrst, 'reload schema';

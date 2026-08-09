@@ -28,3 +28,5 @@ CREATE POLICY "Users can update own non-sensitive fields" ON public.users
     (open_id = auth.uid()::text OR email = (auth.jwt() ->> 'email'))
     AND role = (SELECT role FROM public.users WHERE open_id = auth.uid()::text OR email = (auth.jwt() ->> 'email'))
   );
+
+NOTIFY pgrst, 'reload schema';

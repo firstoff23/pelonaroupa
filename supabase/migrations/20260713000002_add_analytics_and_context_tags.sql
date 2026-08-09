@@ -34,3 +34,5 @@ CREATE POLICY "Only staff can view analytics events" ON public.analytics_events
 -- 2. Alter classification_events table to add context_tags column
 ALTER TABLE public.classification_events 
   ADD COLUMN IF NOT EXISTS context_tags TEXT[] DEFAULT '{}'::text[] NOT NULL;
+
+NOTIFY pgrst, 'reload schema';

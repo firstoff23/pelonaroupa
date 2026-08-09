@@ -32,3 +32,5 @@ USING (user_id = private.current_app_user_id());
 
 -- Add missing owner_note column to vet_shares if it doesn't exist
 ALTER TABLE public.vet_shares ADD COLUMN IF NOT EXISTS owner_note TEXT;
+
+NOTIFY pgrst, 'reload schema';

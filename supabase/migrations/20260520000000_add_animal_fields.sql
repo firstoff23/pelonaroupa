@@ -7,3 +7,5 @@ ALTER TABLE public.animals
     CHECK (coat IN ('short', 'medium', 'long')),
   ADD COLUMN IF NOT EXISTS photo_url TEXT,
   ADD COLUMN IF NOT EXISTS microchip_number VARCHAR(15);
+
+NOTIFY pgrst, 'reload schema';

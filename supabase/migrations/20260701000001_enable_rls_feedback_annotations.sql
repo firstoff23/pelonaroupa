@@ -13,3 +13,5 @@ CREATE POLICY "Allow inserts on feedback_annotations" ON public.feedback_annotat
 CREATE POLICY "Restrict reading/updating/deleting on feedback_annotations" ON public.feedback_annotations
   FOR ALL USING (auth.role() = 'authenticated');
 
+
+NOTIFY pgrst, 'reload schema';

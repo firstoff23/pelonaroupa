@@ -139,3 +139,5 @@ DROP POLICY IF EXISTS "vets_read_licensing" ON public.licensing;
 CREATE POLICY "vets_read_licensing" ON public.licensing
 FOR SELECT TO authenticated
 USING (private.current_user_is_vet() AND EXISTS (SELECT 1 FROM public.vet_shares vs WHERE vs.animal_id = licensing.animal_id AND (vs.vet_user_id = private.current_app_user_id() OR vs.vet_email = (auth.jwt() ->> 'email'))));
+
+NOTIFY pgrst, 'reload schema';

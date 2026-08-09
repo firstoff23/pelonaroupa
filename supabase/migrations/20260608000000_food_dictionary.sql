@@ -401,3 +401,5 @@ VALUES
     'Sirva cozidos em água simples ou crus cortados, livres de sal ou cebola.',
     ARRAY['AKC']
   );
+
+NOTIFY pgrst, 'reload schema';

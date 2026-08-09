@@ -25,6 +25,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Deep Links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="animalmind.vercel.app" android:pathPrefix="/gravar" />
+                <data android:scheme="https" android:host="animalmind.vercel.app" android:pathPrefix="/resultado" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -36,6 +45,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Foreground Service for continuous audio monitoring (Android 14+ requires foregroundServiceType) -->
+        <service
+            android:name="io.capawesome.capacitorjs.plugins.foregroundservice.AndroidForegroundService"
+            android:foregroundServiceType="microphone"
+            android:exported="false" />
+
+        <!-- Broadcast receiver for foreground service notification actions -->
+        <receiver
+            android:name="io.capawesome.capacitorjs.plugins.foregroundservice.NotificationActionBroadcastReceiver"
+            android:exported="false" />
+
     </application>
 
     <!-- Permissions -->
@@ -44,4 +65,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Android 12+: allow the app to ignore battery optimizations (Xiaomi/Samsung Doze) -->
+    <!-- NOTE: Requires Play Store justification under "continuous health monitoring" use case -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 </manifest>

@@ -1,0 +1,21 @@
+{
+	"appId": "com.pawra.app",
+	"appName": "PeloNaRoupa",
+	"webDir": "dist/public",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {
+		"CapacitorSQLite": {
+			"androidIsEncryption": false
+		}
+	},
+	"packageClassList": [
+		"FCMPlugin",
+		"KeepAwakePlugin",
+		"CapacitorSQLitePlugin",
+		"CAPCameraPlugin",
+		"PushNotificationsPlugin",
+		"VoiceRecorder"
+	]
+}

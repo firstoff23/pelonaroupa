@@ -1,10 +1,11 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import Lenis from "lenis";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { lazy, Suspense, useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "wouter";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import { CommandPalette } from "@/components/CommandPalette";
-import { BackgroundGrid } from "@/components/ui/BackgroundGrid";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { trpc } from "@/lib/trpc";
@@ -25,6 +26,12 @@ import { MoodProvider } from "./contexts/MoodContext";
 import { SelfHealingProvider } from "./contexts/SelfHealingContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useRealtimeNotifications } from "./hooks/useRealtimeNotifications";
+import { useMLBackendSSE } from "./hooks/useMLBackendSSE";
+import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
+import { GlobalFallback } from "./components/GlobalFallback";
+import { usePushNotifications } from "./hooks/usePushNotifications";
+import { Capacitor } from "@capacitor/core";
+import { App as CapApp } from "@capacitor/app";
 
 const AnimalDetailPage = lazy(() => import("./pages/AnimalDetailPage"));
 const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
@@ -34,6 +41,7 @@ const ComparisonPage = lazy(() => import("./pages/ComparisonPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const FamilyDashboard = lazy(() => import("./pages/FamilyDashboard"));
 const FoodSearchPage = lazy(() => import("./pages/FoodSearchPage"));
+const FeedbackAuditPage = lazy(() => import("./pages/FeedbackAuditPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const HealthPage = lazy(() => import("./pages/HealthPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
@@ -41,16 +49,36 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const MindiPage = lazy(() => import("./pages/MindiPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const CookiePolicyPage = lazy(() => import("./pages/CookiePolicyPage"));
+const TermsOfUsePage = lazy(() => import("./pages/TermsOfUsePage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const RecordingPage = lazy(() => import("./pages/RecordingPage"));
+const RefundPage = lazy(() => import("./pages/RefundPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 const VerifyOtpPage = lazy(() => import("./pages/VerifyOtpPage"));
 const VetDashboardPage = lazy(() => import("./pages/VetDashboardPage"));
+const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
 const VetPage = lazy(() => import("./pages/VetPage"));
 const VetPetDetailPage = lazy(() => import("./pages/VetPetDetailPage"));
+const MonitorPage = lazy(() => import("./pages/MonitorPage"));
+const SurveillancePage = lazy(() => import("./pages/SurveillancePage").then(m => ({ default: m.SurveillancePage })));
+
+// ─── Route Prefetch Helper ───────────────────────────────────────────────────
+// Call this on onMouseEnter / onFocus to pre-load a lazy page chunk before
+// the user actually navigates. Uses the same dynamic import() as React.lazy,
+// so the browser caches the module — no double-fetch.
+// Usage: <Link onMouseEnter={prefetch(() => import('./pages/DashboardPage'))} />
+// ─────────────────────────────────────────────────────────────────────────────
+export function prefetch(factory: () => Promise<unknown>) {
+  return () => {
+    factory().catch(() => {
+      /* ignore prefetch errors silently */
+    });
+  };
+}
 
 // Helper component to dry up Lazy + Suspense routes
 function LazyRoute({
@@ -95,13 +123,15 @@ function RealtimeNotificationsBridge({ enabled }: { enabled: boolean }) {
 
 function PushNotificationsBridge({ enabled }: { enabled: boolean }) {
   const subscribeMutation = trpc.push.subscribe.useMutation();
+  usePushNotifications(); // Native mobile push notifications
 
   useEffect(() => {
-    if (enabled) {
+    if (enabled && !Capacitor.isNativePlatform()) {
+      // Web push notifications fallback
       import("@/lib/pushSetup").then(({ subscribeUserToPush }) => {
         subscribeUserToPush(subscribeMutation.mutateAsync).catch((err) => {
           console.error(
-            "[Push Setup] Failed to register push subscription:",
+            "[Push Setup] Failed to register web push subscription:",
             err,
           );
         });
@@ -109,6 +139,11 @@ function PushNotificationsBridge({ enabled }: { enabled: boolean }) {
     }
   }, [enabled]);
 
+  return null;
+}
+
+function MLBackendSSEBridge({ enabled }: { enabled: boolean }) {
+  useMLBackendSSE({ enabled });
   return null;
 }
 
@@ -137,6 +172,8 @@ function Router() {
     "/verify-otp",
     "/auth/callback",
     "/privacidade",
+    "/termos",
+    "/cookies",
   ].includes(location);
 
   if (isAuthenticated && dbUserLoading && !isPublicRoute) {
@@ -159,11 +196,10 @@ function Router() {
         !isAuthenticated && "flex-col",
       )}
     >
-      {/* Background Grid */}
-      {isAuthenticated && <BackgroundGrid />}
 
       <RealtimeNotificationsBridge enabled={isAuthenticated} />
       <PushNotificationsBridge enabled={isAuthenticated} />
+      <MLBackendSSEBridge enabled={isAuthenticated} />
 
       {/* Sidebar Desktop — only shown when authenticated */}
       {isAuthenticated && <Sidebar />}
@@ -208,23 +244,41 @@ function Router() {
                     variant="settings"
                   />
                 </Route>
-                <Route path="/reset-password">
-                  <LazyRoute component={ResetPasswordPage} variant="settings" />
-                </Route>
-                <Route path="/verify-email">
-                  <LazyRoute component={VerifyEmailPage} variant="settings" />
-                </Route>
-                <Route path="/verify-otp">
-                  <LazyRoute component={VerifyOtpPage} variant="settings" />
-                </Route>
+                <Route path="/forgot-password" component={ForgotPasswordPage} />
+                <Route path="/reset-password" component={ResetPasswordPage} />
+                <Route path="/auth/callback" component={AuthCallbackPage} />
+                <Route path="/verify-otp" component={VerifyOtpPage} />
+                <Route path="/verify-email" component={VerifyEmailPage} />
+                
+                {/* Public Policy Pages */}
+                <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+                <Route path="/cookie-policy" component={CookiePolicyPage} />
+                <Route path="/terms" component={TermsOfUsePage} />
+                <Route path="/reembolsos" component={RefundPage} />
+                <Route path="/eliminar-conta" component={DeleteAccountPage} />
                 <Route path="/auth/callback">
                   <LazyRoute component={AuthCallbackPage} variant="content" />
                 </Route>
-                <Route path="/">
+                <Route path="/monitor">
+                  <LazyRoute component={MonitorPage} isProtected />
+                </Route>
+                <Route path="/vigilancia">
+                  <LazyRoute component={SurveillancePage} isProtected />
+                </Route>
+      <Route path="/">
                   <LazyRoute component={LandingPage} variant="content" />
                 </Route>
                 <Route path="/privacidade">
                   <LazyRoute component={PrivacyPolicyPage} variant="content" />
+                </Route>
+                <Route path="/termos">
+                  <LazyRoute component={TermsOfUsePage} variant="content" />
+                </Route>
+                <Route path="/cookies">
+                  <LazyRoute component={CookiePolicyPage} variant="content" />
+                </Route>
+                <Route path="/reembolsos">
+                  <LazyRoute component={RefundPage} variant="content" />
                 </Route>
 
                 {/* Protected routes */}
@@ -402,6 +456,16 @@ function Router() {
                     />
                   )}
                 </Route>
+                <Route path="/feedback-audit">
+                  {(params) => (
+                    <LazyRoute
+                      component={FeedbackAuditPage}
+                      variant="content"
+                      isProtected
+                      {...params}
+                    />
+                  )}
+                </Route>
 
                 {/* Not found */}
                 <Route path="/404" component={NotFound} />
@@ -417,12 +481,10 @@ function Router() {
         <CookieBanner />
 
         {/* Global Command Palette */}
-        {isAuthenticated && (
-          <CommandPalette
-            open={commandPaletteOpen}
-            onOpenChange={setCommandPaletteOpen}
-          />
-        )}
+        <CommandPalette
+          open={commandPaletteOpen}
+          onOpenChange={setCommandPaletteOpen}
+        />
       </div>
     </div>
   );
@@ -431,6 +493,8 @@ function Router() {
 import { LanguageProvider } from "./hooks/useLanguage";
 
 function App() {
+  const [, setLocation] = useLocation();
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time: number) {
@@ -441,13 +505,25 @@ function App() {
     return () => lenis.destroy();
   }, []);
 
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener("appUrlOpen", (event) => {
+        const url = new URL(event.url);
+        if (url.hostname === "pelonaroupa.app" || url.hostname === "animalmind.vercel.app") {
+          // Use search params as well
+          setLocation(url.pathname + url.search);
+        }
+      });
+    }
+  }, [setLocation]);
+
   return (
     <ErrorBoundary>
       <MobileOnlyGate>
         <AuthProvider>
           <SelfHealingProvider>
             <LanguageProvider>
-              <ThemeProvider defaultTheme="dark" switchable>
+              <ThemeProvider defaultTheme="dark">
                 <TooltipProvider>
                   <Toaster
                     theme="dark"
@@ -461,7 +537,9 @@ function App() {
                     }}
                   />
                   <MoodProvider>
-                    <Router />
+                    <ReactErrorBoundary FallbackComponent={GlobalFallback}>
+                      <Router />
+                    </ReactErrorBoundary>
                   </MoodProvider>
                 </TooltipProvider>
               </ThemeProvider>
@@ -469,6 +547,8 @@ function App() {
           </SelfHealingProvider>
         </AuthProvider>
       </MobileOnlyGate>
+      <Analytics />
+      <SpeedInsights />
     </ErrorBoundary>
   );
 }

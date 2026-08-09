@@ -30,3 +30,5 @@ CREATE POLICY "Users can view their own notification logs" ON notification_logs
   FOR SELECT USING (auth.uid()::text IN (
     SELECT open_id FROM users WHERE id = notification_logs.user_id
   ));
+
+NOTIFY pgrst, 'reload schema';

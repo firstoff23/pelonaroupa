@@ -4,36 +4,139 @@ import subprocess
 import tempfile
 from typing import Dict, List, Optional, Tuple
 
+# Load environment variables from .env if present
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import numpy as np
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel
 from scipy import signal
 from scipy.io import wavfile
-import asyncpg
+try:
+    import asyncpg
+except ImportError:
+    asyncpg = None
+
 import hashlib
 import json
-import redis as redis_client
+
+try:
+    import redis as redis_client
+except ImportError:
+    redis_client = None
 from datetime import datetime, timezone
+from fastapi.responses import StreamingResponse
+
+# ─── SSE (Server-Sent Events) broadcast queue ────────────────────────────────
+# Each connected SSE client gets a reference to its own asyncio.Queue.
+# When /classify completes, it broadcasts the result to all connected queues.
+_sse_subscribers: list[asyncio.Queue] = []
+
+def _sse_broadcast(event_type: str, data: dict):
+    """Push an event to all currently connected SSE clients."""
+    payload = json.dumps({"type": event_type, "data": data, "ts": datetime.now(timezone.utc).isoformat()})
+    dead = []
+    for q in _sse_subscribers:
+        try:
+            q.put_nowait(payload)
+        except asyncio.QueueFull:
+            dead.append(q)
+    for q in dead:
+        _sse_subscribers.remove(q)
+
+from utils.logging import setup_structured_logging, logger
+from utils.auth import get_current_user
+setup_structured_logging()
 
 app = FastAPI(
-    title="AnimalMind Acoustic Classifier Backend",
-    description="FastAPI backend for pet audio classification and breed identification.",
-    version="1.3.0",
+    title="PeloNaRoupa Acoustic & Vision Classifier Backend",
+    description="FastAPI backend for pet audio classification, breed identification, and posture detection.",
+    version="1.4.0",
 )
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key", "X-Correlation-ID"],
 )
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+import asyncio
+
+class AuditLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        path = request.url.path
+        if path in ["/login", "/logout", "/delete-account"]:
+            ip = request.client.host if request.client else "unknown"
+            user_agent = request.headers.get("user-agent", "unknown")
+            action = path.strip("/")
+            
+            if db_pool:
+                try:
+                    asyncio.create_task(self.log_audit(action, ip, user_agent))
+                except Exception as e:
+                    logger.warning("Failed to schedule audit log", extra={"error": str(e)})
+        
+        return response
+        
+    async def log_audit(self, action: str, ip: str, user_agent: str):
+        try:
+            async with db_pool.acquire() as conn:
+                await conn.execute(
+                    "INSERT INTO audit_logs (action, ip_address, user_agent) VALUES ($1, $2, $3)",
+                    action, ip, user_agent
+                )
+        except Exception as e:
+            logger.error("Error inserting audit log", extra={"error": str(e)})
+
+app.add_middleware(AuditLogMiddleware)
+
+import uuid
+
+class CorrelationIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        request.state.correlation_id = correlation_id
+        response = await call_next(request)
+        response.headers["X-Correlation-ID"] = correlation_id
+        return response
+
+app.add_middleware(CorrelationIDMiddleware)
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Correlation-ID"] = getattr(request.state, "correlation_id", "")
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # --- Globals: DB pool e Redis client ---
 db_pool = None
 redis_conn = None
+
 
 
 @app.on_event("startup")
@@ -56,16 +159,27 @@ async def startup():
                         created_at TIMESTAMPTZ DEFAULT NOW()
                     )
                 """)
-            print("[DB] PostgreSQL conectado e tabela criada.")
+                await conn.execute("""
+                    CREATE TABLE IF NOT EXISTS audit_logs (
+                        id SERIAL PRIMARY KEY,
+                        action TEXT NOT NULL,
+                        ip_address TEXT,
+                        user_agent TEXT,
+                        created_at TIMESTAMPTZ DEFAULT NOW()
+                    )
+                """)
+                await conn.execute("CREATE INDEX IF NOT EXISTS idx_classifications_created_at ON classifications(created_at)")
+                await conn.execute("CREATE INDEX IF NOT EXISTS idx_classifications_state ON classifications(state)")
+            logger.info("PostgreSQL connected and tables initialized")
         except Exception as e:
-            print(f"[DB] Erro ao conectar ao PostgreSQL: {e}")
+            logger.error("PostgreSQL connection failed", extra={"error": str(e)})
     if redis_url:
         try:
             redis_conn = redis_client.from_url(redis_url, decode_responses=True)
             redis_conn.ping()
-            print("[Redis] Conectado com sucesso.")
+            logger.info("Redis connected successfully")
         except Exception as e:
-            print(f"[Redis] Erro ao conectar: {e}")
+            logger.error("Redis connection failed", extra={"error": str(e)})
 
 
 @app.on_event("shutdown")
@@ -73,7 +187,7 @@ async def shutdown():
     global db_pool
     if db_pool:
         await db_pool.close()
-        print("[DB] Pool fechado.")
+        logger.info("PostgreSQL pool closed")
 
 
 # ─── Audio Classification (YAMNet) ───────────────────────────────────────────
@@ -171,7 +285,7 @@ def _extract_signal_features(wav_path: str) -> Dict[str, float]:
     fft_vals = np.abs(np.fft.rfft(waveform))
     fft_freqs = np.fft.rfftfreq(len(waveform), 1.0 / sample_rate)
     dom_freq = float(fft_freqs[int(np.argmax(fft_vals))]) if len(fft_vals) > 0 else 0.0
-    print(f"[Signal] RMS={rms:.4f} ZCR={zcr:.4f} DominantFreq={dom_freq:.1f}Hz")
+    logger.debug("Signal features extracted", extra={"rms": round(rms,4), "zcr": round(zcr,4), "dom_freq": round(dom_freq,1)})
     return {"rms": rms, "zcr": zcr, "dom_freq": dom_freq, "sample_rate": float(sample_rate)}
 
 
@@ -223,7 +337,7 @@ def load_yamnet_model():
         class_map_path = class_map_path.decode("utf-8")
     _yamnet_model = model
     _yamnet_class_names = _class_names_from_csv(class_map_path)
-    print(f"[YAMNet] Loaded {YAMNET_MODEL_HANDLE} with {len(_yamnet_class_names)} classes")
+    logger.info("YAMNet model loaded", extra={"handle": YAMNET_MODEL_HANDLE, "num_classes": len(_yamnet_class_names)})
     return _yamnet_model, _yamnet_class_names
 
 
@@ -265,14 +379,57 @@ def classify_with_yamnet(wav_path: str) -> Dict[str, object]:
         if int(index) < len(class_names)
     ]
     top_debug = ", ".join(f"{label}:{score:.2f}" for label, score in top_predictions[:5])
-    print(f"[YAMNet] Top classes: {top_debug}")
+    logger.debug("YAMNet top predictions", extra={"top_classes": top_debug})
     signal_result = classify_with_signal_features(wav_path)
     state, confidence = _score_state_from_yamnet(top_predictions, signal_result)
     return {"state": state, "confidence": round(confidence, 2), "model": "yamnet-tfhub"}
 
 
+MAX_SSE_CLIENTS = 100
+
+@app.get("/sse")
+async def sse_stream(request: Request, _user: dict = Depends(get_current_user)):
+    """Server-Sent Events stream for real-time classification notifications."""
+    if len(_sse_subscribers) >= MAX_SSE_CLIENTS:
+        raise HTTPException(status_code=503, detail="Too many SSE clients. Please try again later.")
+    queue: asyncio.Queue = asyncio.Queue(maxsize=50)
+    _sse_subscribers.append(queue)
+
+    async def event_generator():
+        try:
+            # Send initial heartbeat
+            yield "event: connected\ndata: {\"status\": \"ok\"}\n\n"
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    payload = await asyncio.wait_for(queue.get(), timeout=25.0)
+                    yield f"data: {payload}\n\n"
+                except asyncio.TimeoutError:
+                    # Send keep-alive comment to prevent proxy timeouts
+                    yield ": keepalive\n\n"
+        finally:
+            if queue in _sse_subscribers:
+                _sse_subscribers.remove(queue)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
+
+
 @app.post("/classify", response_model=ClassificationResponse)
-async def classify_audio(file: UploadFile = File(...)):
+@limiter.limit("3/15minutes")
+async def classify_audio(
+    request: Request,
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
     filename = file.filename or "recording.webm"
     ext = os.path.splitext(filename)[1].lower() or ".webm"
     audio_bytes = await file.read()
@@ -283,10 +440,10 @@ async def classify_audio(file: UploadFile = File(...)):
             cache_key = f"classify:{hashlib.md5(audio_bytes).hexdigest()}"
             cached = redis_conn.get(cache_key)
             if cached:
-                print(f"[Redis] Cache hit para {cache_key}")
+                logger.debug("Redis cache hit", extra={"cache_key": cache_key})
                 return ClassificationResponse(**json.loads(cached))
         except Exception as redis_err:
-            print(f"[Redis] Erro ao ler cache: {redis_err}")
+            logger.warning("Redis cache read error", extra={"error": str(redis_err)})
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_in:
         temp_in.write(audio_bytes)
@@ -299,7 +456,7 @@ async def classify_audio(file: UploadFile = File(...)):
         try:
             analysis = classify_with_yamnet(temp_wav_path)
         except Exception as yamnet_error:
-            print(f"[YAMNet] Falling back to scipy heuristics: {str(yamnet_error)}")
+            logger.warning("YAMNet failed, using scipy fallback", extra={"error": str(yamnet_error)})
             analysis = classify_with_signal_features(temp_wav_path)
 
         state = str(analysis["state"])
@@ -311,6 +468,14 @@ async def classify_audio(file: UploadFile = File(...)):
             state=state, confidence=confidence, emoji=emoji, model_used=model_used,
         )
 
+        # Broadcast SSE event to all connected clients
+        _sse_broadcast("classification", {
+            "state": state,
+            "confidence": confidence,
+            "emoji": emoji,
+            "model_used": model_used,
+        })
+
         if db_pool:
             try:
                 async with db_pool.acquire() as conn:
@@ -319,18 +484,19 @@ async def classify_audio(file: UploadFile = File(...)):
                         file.filename, state, confidence, emoji, model_used
                     )
             except Exception as db_err:
-                print(f"[DB] Erro ao guardar classificação: {db_err}")
+                logger.error("Failed to persist classification to DB", extra={"error": str(db_err)})
 
         if redis_conn:
             try:
                 cache_key = f"classify:{hashlib.md5(audio_bytes).hexdigest()}"
                 redis_conn.setex(cache_key, 600, json.dumps(result.dict()))
             except Exception as redis_err:
-                print(f"[Redis] Erro ao guardar cache: {redis_err}")
+                logger.warning("Redis cache write error", extra={"error": str(redis_err)})
 
         return result
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Audio processing error: {str(exc)}")
+        logger.error("Audio classification failed", extra={"error": str(exc)})
+        raise HTTPException(status_code=500, detail="Audio processing failed. Please try again.")
     finally:
         if os.path.exists(temp_in_path):
             os.remove(temp_in_path)
@@ -354,13 +520,13 @@ def _get_dog_classifier():
     global _dog_classifier
     if _dog_classifier is None:
         from transformers import pipeline as hf_pipeline
-        print(f"[Breed] A carregar modelo de cão: {DOG_MODEL_ID}")
+        logger.info("Loading dog breed model", extra={"model": DOG_MODEL_ID})
         _dog_classifier = hf_pipeline(
             "image-classification",
             model=DOG_MODEL_ID,
             top_k=3,
         )
-        print("[Breed] Modelo de cão carregado.")
+        logger.info("Dog breed model loaded")
     return _dog_classifier
 
 
@@ -368,13 +534,13 @@ def _get_cat_classifier():
     global _cat_classifier
     if _cat_classifier is None:
         from transformers import pipeline as hf_pipeline
-        print(f"[Breed] A carregar modelo de gato: {CAT_MODEL_ID}")
+        logger.info("Loading cat breed model", extra={"model": CAT_MODEL_ID})
         _cat_classifier = hf_pipeline(
             "image-classification",
             model=CAT_MODEL_ID,
             top_k=3,
         )
-        print("[Breed] Modelo de gato carregado.")
+        logger.info("Cat breed model loaded")
     return _cat_classifier
 
 
@@ -400,9 +566,12 @@ class BreedResult(BaseModel):
 
 
 @app.post("/identify-breed", response_model=BreedResult)
+@limiter.limit("3/15minutes")
 async def identify_breed(
+    request: Request,
     file: UploadFile = File(...),
     animal_type: str = Form(default="dog"),
+    _user: dict = Depends(get_current_user),
 ):
     """
     Identifica a raça de um cão ou gato a partir de uma foto.
@@ -440,7 +609,7 @@ async def identify_breed(
                 None, _run_breed_pipeline, _get_cat_classifier(), image_bytes
             )
     except Exception as e:
-        print(f"[Breed] Erro no pipeline: {e}")
+        logger.error("Breed pipeline error", extra={"error": str(e)})
         raise HTTPException(
             status_code=500,
             detail=f"Erro ao classificar raça: {str(e)[:300]}"
@@ -461,7 +630,7 @@ async def identify_breed(
         for r in results[:3]
     ]
 
-    print(f"[Breed] {species}: {breed_name} ({confidence:.1%})")
+    logger.info("Breed identified", extra={"species": species, "breed": breed_name, "confidence": confidence})
 
     return BreedResult(
         breed=breed_name,
@@ -487,9 +656,9 @@ def _get_yolo_model():
     try:
         from ultralytics import YOLO
         _yolo_model = YOLO("yolov8n-pose.pt")
-        print("[YOLOv8] yolov8n-pose model loaded.")
+        logger.info("YOLOv8 pose model loaded")
     except Exception as e:
-        print(f"[YOLOv8] Failed to load model: {e}")
+        logger.warning("YOLOv8 model load failed", extra={"error": str(e)})
         _yolo_model = False  # sentinel: tried but failed
     return _yolo_model
 
@@ -536,7 +705,10 @@ def _detect_posture_yolo(image_bytes: bytes):
 
 
 @app.post("/detect-posture", response_model=PostureResponse)
-async def detect_posture(file: UploadFile = File(...)):
+async def detect_posture(
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
     content_type = file.content_type or ""
     if not content_type.startswith("image/"):
         raise HTTPException(
@@ -553,7 +725,7 @@ async def detect_posture(file: UploadFile = File(...)):
         if yolo_result:
             return PostureResponse(**yolo_result)
     except Exception as yolo_err:
-        print(f"[YOLOv8] Inference error, falling back to heuristic: {yolo_err}")
+        logger.warning("YOLOv8 inference error, using heuristic fallback", extra={"error": str(yolo_err)})
 
     # Deterministic fallback (MD5-based)
     h = hashlib.md5(image_bytes).hexdigest()
@@ -577,13 +749,13 @@ def _get_species_classifier():
     global _species_classifier
     if _species_classifier is None:
         from transformers import pipeline as hf_pipeline
-        print(f"[Species] A carregar modelo de deteção de espécie: {SPECIES_MODEL_ID}")
+        logger.info("Loading species classifier", extra={"model": SPECIES_MODEL_ID})
         _species_classifier = hf_pipeline(
             "image-classification",
             model=SPECIES_MODEL_ID,
             top_k=10,
         )
-        print("[Species] Modelo carregado.")
+        logger.info("Species classifier loaded")
     return _species_classifier
 
 
@@ -629,7 +801,10 @@ class SpeciesResponse(BaseModel):
 
 
 @app.post("/detect-species", response_model=SpeciesResponse)
-async def detect_species(file: UploadFile = File(...)):
+async def detect_species(
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
     """
     Deteta automaticamente se o animal na imagem é cão, gato, ou desconhecido.
     Usa google/vit-base-patch16-224 (ImageNet) sem requerer seleção prévia de espécie.
@@ -654,11 +829,11 @@ async def detect_species(file: UploadFile = File(...)):
 
         results = await loop.run_in_executor(None, _run)
         mapping = _map_imagenet_to_species(results)
-        print(f"[Species] Detected: {mapping['species']} ({mapping['confidence']:.1%})")
+        logger.info("Species detected", extra={"species": mapping['species'], "confidence": mapping['confidence']})
         return SpeciesResponse(**mapping)
     except Exception as e:
-        print(f"[Species] Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Erro ao detetar espécie: {str(e)[:300]}")
+        logger.error("Species detection error", extra={"error": str(e)})
+        raise HTTPException(status_code=500, detail="Species detection failed. Please try again.")
 
 
 # ─── Advanced Audio Metrics ───────────────────────────────────────────────────
@@ -672,7 +847,10 @@ class AdvancedAudioMetrics(BaseModel):
 
 
 @app.post("/analyze-audio-advanced", response_model=AdvancedAudioMetrics)
-async def analyze_audio_advanced(file: UploadFile = File(...)):
+async def analyze_audio_advanced(
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
     """
     Retorna métricas avançadas de áudio: RMS, ZCR, centroide espectral e pitch.
     Suporta os mesmos formatos que /classify (webm, wav, mp3, m4a, etc.).
@@ -730,7 +908,7 @@ async def analyze_audio_advanced(file: UploadFile = File(...)):
                 if best_lag > 0:
                     pitch_hz = float(sample_rate / best_lag)
 
-        print(f"[AdvAudio] RMS={rms:.4f} ZCR={zcr:.4f} SC={spectral_centroid:.1f}Hz Pitch={pitch_hz:.1f}Hz Dur={duration_s:.2f}s")
+        logger.debug("Advanced audio metrics", extra={"rms": round(rms,4), "zcr": round(zcr,4), "spectral_centroid": round(spectral_centroid,1), "pitch_hz": round(pitch_hz,1), "duration_s": round(duration_s,2)})
 
         return AdvancedAudioMetrics(
             rms=round(rms, 4),
@@ -740,7 +918,8 @@ async def analyze_audio_advanced(file: UploadFile = File(...)):
             duration_s=round(duration_s, 3),
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Audio analysis error: {str(exc)}")
+        logger.error("Advanced audio analysis failed", extra={"error": str(exc)})
+        raise HTTPException(status_code=500, detail="Audio analysis failed. Please try again.")
     finally:
         if os.path.exists(tmp_in_path):
             os.remove(tmp_in_path)
@@ -814,23 +993,23 @@ def _load_vision_model():
             _vit_processor = ViTImageProcessor.from_pretrained(str(local_path))
             _vit_model = ViTForImageClassification.from_pretrained(str(local_path))
             _vit_source = "fine-tuned-local"
-            print(f"[Vision] Loaded local fine-tuned model from {local_path}")
+            logger.info("Vision model loaded from local path", extra={"path": str(local_path)})
         else:
             # Try Hugging Face Hub
             _vit_processor = ViTImageProcessor.from_pretrained(model_name)
             _vit_model = ViTForImageClassification.from_pretrained(model_name)
             _vit_source = "fine-tuned-hub"
-            print(f"[Vision] Loaded fine-tuned breed classifier from Hugging Face: {model_name}")
+            logger.info("Vision model loaded from Hugging Face", extra={"model": model_name})
     except Exception as exc:
-        print(f"[Vision] Failed to load fine-tuned model ({exc}). Falling back to pretrained ViT backbone...")
+        logger.warning("Fine-tuned vision model failed to load, trying pretrained fallback", extra={"error": str(exc)})
         try:
             _vit_processor = ViTImageProcessor.from_pretrained(_VIT_BASE)
             backbone  = ViTModel.from_pretrained(_VIT_BASE)
             _vit_model = _DualHeadViT(backbone, len(_SPECIES_LABELS), len(_BREED_LABELS))
             _vit_source = "pretrained-fallback"
-            print("[Vision] Pretrained fallback loaded successfully.")
+            logger.info("Vision pretrained fallback loaded")
         except Exception as exc_fallback:
-            print(f"[Vision] Critical error during fallback: {exc_fallback}")
+            logger.error("Vision model critical load failure", extra={"error": str(exc_fallback)})
             raise exc_fallback
 
     _vit_model.eval()
@@ -855,7 +1034,10 @@ class ModelHealthResponse(BaseModel):
 
 
 @app.post("/classify-image", response_model=ImageClassificationResponse)
-async def classify_image(file: UploadFile = File(...)):
+async def classify_image(
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
     """
     Classify a pet image, returning species, breed and confidence.
 

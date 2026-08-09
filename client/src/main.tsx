@@ -43,8 +43,9 @@ const queryClient = new QueryClient({
       gcTime: 10 * 60 * 1000,
       // Don't refetch on window focus (mobile PWA behaviour)
       refetchOnWindowFocus: false,
-      // Retry failed queries once before surfacing the error
-      retry: 1,
+      // Retry failed queries up to 3 times with exponential backoff (Circuit Breaker approach)
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
     mutations: {
       // Mutations don't retry by default to avoid double-submits
@@ -122,3 +123,28 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </trpc.Provider>,
 );
+
+// ─── Core Web Vitals Reporting ───────────────────────────────────────────────
+// Measures LCP, FCP, CLS, TTFB, and INP. Logs to console in dev mode.
+// Extend `reportVital` to send metrics to your analytics endpoint in prod.
+// ─────────────────────────────────────────────────────────────────────────────
+import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+
+function reportVital(metric: Metric) {
+  if (import.meta.env.DEV) {
+    const emoji =
+      metric.rating === "good" ? "✅" : metric.rating === "poor" ? "❌" : "⚠️";
+    console.log(
+      `%c[WebVital] ${emoji} ${metric.name}: ${Math.round(metric.value)} (${metric.rating ?? "–"})`,
+      "color: #6ee7b7; font-weight: bold;",
+    );
+  }
+  // Production hook — uncomment to send to your analytics:
+  // fetch('/api/vitals', { method: 'POST', body: JSON.stringify(metric) });
+}
+
+onCLS(reportVital);
+onFCP(reportVital);
+onINP(reportVital);
+onLCP(reportVital);
+onTTFB(reportVital);

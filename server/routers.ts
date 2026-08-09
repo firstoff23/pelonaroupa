@@ -2,6 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { type ModelMessage, streamText } from "ai";
 import { z } from "zod";
+
+const ALLOWED_AUDIT_ROLES = ["admin", "vet", "veterinarian", "clinic_admin"];
 import {
   type EmotionalState,
   type ModelUsed,
@@ -67,18 +69,69 @@ import {
   updateEventAudio,
   updateEventFeedback,
   updateEventNotes,
+  updateEventContextTags,
   updateUser,
   uploadAudioToSupabase,
   upsertSettings,
   verifyAnimalOwner,
+  saveFeedbackAnnotation,
+  getFeedbackAnnotations,
+  reviewFeedbackAnnotation,
+  logAnalyticsEvent,
 } from "./db";
 import { familyRouter } from "./routers/family";
 import { foodsRouter } from "./routers/foods";
 import { healingRouter } from "./routers/healing";
 import { healthRouter } from "./routers/health";
 import { pushRouter } from "./routers/push";
+import { insightsRouter } from "./routers/insights";
 import { trendsRouter } from "./routers/trends";
 import { vetRouter } from "./routers/vet";
+
+// ─── TOTP / MFA helper (RFC 6238, no external deps) ─────────────────────────
+
+import { createHmac } from "node:crypto";
+
+function base32Decode(base32: string): Uint8Array {
+  const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  const input = base32.toUpperCase().replace(/=+$/, "");
+  const bits: number[] = [];
+  for (const ch of input) {
+    const val = CHARS.indexOf(ch);
+    if (val < 0) continue;
+    for (let i = 4; i >= 0; i--) bits.push((val >> i) & 1);
+  }
+  const bytes = new Uint8Array(Math.floor(bits.length / 8));
+  for (let i = 0; i < bytes.length; i++) {
+    let b = 0;
+    for (let j = 0; j < 8; j++) b = (b << 1) | (bits[i * 8 + j] ?? 0);
+    bytes[i] = b;
+  }
+  return bytes;
+}
+
+function hotp(secretBytes: Uint8Array, counter: bigint): string {
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64BE(counter);
+  const hmac = createHmac("sha1", Buffer.from(secretBytes)).update(buf).digest();
+  const offset = hmac[19]! & 0x0f;
+  const code =
+    (((hmac[offset]! & 0x7f) << 24) |
+      ((hmac[offset + 1]! & 0xff) << 16) |
+      ((hmac[offset + 2]! & 0xff) << 8) |
+      (hmac[offset + 3]! & 0xff)) %
+    1_000_000;
+  return String(code).padStart(6, "0");
+}
+
+function validateTotp(secret: string, token: string, windowSteps = 1): boolean {
+  const secretBytes = base32Decode(secret);
+  const counter = BigInt(Math.floor(Date.now() / 1000 / 30));
+  for (let delta = -windowSteps; delta <= windowSteps; delta++) {
+    if (hotp(secretBytes, counter + BigInt(delta)) === token) return true;
+  }
+  return false;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -275,12 +328,13 @@ function mapDbEvent(e: any) {
     audioUrl: e.audio_url ?? e.audioUrl ?? null,
     createdAt: createdAt ? new Date(createdAt) : new Date(),
     notes: e.notes ?? null,
+    contextTags: e.context_tags ?? e.contextTags ?? [],
   };
 }
 
 const MINDI_DEFAULT_MODEL = "google/gemini-3.5-flash";
 const MINDI_BASE_PROMPT =
-  "És a Mindi, assistente de bem-estar animal do Pawra. Tens acesso ao perfil do animal [nome, espécie, raça] e ao histórico de classificações recentes. Responde sempre em português de Portugal. Sê precisa, empática e recomenda sempre consulta veterinária para situações de saúde sérias. Nunca substituas um diagnóstico médico.";
+  "És a Mindi, assistente de bem-estar animal do PeloNaRoupa. Tens acesso ao perfil do animal [nome, espécie, raça] e ao histórico de classificações recentes. Responde sempre em português de Portugal. Sê precisa, empática e recomenda sempre consulta veterinária para situações de saúde sérias. Nunca substituas um diagnóstico médico.";
 
 const SPECIES_LABELS: Record<string, string> = {
   dog: "cão",
@@ -324,7 +378,7 @@ function buildMindiSystemPrompt(
 ) {
   return `${MINDI_BASE_PROMPT}
 
-Contexto automático do Pawra:
+Contexto automático do PeloNaRoupa:
 ${formatAnimalContext(animal)}
 
 Últimas 5 classificações do histórico:
@@ -370,6 +424,99 @@ function buildFallbackMindiResponse(
 
   return `Com base no perfil de ${animalName} e no histórico recente, posso ajudar-te a interpretar sinais de comportamento, alimentação e bem-estar.${recentState} Diz-me o que observaste, há quanto tempo acontece e se existem sinais físicos como dor, vómitos, diarreia, apatia ou dificuldade respiratória. Para sintomas sérios, a avaliação veterinária é indispensável.`;
 }
+
+const feedbackRouter = router({
+  submit: protectedProcedure
+    .input(
+      z.object({
+        classificationEventId: z.number(),
+        confirmedState: z.string().max(50),
+        comment: z.string().max(500).optional().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const accessToken = ctx.accessToken;
+      if (!accessToken) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Token de acesso em falta na sessão",
+        });
+      }
+      const userId = await effectiveUserId(ctx.user);
+      const data = await saveFeedbackAnnotation(accessToken, userId, input);
+      return { success: true, data };
+    }),
+
+  list: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(20),
+        offset: z.number().min(0).default(0),
+        animal_type: z.string().optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
+        reviewed: z.enum(["all", "pending", "reviewed"]).default("all"),
+        predicted_state: z.enum(["distress", "attention", "excitement", "hunger", "alert", "relaxed"]).optional(),
+      }).optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const accessToken = ctx.accessToken;
+      if (!accessToken) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Token de acesso em falta na sessão",
+        });
+      }
+      if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Acesso restrito a utilizadores com role veterinária ou administrativa.",
+        });
+      }
+      const data = await getFeedbackAnnotations(accessToken, input);
+      return data;
+    }),
+
+  review: protectedProcedure
+    .input(
+      z.object({
+        feedbackId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const accessToken = ctx.accessToken;
+      if (!accessToken) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Token de acesso em falta na sessão",
+        });
+      }
+      if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Acesso restrito a utilizadores com role veterinária ou administrativa.",
+        });
+      }
+      const userId = await effectiveUserId(ctx.user);
+      const data = await reviewFeedbackAnnotation(accessToken, userId, input.feedbackId);
+      return { success: true, data };
+    }),
+});
+
+const analyticsRouter = router({
+  logEvent: protectedProcedure
+    .input(
+      z.object({
+        eventName: z.string(),
+        properties: z.any().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      await logAnalyticsEvent(userId, input.eventName, input.properties);
+      return { success: true };
+    }),
+});
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
@@ -467,7 +614,7 @@ export const appRouter = router({
         z.object({
           name: z.string().min(1).max(100).optional(),
           email: z.string().email().optional(),
-        }),
+        }).strict(),
       )
       .mutation(async ({ ctx, input }) => {
         const userId = await effectiveUserId(ctx.user);
@@ -557,6 +704,131 @@ export const appRouter = router({
 
       return { success: true };
     }),
+
+    // ── MFA / TOTP ─────────────────────────────────────────────────────────────
+    "mfa.setup": protectedProcedure.mutation(async ({ ctx }) => {
+      const userId = await effectiveUserId(ctx.user);
+      const supabase = getSupabase();
+
+      // Generate a new TOTP secret using Web Crypto (no native deps)
+      const secretBytes = crypto.getRandomValues(new Uint8Array(20));
+      const BASE32_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      let secret = "";
+      for (let i = 0; i < secretBytes.length; ) {
+        const b0 = secretBytes[i++] ?? 0;
+        const b1 = secretBytes[i++] ?? 0;
+        const b2 = secretBytes[i++] ?? 0;
+        const b3 = secretBytes[i++] ?? 0;
+        const b4 = secretBytes[i++] ?? 0;
+        secret += BASE32_CHARS[(b0 >> 3) & 31];
+        secret += BASE32_CHARS[((b0 << 2) | (b1 >> 6)) & 31];
+        secret += BASE32_CHARS[(b1 >> 1) & 31];
+        secret += BASE32_CHARS[((b1 << 4) | (b2 >> 4)) & 31];
+        secret += BASE32_CHARS[((b2 << 1) | (b3 >> 7)) & 31];
+        secret += BASE32_CHARS[(b3 >> 2) & 31];
+        secret += BASE32_CHARS[((b3 << 3) | (b4 >> 5)) & 31];
+        secret += BASE32_CHARS[b4 & 31];
+      }
+
+      // Persist the secret (not yet enabled – user must verify first)
+      const { error } = await supabase
+        .from("users")
+        .update({ mfa_secret: secret, mfa_enabled: false })
+        .eq("id", userId);
+
+      if (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Erro ao guardar segredo MFA: ${error.message}`,
+        });
+      }
+
+      const email = ctx.user.email ?? `user-${userId}@pelonaroupa`;
+      const issuer = "PeloNaRoupa";
+      const otpAuthUri = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(email)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`;
+
+      return { secret, otpAuthUri };
+    }),
+
+    "mfa.verify": protectedProcedure
+      .input(z.object({ code: z.string().length(6).regex(/^\d{6}$/) }))
+      .mutation(async ({ ctx, input }) => {
+        const userId = await effectiveUserId(ctx.user);
+        const supabase = getSupabase();
+
+        const { data: userData, error: fetchError } = await supabase
+          .from("users")
+          .select("mfa_secret")
+          .eq("id", userId)
+          .single();
+
+        if (fetchError || !userData?.mfa_secret) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "MFA não configurado. Inicia o setup primeiro.",
+          });
+        }
+
+        // Validate TOTP code using RFC 6238 (SHA1, 6 digits, 30s window)
+        const isValid = validateTotp(userData.mfa_secret, input.code);
+        if (!isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Código inválido ou expirado.",
+          });
+        }
+
+        // Activate MFA on the account
+        const { error: updateError } = await supabase
+          .from("users")
+          .update({ mfa_enabled: true })
+          .eq("id", userId);
+
+        if (updateError) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: `Erro ao ativar MFA: ${updateError.message}`,
+          });
+        }
+
+        return { success: true };
+      }),
+
+    "mfa.disable": protectedProcedure.mutation(async ({ ctx }) => {
+      const userId = await effectiveUserId(ctx.user);
+      const supabase = getSupabase();
+
+      const { error } = await supabase
+        .from("users")
+        .update({ mfa_secret: null, mfa_enabled: false })
+        .eq("id", userId);
+
+      if (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Erro ao desativar MFA: ${error.message}`,
+        });
+      }
+
+      return { success: true };
+    }),
+
+    "mfa.status": protectedProcedure.query(async ({ ctx }) => {
+      const userId = await effectiveUserId(ctx.user);
+      const supabase = getSupabase();
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("mfa_enabled")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        return { enabled: false };
+      }
+
+      return { enabled: Boolean(data?.mfa_enabled) };
+    }),
   }),
 
   // ── Classify ────────────────────────────────────────────────────────────────
@@ -572,6 +844,7 @@ export const appRouter = router({
             pitch: z.number().optional(),
             spectralEnergy: z.number().optional(),
             tonalBrightness: z.number().optional(),
+            contextTags: z.array(z.string()).optional(),
           })
           .refine(
             (val) => {
@@ -678,6 +951,7 @@ export const appRouter = router({
           emoji: result.emoji,
           modelUsed: result.model_used,
           cached: result.cached,
+          contextTags: input.contextTags || [],
         });
 
         const eventId = (event as any)?.id;
@@ -715,6 +989,20 @@ export const appRouter = router({
               err,
             );
           }
+
+          // ── Push Notification ───────────────────────────────────────────────
+          if (result.state === "distress" || result.state === "alert") {
+            const animalName = targetAnimal?.name || "O seu animal";
+            const stateLabel = result.state === "distress" ? "angústia" : "alerta";
+            
+            sendPushNotification(userId, {
+              title: `PeloNaRoupa - Alerta de ${stateLabel}!`,
+              body: `${animalName} está a mostrar sinais de ${stateLabel} (${Math.round(result.confidence * 100)}% de confiança).`,
+              data: { eventId: String(eventId), animalId: String(targetAnimalId) }
+            }).catch(err => console.error("[Push] Erro ao enviar notificação após classify:", err));
+          }
+          // ────────────────────────────────────────────────────────────────────
+
           if (input.posture) {
             await savePostureForEvent(eventId, input.posture);
           }
@@ -845,6 +1133,121 @@ export const appRouter = router({
           });
         }
         return data as { species: string; confidence: number };
+      }),
+
+    classifyBreedV1: protectedProcedure
+      .input(
+        z.object({
+          image: z.string(),
+          includeInfo: z.boolean().default(true),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        checkRateLimit(ctx, "classify.classifyBreedV1", 45);
+        const userId = await effectiveUserId(ctx.user);
+        await checkAndIncrementAnalysisLimit(userId);
+        const buffer = Buffer.from(input.image, "base64");
+
+        const form = new FormData();
+        const blob = new Blob([buffer], { type: "image/jpeg" });
+        form.append("file", blob, "photo.jpg");
+
+        const backends = [
+          process.env.FASTAPI_BACKEND_URL,
+          process.env.ML_BACKEND_URL,
+          HF_BACKEND_URL,
+          PRIMARY_BACKEND_URL,
+        ].filter(Boolean) as string[];
+
+        const authHeaders: Record<string, string> = {};
+        if (ctx.req.headers.authorization) {
+          authHeaders["Authorization"] = ctx.req.headers.authorization;
+        }
+        if (process.env.API_KEY) {
+          authHeaders["X-API-Key"] = process.env.API_KEY;
+        }
+
+        for (const backendUrl of backends) {
+          try {
+            const endpoint = `/v1/classify-breed?include_info=${input.includeInfo}`;
+            const res = await fetch(`${backendUrl}${endpoint}`, {
+              method: "POST",
+              body: form,
+              headers: authHeaders,
+            });
+            if (res.ok) {
+              return await res.json();
+            }
+          } catch (err) {
+            console.warn(`[ML] Failed classifyBreedV1 on ${backendUrl}:`, err);
+          }
+        }
+
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message: "Classificação de raça v1 indisponível no momento.",
+        });
+      }),
+
+    submitFeedbackV1: protectedProcedure
+      .input(
+        z.object({
+          model_name: z.string(),
+          model_version: z.string().default("v1.0.0"),
+          input_hash: z.string(),
+          prediction: z.string(),
+          confidence: z.number(),
+          is_correct: z.boolean(),
+          correct_label: z.string().optional(),
+          user_confidence: z.number().optional(),
+          feedback_text: z.string().optional(),
+          metadata: z.record(z.string(), z.any()).optional(),
+          image: z.string().optional(),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        checkRateLimit(ctx, "classify.submitFeedbackV1", 60);
+        const form = new FormData();
+        const { image, ...jsonData } = input;
+        form.append("json_data", JSON.stringify(jsonData));
+
+        if (image) {
+          const buffer = Buffer.from(image, "base64");
+          const blob = new Blob([buffer], { type: "image/jpeg" });
+          form.append("image", blob, "feedback.jpg");
+        }
+
+        const backends = [
+          process.env.FASTAPI_BACKEND_URL,
+          process.env.ML_BACKEND_URL,
+          HF_BACKEND_URL,
+          PRIMARY_BACKEND_URL,
+        ].filter(Boolean) as string[];
+
+        const authHeaders: Record<string, string> = {};
+        if (ctx.req.headers.authorization) {
+          authHeaders["Authorization"] = ctx.req.headers.authorization;
+        }
+        if (process.env.API_KEY) {
+          authHeaders["X-API-Key"] = process.env.API_KEY;
+        }
+
+        for (const backendUrl of backends) {
+          try {
+            const res = await fetch(`${backendUrl}/v1/feedback`, {
+              method: "POST",
+              body: form,
+              headers: authHeaders,
+            });
+            if (res.ok) {
+              return await res.json();
+            }
+          } catch (err) {
+            console.warn(`[ML] Failed submitFeedbackV1 on ${backendUrl}:`, err);
+          }
+        }
+
+        return { status: "fallback", id: "local-" + Date.now() };
       }),
 
     saveVisionEvent: protectedProcedure
@@ -1444,6 +1847,7 @@ export const appRouter = router({
           dateFrom: z.string().optional(),
           dateTo: z.string().optional(),
           animalId: z.number().optional(),
+          contextTag: z.string().optional(),
         }),
       )
       .query(async ({ ctx, input }) => {
@@ -1456,6 +1860,7 @@ export const appRouter = router({
           input.dateFrom,
           input.dateTo,
           input.animalId,
+          input.contextTag,
         );
         const mappedEvents = await Promise.all(
           result.events.map(mapDbEvent).map(async (e) => ({
@@ -1555,6 +1960,18 @@ export const appRouter = router({
         return { success: true, notes };
       }),
 
+    updateTags: protectedProcedure
+      .input(
+        z.object({
+          eventId: z.number(),
+          tags: z.array(z.string()),
+        }),
+      )
+      .mutation(async ({ input }) => {
+        const tags = await updateEventContextTags(input.eventId, input.tags);
+        return { success: true, tags };
+      }),
+
     listForAnimal: protectedProcedure
       .input(
         z.object({
@@ -1640,9 +2057,12 @@ export const appRouter = router({
   vet: vetRouter,
   health: healthRouter,
   trends: trendsRouter,
+  insights: insightsRouter,
   healing: healingRouter,
   foods: foodsRouter,
   push: pushRouter,
+  feedback: feedbackRouter,
+  analytics: analyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

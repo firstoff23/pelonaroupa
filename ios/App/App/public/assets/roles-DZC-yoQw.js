@@ -1,0 +1,1 @@
+const n=["vet","veterinarian","clinic_admin","admin"];function e(i){return typeof i=="string"&&n.includes(i)}function r(i){return i==="clinic_admin"?"Admin clínica":i==="admin"?"Admin":"Veterinário"}export{r as g,e as i};

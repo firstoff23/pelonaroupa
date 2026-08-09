@@ -18,7 +18,8 @@
     "test": "vitest run",
     "db:push": "supabase db push",
     "cleanup": "node scripts/cleanup-test-data.cjs",
-    "repomix": "npx repomix"
+    "repomix": "npx repomix",
+    "verify": "bash scripts/verify-deploy.sh"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.27",

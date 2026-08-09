@@ -169,7 +169,7 @@
     "tapForSingle": "Toque para uma gravação única de 3 segundos",
     "nextAcusticSoon": "Próxima análise acústica a iniciar em breve…",
     "continuousMode": "Modo contínuo",
-    "continuousDesc": "Permite classificar sem interrupções",
+    "continuousDesc": "Classifica automaticamente a cada 3 segundos",
     "classificationsCount": "classificações nesta sessão",
     "lastClass": "Última:",
     "recentClass": "Últimas classificações",

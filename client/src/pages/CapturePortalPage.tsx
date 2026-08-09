@@ -1,13 +1,37 @@
-import { motion } from "motion/react";
-import { Camera, Mic } from "lucide-react";
+﻿import { motion } from "motion/react";
+import { Camera, CheckCircle2, Mic, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/useLanguage";
 
+type PermState = "prompt" | "granted" | "denied" | "unknown";
+
+function useCameraPermission(): PermState {
+  const [perm, setPerm] = useState<PermState>("unknown");
+
+  useEffect(() => {
+    if (!navigator?.permissions?.query) {
+      setPerm("unknown");
+      return;
+    }
+    navigator.permissions
+      .query({ name: "camera" as PermissionName })
+      .then((result) => {
+        setPerm(result.state as PermState);
+        result.onchange = () => setPerm(result.state as PermState);
+      })
+      .catch(() => setPerm("unknown"));
+  }, []);
+
+  return perm;
+}
+
 export default function CapturePortalPage() {
   const [, setLocation] = useLocation();
   const { language } = useLanguage();
+  const cameraPerm = useCameraPermission();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 15 },
@@ -32,6 +56,34 @@ export default function CapturePortalPage() {
     },
   };
 
+  function CameraPermBadge() {
+    if (cameraPerm === "granted") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+          <CheckCircle2 size={10} />
+          {language === "pt" ? "Camara pronta" : "Camera ready"}
+        </span>
+      );
+    }
+    if (cameraPerm === "denied") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-full">
+          <XCircle size={10} />
+          {language === "pt" ? "Acesso negado" : "Access denied"}
+        </span>
+      );
+    }
+    if (cameraPerm === "prompt") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          {language === "pt" ? "Conceder acesso" : "Grant access"}
+        </span>
+      );
+    }
+    return null;
+  }
+
   return (
     <motion.div
       variants={containerVariants}
@@ -41,7 +93,7 @@ export default function CapturePortalPage() {
     >
       <div className="flex flex-col gap-1 text-center mb-4">
         <h1 className="text-2xl font-bold text-foreground tracking-tight">
-          {language === "pt" ? "Capturar Expressão" : "Capture Expression"}
+          {language === "pt" ? "Capturar Expressao" : "Capture Expression"}
         </h1>
         <p className="text-xs text-muted-foreground">
           {language === "pt"
@@ -51,7 +103,6 @@ export default function CapturePortalPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {/* Audio Card */}
         <motion.div
           variants={cardVariants}
           whileHover={{ scale: 1.015 }}
@@ -67,11 +118,11 @@ export default function CapturePortalPage() {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-foreground">
-                  {language === "pt" ? "Gravar Áudio" : "Record Audio"}
+                  {language === "pt" ? "Gravar Audio" : "Record Audio"}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {language === "pt"
-                    ? "Grave vocalizações do animal para tradução acústica imediata."
+                    ? "Grave vocalizacoes do animal para traducao acustica imediata."
                     : "Record vocalizations for immediate acoustic analysis."}
                 </p>
               </div>
@@ -87,7 +138,6 @@ export default function CapturePortalPage() {
           </Card>
         </motion.div>
 
-        {/* Camera Card */}
         <motion.div
           variants={cardVariants}
           whileHover={{ scale: 1.015 }}
@@ -102,10 +152,13 @@ export default function CapturePortalPage() {
                 <Camera size={20} />
               </div>
               <div className="min-w-0">
-                <h2 className="text-base font-bold text-foreground truncate">
-                  {language === "pt" ? "Câmara Visão" : "Vision Camera"}
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed truncate">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-bold text-foreground">
+                    {language === "pt" ? "Camara Visao" : "Vision Camera"}
+                  </h2>
+                  <CameraPermBadge />
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                   {language === "pt"
                     ? "Analise a postura e linguagem corporal em tempo real."
                     : "Analyze posture and body language in real time."}

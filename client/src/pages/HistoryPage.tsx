@@ -495,35 +495,78 @@ function groupEventsByDay(events: HistoryEvent[], language: string) {
 function EmptyState({ filtered }: { filtered: boolean }) {
   const { t, language } = useLanguage();
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-      <div className="w-16 h-16 rounded-full bg-secondary/60 flex items-center justify-center">
-        {filtered ? (
-          <Search size={28} className="text-muted-foreground" />
-        ) : (
-          <PawPrint size={28} className="text-muted-foreground" />
-        )}
-      </div>
-      <p className="font-semibold text-foreground">
-        {filtered
-          ? (language === "pt" ? "Sem resultados" : "No results")
-          : (language === "pt" ? "Sem histórico ainda" : "No history yet")}
-      </p>
-      <p className="text-sm text-muted-foreground max-w-xs">
-        {filtered
-          ? (language === "pt" ? "Tente ajustar os filtros para encontrar registos." : "Try adjusting the filters to find records.")
-          : (language === "pt" ? "Grave o som do seu animal para ver o histórico de classificações aqui." : "Record your pet's sound to see classification history here.")}
-      </p>
-      {!filtered && (
-        <Link href="/capturar">
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 gap-2 border-primary/30 hover:bg-primary/10"
-          >
-            <Mic size={16} className="text-primary animate-pulse" />
-            <span>{language === "pt" ? "Fazer gravação" : "Record audio"}</span>
-          </Button>
-        </Link>
+    <div className="flex flex-col items-center justify-center py-16 text-center space-y-5 px-6">
+      {filtered ? (
+        /* ─── Filtered Empty ─── */
+        <>
+          <div className="w-16 h-16 rounded-full bg-secondary/60 flex items-center justify-center">
+            <Search size={28} className="text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <p className="font-semibold text-foreground">
+              {language === "pt" ? "Sem resultados" : "No results"}
+            </p>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              {language === "pt"
+                ? "Tente ajustar os filtros para encontrar registos."
+                : "Try adjusting the filters to find records."}
+            </p>
+          </div>
+        </>
+      ) : (
+        /* ─── First-time Empty ─── */
+        <>
+          {/* Animated SVG illustration */}
+          <div className="relative">
+            <svg
+              width="96"
+              height="96"
+              viewBox="0 0 96 96"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="drop-shadow-lg"
+              aria-hidden="true"
+            >
+              {/* Paw body */}
+              <circle cx="48" cy="58" r="22" fill="currentColor" className="text-primary/20" />
+              <circle cx="48" cy="58" r="22" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/40" />
+              {/* Toes */}
+              <circle cx="36" cy="40" r="8" fill="currentColor" className="text-primary/15" />
+              <circle cx="36" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
+              <circle cx="48" cy="36" r="8" fill="currentColor" className="text-primary/15" />
+              <circle cx="48" cy="36" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
+              <circle cx="60" cy="40" r="8" fill="currentColor" className="text-primary/15" />
+              <circle cx="60" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
+              {/* Sound waves */}
+              <path d="M72 52 Q80 58 72 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" className="text-primary/50" />
+              <path d="M78 46 Q90 58 78 70" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" className="text-primary/30" />
+              <path d="M24 52 Q16 58 24 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" className="text-primary/50" />
+              <path d="M18 46 Q6 58 18 70" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" className="text-primary/30" />
+            </svg>
+            {/* Pulse ring */}
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: "2.5s" }} />
+          </div>
+
+          <div className="space-y-2 max-w-xs">
+            <p className="text-lg font-bold text-foreground">
+              {language === "pt" ? "Nenhuma análise ainda" : "No analyses yet"}
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {language === "pt"
+                ? "Grave o som do seu animal e descubra o que ele está a tentar dizer."
+                : "Record your pet's sounds and discover what they're trying to say."}
+            </p>
+          </div>
+
+          <Link href="/capturar">
+            <Button
+              className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6"
+            >
+              <Mic size={16} className="animate-pulse" />
+              {language === "pt" ? "Fazer primeira gravação" : "Make first recording"}
+            </Button>
+          </Link>
+        </>
       )}
     </div>
   );

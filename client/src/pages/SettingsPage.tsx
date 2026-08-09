@@ -48,6 +48,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/ui/Logo";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSelfHealing } from "@/contexts/SelfHealingContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -94,6 +95,11 @@ export default function SettingsPage() {
 
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  // Track saved originals to detect unsaved changes
+  const [originalUserName, setOriginalUserName] = useState("");
+  const [originalUserEmail, setOriginalUserEmail] = useState("");
+  const profileHasChanges =
+    userName !== originalUserName || userEmail !== originalUserEmail;
   const [notifications, setNotifications] = useState(true);
   const [distressAlerts, setDistressAlerts] = useState(true);
   const [hungerAlerts, setHungerAlerts] = useState(true);
@@ -220,6 +226,9 @@ export default function SettingsPage() {
     if (dbUser) {
       setUserName(dbUser.name || "");
       setUserEmail(dbUser.email || "");
+      // Snapshot originals for change detection
+      setOriginalUserName(dbUser.name || "");
+      setOriginalUserEmail(dbUser.email || "");
     }
   }, [dbUser]);
 
@@ -244,6 +253,9 @@ export default function SettingsPage() {
       // Invalidate the cache entry and refetch to pick up the new data
       utils.auth.me.invalidate();
       refetchUser();
+      // Reset change-detection snapshot so the Save button disables again
+      setOriginalUserName(userName);
+      setOriginalUserEmail(userEmail);
     },
     onError: (err) => {
       toast.error(
@@ -462,7 +474,7 @@ export default function SettingsPage() {
               <div className="pt-2 pb-4 border-b border-border/50">
                 <Button
                   type="submit"
-                  disabled={updateProfileMutation.isPending}
+                  disabled={updateProfileMutation.isPending || !profileHasChanges}
                   className="w-full text-xs h-9 active-scale tap-highlight-none"
                 >
                   {updateProfileMutation.isPending ? (
@@ -503,8 +515,9 @@ export default function SettingsPage() {
                 setLanguage("pt");
                 toast.success("Idioma alterado para Português");
               }}
-              className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none"
+              className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none gap-1.5"
             >
+              {language === "pt" && <Check className="w-3.5 h-3.5 stroke-[2.5px]" />}
               Português (PT)
             </Button>
             <Button
@@ -513,8 +526,9 @@ export default function SettingsPage() {
                 setLanguage("en");
                 toast.success("Language changed to English");
               }}
-              className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none"
+              className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none gap-1.5"
             >
+              {language === "en" && <Check className="w-3.5 h-3.5 stroke-[2.5px]" />}
               English (EN)
             </Button>
           </CardContent>
@@ -842,24 +856,66 @@ export default function SettingsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
-                <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between">
-                  <span className="text-muted-foreground">API Backend:</span>
-                  <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3" /> Operational
-                  </span>
-                </div>
-                <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between">
-                  <span className="text-muted-foreground">Camera System:</span>
-                  <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3" /> Ready
-                  </span>
-                </div>
-                <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between">
-                  <span className="text-muted-foreground">Audio / YAMNet:</span>
-                  <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
-                    <CheckCircle2 className="w-3 h-3" /> Online
-                  </span>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        API Backend: <Info className="w-2.5 h-2.5 opacity-50" />
+                      </span>
+                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3" /> Operational
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-[180px]">
+                      {language === "pt"
+                        ? "API FastAPI em produção (HF Spaces). Recebe pedidos de classificação de áudio e raças."
+                        : "FastAPI backend on HF Spaces. Receives breed and audio classification requests."}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        Camera System: <Info className="w-2.5 h-2.5 opacity-50" />
+                      </span>
+                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3" /> Ready
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-[180px]">
+                      {language === "pt"
+                        ? "Sistema de câmara do WebView pronto para captura de imagens para identificação de raças."
+                        : "WebView camera system ready to capture images for breed identification."}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        Audio / YAMNet: <Info className="w-2.5 h-2.5 opacity-50" />
+                      </span>
+                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3" /> Online
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-[180px]">
+                      {language === "pt"
+                        ? "Modelo YAMNet de classificação acústica ativo. Analisa vocalizações de cães e gatos."
+                        : "YAMNet acoustic classification model active. Analyzes dog and cat vocalizations."}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+
                 <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between">
                   <span className="text-muted-foreground">Last Checked:</span>
                   <span className="font-semibold text-foreground mt-0.5">

@@ -169,7 +169,7 @@
     "tapForSingle": "Tap for a single 3-second recording",
     "nextAcusticSoon": "Next acoustic analysis starting soon…",
     "continuousMode": "Continuous Mode",
-    "continuousDesc": "Allows non-stop classification",
+    "continuousDesc": "Allows non-stop classification (every 3 seconds)",
     "classificationsCount": "classifications this session",
     "lastClass": "Last:",
     "recentClass": "Recent Classifications",

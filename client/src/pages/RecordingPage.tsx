@@ -1573,6 +1573,19 @@ export default function RecordingPage() {
                   )}
                 </div>
 
+                {/* ─── Veterinary Disclaimer (before button) ─── */}
+                <div className="w-full px-1">
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2 text-left">
+                    <span className="text-sm select-none shrink-0 mt-0.5">⚠️</span>
+                    <p className="leading-relaxed">
+                      <strong>{language === "pt" ? "Aviso:" : "Notice:"}</strong>{" "}
+                      {language === "pt"
+                        ? "PeloNaRoupa não substitui avaliação veterinária. Os resultados são estimativas comportamentais."
+                        : "PeloNaRoupa does not replace veterinary evaluation. Results are behavioral estimates."}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="relative flex items-center justify-center">
                   <div
                     className={cn(
@@ -1736,8 +1749,11 @@ export default function RecordingPage() {
             <InfinityIcon size={16} />
           </div>
           <div className="text-left">
-            <p className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <p className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
               {t("recordingPage.continuousMode")}
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 normal-case tracking-normal">
+                Beta
+              </span>
             </p>
             <p className="text-xs text-muted-foreground">
               {isAutoMode
@@ -1792,20 +1808,6 @@ export default function RecordingPage() {
         </div>
       )}
 
-      {/* Veterinary Disclaimer */}
-      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2.5 shadow-sm text-left">
-        <span className="text-base select-none mt-0.5">⚠️</span>
-        <p className="leading-relaxed">
-          <strong>Aviso:</strong> PeloNaRoupa não substitui avaliação veterinária. Os
-          resultados são estimativas comportamentais baseadas em áudio.
-        </p>
-      </div>
-
-      <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed max-w-[360px] mx-auto pt-4 pb-2">
-        {language === "pt"
-          ? "PeloNaRoupa não substitui avaliação veterinária. Os resultados são estimativas comportamentais baseadas em áudio e contexto."
-          : "PeloNaRoupa does not replace veterinary evaluation. Results are behavioral estimates based on audio and context."}
-      </p>
     </div>
   );
 }

@@ -11,8 +11,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 // ─── Surveillance configuration ───────────────────────────────────────────────
 /** Duration of each audio recording chunk. */
 const RECORD_DURATION_MS = 5_000;
-/** Idle pause between cycles — lets CPU/radio enter low-power state. */
-const ANALYSIS_PAUSE_MS  = 4_000;
+/** Idle pause between cycles — lets CPU/radio enter low-power state. Increased for better battery. */
+const ANALYSIS_PAUSE_MS  = 10_000;
 
 export function SurveillancePage() {
   const [isActive, setIsActive] = useState(false);
@@ -123,14 +123,21 @@ export function SurveillancePage() {
       setStatus("A analisar...");
 
       if (result.value?.recordDataBase64) {
+        let base64Audio: string | null = result.value.recordDataBase64;
+        const mime = result.value.mimeType;
         try {
           await classifyMutation.mutateAsync({
-            audio: result.value.recordDataBase64,
-            audioMimeType: result.value.mimeType,
+            audio: base64Audio,
+            audioMimeType: mime,
           });
         } catch (classifyErr) {
           // Classification errors don't stop the surveillance loop
           console.error("[Surveillance] Classify error (continuing):", classifyErr);
+        } finally {
+          // Explicit cleanup to help the JS Garbage Collector 
+          // clear the massive base64 string from memory immediately
+          base64Audio = null;
+          result.value.recordDataBase64 = "";
         }
       }
     } catch (e) {

@@ -31,6 +31,8 @@ import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 import { GlobalFallback } from "./components/GlobalFallback";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import { Capacitor } from "@capacitor/core";
+import { App as CapApp } from "@capacitor/app";
+
 const AnimalDetailPage = lazy(() => import("./pages/AnimalDetailPage"));
 const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
 const CameraPage = lazy(() => import("./pages/CameraPage"));
@@ -491,6 +493,8 @@ function Router() {
 import { LanguageProvider } from "./hooks/useLanguage";
 
 function App() {
+  const [, setLocation] = useLocation();
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time: number) {
@@ -500,6 +504,18 @@ function App() {
     requestAnimationFrame(raf);
     return () => lenis.destroy();
   }, []);
+
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener("appUrlOpen", (event) => {
+        const url = new URL(event.url);
+        if (url.hostname === "pelonaroupa.app") {
+          // Use search params as well
+          setLocation(url.pathname + url.search);
+        }
+      });
+    }
+  }, [setLocation]);
 
   return (
     <ErrorBoundary>

@@ -509,7 +509,7 @@ function App() {
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener("appUrlOpen", (event) => {
         const url = new URL(event.url);
-        if (url.hostname === "pelonaroupa.app") {
+        if (url.hostname === "pelonaroupa.app" || url.hostname === "animalmind.vercel.app") {
           // Use search params as well
           setLocation(url.pathname + url.search);
         }

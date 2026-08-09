@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
 import { VoiceRecorder } from "capacitor-voice-recorder";
 import { ForegroundService } from "@capawesome-team/capacitor-android-foreground-service";
@@ -8,11 +8,19 @@ import { Shield, ShieldAlert, Activity, StopCircle, PlayCircle } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+// ─── Surveillance configuration ───────────────────────────────────────────────
+/** Duration of each audio recording chunk. */
+const RECORD_DURATION_MS = 5_000;
+/** Idle pause between cycles — lets CPU/radio enter low-power state. */
+const ANALYSIS_PAUSE_MS  = 4_000;
+
 export function SurveillancePage() {
   const [isActive, setIsActive] = useState(false);
   const [status, setStatus] = useState("Inativo");
   const classifyMutation = trpc.classify.run.useMutation();
   const loopRef = useRef<boolean>(false);
+  /** Stores the active setTimeout handle so we can cancel it on stop. */
+  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Clean up on unmount
   useEffect(() => {
@@ -58,9 +66,15 @@ export function SurveillancePage() {
   };
 
   const stopSurveillance = async () => {
-    setIsActive(false);
     loopRef.current = false;
+    setIsActive(false);
     setStatus("Inativo");
+
+    // Cancel any pending idle timer immediately
+    if (stopTimerRef.current !== null) {
+      clearTimeout(stopTimerRef.current);
+      stopTimerRef.current = null;
+    }
 
     try {
       if (Capacitor.isNativePlatform()) {
@@ -68,46 +82,84 @@ export function SurveillancePage() {
         if (Capacitor.getPlatform() === 'android') {
           await ForegroundService.stopForegroundService();
         }
-        const status = await VoiceRecorder.getCurrentStatus();
-        if (status.status === 'RECORDING') {
+        const recStatus = await VoiceRecorder.getCurrentStatus();
+        if (recStatus.status === 'RECORDING') {
           await VoiceRecorder.stopRecording();
         }
       }
     } catch (e) {
-      console.error("Error stopping surveillance", e);
+      console.error("[Surveillance] Error stopping:", e);
     }
   };
 
-  const surveillanceLoop = async () => {
-    while (loopRef.current) {
-      try {
-        await VoiceRecorder.startRecording();
-        setStatus("A gravar...");
-        
-        // Record for 5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        
-        if (!loopRef.current) {
-          await VoiceRecorder.stopRecording();
-          break;
-        }
-        
-        const result = await VoiceRecorder.stopRecording();
-        setStatus("A analisar...");
-        
-        if (result.value && result.value.recordDataBase64) {
+  /**
+   * Recursive surveillance loop.
+   * Uses setTimeout-based recursion (not while-true) so the JS engine
+   * can breathe between iterations and the CPU can enter low-power state.
+   */
+  const surveillanceLoop = useCallback(async () => {
+    if (!loopRef.current) return;
+
+    try {
+      setStatus("A gravar...");
+      await VoiceRecorder.startRecording();
+
+      // Wait for the record duration, storing the handle so stopSurveillance
+      // can cancel it immediately without waiting.
+      await new Promise<void>((resolve) => {
+        stopTimerRef.current = setTimeout(() => {
+          stopTimerRef.current = null;
+          resolve();
+        }, RECORD_DURATION_MS);
+      });
+
+      // Guard: user may have pressed stop during recording
+      if (!loopRef.current) {
+        await VoiceRecorder.stopRecording().catch(() => {});
+        return;
+      }
+
+      const result = await VoiceRecorder.stopRecording();
+      setStatus("A analisar...");
+
+      if (result.value?.recordDataBase64) {
+        try {
           await classifyMutation.mutateAsync({
             audio: result.value.recordDataBase64,
             audioMimeType: result.value.mimeType,
           });
+        } catch (classifyErr) {
+          // Classification errors don't stop the surveillance loop
+          console.error("[Surveillance] Classify error (continuing):", classifyErr);
         }
-      } catch (e) {
-        console.error("Erro no loop de vigilância:", e);
-        setStatus("Erro");
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // wait before retry
       }
+    } catch (e) {
+      console.error("[Surveillance] Loop error:", e);
+      setStatus("Erro — a reiniciar...");
+      // Brief pause after error before retrying
+      await new Promise<void>((resolve) => {
+        stopTimerRef.current = setTimeout(() => {
+          stopTimerRef.current = null;
+          resolve();
+        }, 2_000);
+      });
     }
-  };
+
+    if (loopRef.current) {
+      // ── Idle pause ────────────────────────────────────────────────────────
+      // This is the key battery optimization: giving the CPU and radio
+      // time to enter a low-power state between recording cycles.
+      setStatus("Em espera...");
+      await new Promise<void>((resolve) => {
+        stopTimerRef.current = setTimeout(() => {
+          stopTimerRef.current = null;
+          resolve();
+        }, ANALYSIS_PAUSE_MS);
+      });
+      // Tail-call: schedule next iteration without growing the call stack
+      surveillanceLoop();
+    }
+  }, [classifyMutation]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 text-center space-y-6">

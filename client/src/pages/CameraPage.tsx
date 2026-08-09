@@ -130,14 +130,22 @@ export default function CameraPage() {
 
     // Create an offscreen canvas
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+
+    // Cap the longest side at MAX_CAPTURE_SIDE to keep base64 payloads small.
+    // A 1080p frame at q=0.85 can be ~500 KB in base64; at 800px q=0.75 it's ~60-80 KB.
+    const MAX_CAPTURE_SIDE = 800;
+    const srcW = video.videoWidth  || 640;
+    const srcH = video.videoHeight || 480;
+    const scale = Math.min(1, MAX_CAPTURE_SIDE / Math.max(srcW, srcH));
+    canvas.width  = Math.round(srcW * scale);
+    canvas.height = Math.round(srcH * scale);
 
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      // Draw frame to canvas
+      // Draw frame to canvas (scaled)
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      // q=0.75 is visually indistinguishable from 0.85 for ML classification tasks
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
       setCapturedImage(dataUrl);
 
       // Stop the camera once captured to save battery/bandwidth

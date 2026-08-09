@@ -1,21 +1,33 @@
 # Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# For more details, see http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ─── Debugging ────────────────────────────────────────────────────────────────
+# Preserve line numbers in stack traces for easier debugging of release crashes.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ─── Capacitor Bridge ─────────────────────────────────────────────────────────
+# Capacitor uses reflection to load plugins — these must not be renamed/removed.
+-keep class com.getcapacitor.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keepclassmembers class * extends com.getcapacitor.Plugin {
+    @com.getcapacitor.annotation.PluginMethod public *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ─── Capawesome Foreground Service Plugin ─────────────────────────────────────
+-keep class io.capawesome.capacitorjs.plugins.foregroundservice.** { *; }
+
+# ─── Firebase Cloud Messaging ─────────────────────────────────────────────────
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# ─── AndroidX / WebView ───────────────────────────────────────────────────────
+-keep class androidx.webkit.** { *; }
+-keep class android.webkit.** { *; }
+
+# ─── Keep JS interface class members (Capacitor WebView bridge) ───────────────
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}

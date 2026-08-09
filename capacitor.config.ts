@@ -2,11 +2,14 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.pawra.app",
-  appName: "Pawra",
+  appName: "PeloNaRoupa",
   webDir: "dist/public",
   server: {
     androidScheme: "https",
-    url: "https://animalmind.vercel.app",
+    // NOTE: server.url removed — Capacitor now serves assets locally from dist/public.
+    // For local development hot-reload, temporarily add:
+    //   url: "http://<your-local-ip>:5173",
+    //   cleartext: true,
   },
   plugins: {
     CapacitorSQLite: {

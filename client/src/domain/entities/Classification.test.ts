@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { Classification } from "./Classification";
-import { Breed } from "./Breed";
+import { describe, expect, it } from "vitest";
 import { InvalidSpeciesError } from "../errors/InvalidSpeciesError";
+import { Breed } from "./Breed";
+import { Classification } from "./Classification";
 
 describe("Classification Entity", () => {
   it("should create a valid classification", () => {
@@ -10,7 +10,7 @@ describe("Classification Entity", () => {
       userId: "u-1",
       species: "dog",
       confidence: 0.88,
-      timestamp: new Date(Date.now() - 1000)
+      timestamp: new Date(Date.now() - 1000),
     });
 
     expect(classification.id).toBe("c-1");
@@ -22,7 +22,7 @@ describe("Classification Entity", () => {
     const breed = Breed.create({
       id: "b-1",
       name: "Beagle",
-      group: "Hound"
+      group: "Hound",
     });
 
     const classification = Classification.create({
@@ -31,7 +31,7 @@ describe("Classification Entity", () => {
       species: "dog",
       breed,
       confidence: 0.92,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     expect(classification.breed?.name).toBe("Beagle");
@@ -39,22 +39,26 @@ describe("Classification Entity", () => {
 
   it("should throw error for future timestamp", () => {
     const futureDate = new Date(Date.now() + 100000);
-    expect(() => Classification.create({
-      id: "c-1",
-      userId: "u-1",
-      species: "dog",
-      confidence: 0.9,
-      timestamp: futureDate
-    })).toThrowError("O timestamp da classificação não pode ser no futuro.");
+    expect(() =>
+      Classification.create({
+        id: "c-1",
+        userId: "u-1",
+        species: "dog",
+        confidence: 0.9,
+        timestamp: futureDate,
+      }),
+    ).toThrowError("O timestamp da classificação não pode ser no futuro.");
   });
 
   it("should throw error for invalid species", () => {
-    expect(() => Classification.create({
-      id: "c-1",
-      userId: "u-1",
-      species: "bird",
-      confidence: 0.9,
-      timestamp: new Date()
-    })).toThrow(InvalidSpeciesError);
+    expect(() =>
+      Classification.create({
+        id: "c-1",
+        userId: "u-1",
+        species: "bird",
+        confidence: 0.9,
+        timestamp: new Date(),
+      }),
+    ).toThrow(InvalidSpeciesError);
   });
 });

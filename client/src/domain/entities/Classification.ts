@@ -1,6 +1,6 @@
-import { Species } from "../value-objects/Species";
 import { Confidence } from "../value-objects/Confidence";
-import { Breed } from "./Breed";
+import { Species } from "../value-objects/Species";
+import type { Breed } from "./Breed";
 
 export interface ClassificationProps {
   id: string;
@@ -38,7 +38,7 @@ export class Classification {
       speciesVO,
       confidenceVO,
       props.timestamp,
-      props.breed
+      props.breed,
     );
   }
 }

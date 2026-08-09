@@ -19,7 +19,7 @@ export class User {
     if (!props.id) {
       throw new Error("ID do utilizador é obrigatório.");
     }
-    
+
     // Validação básica de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(props.email)) {
@@ -30,7 +30,7 @@ export class User {
       props.id,
       props.email.toLowerCase(),
       props.roles || [],
-      props.mfaEnabled || false
+      props.mfaEnabled || false,
     );
   }
 }

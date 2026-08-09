@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { Feedback } from "./Feedback";
+import { describe, expect, it } from "vitest";
 import { InvalidConfidenceError } from "../errors/InvalidConfidenceError";
+import { Feedback } from "./Feedback";
 
 describe("Feedback Entity", () => {
   it("should create a valid correct feedback", () => {
@@ -10,7 +10,7 @@ describe("Feedback Entity", () => {
       modelName: "MobileNetV3",
       prediction: "Golden Retriever",
       confidence: 0.95,
-      isCorrect: true
+      isCorrect: true,
     });
 
     expect(feedback.id).toBe("f-1");
@@ -26,7 +26,7 @@ describe("Feedback Entity", () => {
       prediction: "Golden Retriever",
       confidence: 0.75,
       isCorrect: false,
-      correctLabel: "Labrador Retriever"
+      correctLabel: "Labrador Retriever",
     });
 
     expect(feedback.isCorrect).toBe(false);
@@ -34,24 +34,30 @@ describe("Feedback Entity", () => {
   });
 
   it("should throw error if incorrect feedback lacks correct label", () => {
-    expect(() => Feedback.create({
-      id: "f-2",
-      userId: "u-1",
-      modelName: "MobileNetV3",
-      prediction: "Golden Retriever",
-      confidence: 0.75,
-      isCorrect: false
-    })).toThrowError("Se a previsão estiver incorreta, o rótulo correto deve ser fornecido.");
+    expect(() =>
+      Feedback.create({
+        id: "f-2",
+        userId: "u-1",
+        modelName: "MobileNetV3",
+        prediction: "Golden Retriever",
+        confidence: 0.75,
+        isCorrect: false,
+      }),
+    ).toThrowError(
+      "Se a previsão estiver incorreta, o rótulo correto deve ser fornecido.",
+    );
   });
 
   it("should throw domain error for invalid confidence", () => {
-    expect(() => Feedback.create({
-      id: "f-3",
-      userId: "u-1",
-      modelName: "MobileNetV3",
-      prediction: "Cat",
-      confidence: 1.5,
-      isCorrect: true
-    })).toThrow(InvalidConfidenceError);
+    expect(() =>
+      Feedback.create({
+        id: "f-3",
+        userId: "u-1",
+        modelName: "MobileNetV3",
+        prediction: "Cat",
+        confidence: 1.5,
+        isCorrect: true,
+      }),
+    ).toThrow(InvalidConfidenceError);
   });
 });

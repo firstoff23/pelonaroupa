@@ -32,7 +32,9 @@ interface InsightEvent {
 
 // ─── effectiveUserId (mesmo padrão de trends.ts / vet.ts) ────────────────────
 
-async function effectiveUserId(ctxUser: { id: number } | null): Promise<number> {
+async function effectiveUserId(
+  ctxUser: { id: number } | null,
+): Promise<number> {
   if (ctxUser) return ctxUser.id;
   const demoId = await getDemoUserId();
   if (!demoId) throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -60,7 +62,9 @@ async function fetchEventsForInsights(
 // feedback_annotations não guarda "correct/incorrect" — guarda se houve
 // correção detalhada. Um evento "tem feedback" se tiver `feedback` rápido
 // OU uma entrada em feedback_annotations.
-async function fetchAnnotatedEventIds(eventIds: number[]): Promise<Set<number>> {
+async function fetchAnnotatedEventIds(
+  eventIds: number[],
+): Promise<Set<number>> {
   if (eventIds.length === 0) return new Set();
   const supabase = getSupabase();
   const { data, error } = await supabase
@@ -68,12 +72,17 @@ async function fetchAnnotatedEventIds(eventIds: number[]): Promise<Set<number>> 
     .select("classification_event_id")
     .in("classification_event_id", eventIds);
   if (error) throw error;
-  return new Set((data ?? []).map((row) => row.classification_event_id as number));
+  return new Set(
+    (data ?? []).map((row) => row.classification_event_id as number),
+  );
 }
 
 // ─── 1. Taxa de feedback ──────────────────────────────────────────────────────
 
-function computeFeedbackRate(events: InsightEvent[], annotatedIds: Set<number>) {
+function computeFeedbackRate(
+  events: InsightEvent[],
+  annotatedIds: Set<number>,
+) {
   const totalEvents = events.length;
   if (totalEvents === 0) return null;
   const eventsWithFeedback = events.filter(
@@ -94,7 +103,9 @@ interface PeriodBucket {
   counts: Record<string, number>;
 }
 
-function computePeriodOfDay(events: InsightEvent[]): Record<PeriodTag, PeriodBucket> {
+function computePeriodOfDay(
+  events: InsightEvent[],
+): Record<PeriodTag, PeriodBucket> {
   const byPeriod: Record<PeriodTag, PeriodBucket> = {
     manha: { dominantState: null, total: 0, counts: {} },
     tarde: { dominantState: null, total: 0, counts: {} },
@@ -114,7 +125,9 @@ function computePeriodOfDay(events: InsightEvent[]): Record<PeriodTag, PeriodBuc
   for (const period of PERIOD_TAGS) {
     const bucket = byPeriod[period];
     if (bucket.total < MIN_EVENTS_FOR_INSIGHT) continue;
-    const [dominant] = Object.entries(bucket.counts).sort((a, b) => b[1] - a[1]);
+    const [dominant] = Object.entries(bucket.counts).sort(
+      (a, b) => b[1] - a[1],
+    );
     bucket.dominantState = dominant?.[0] ?? null;
   }
 
@@ -133,12 +146,18 @@ function computeTopContextByState(events: InsightEvent[]) {
     );
     for (const tag of tags) {
       stateTagCounts[event.state] ??= {};
-      stateTagCounts[event.state][tag] = (stateTagCounts[event.state][tag] ?? 0) + 1;
+      stateTagCounts[event.state][tag] =
+        (stateTagCounts[event.state][tag] ?? 0) + 1;
       stateTotals[event.state] = (stateTotals[event.state] ?? 0) + 1;
     }
   }
 
-  const top: Array<{ state: string; tag: string; occurrences: number; totalForState: number }> = [];
+  const top: Array<{
+    state: string;
+    tag: string;
+    occurrences: number;
+    totalForState: number;
+  }> = [];
   for (const [state, tagCounts] of Object.entries(stateTagCounts)) {
     const totalForState = stateTotals[state] ?? 0;
     if (totalForState < MIN_EVENTS_FOR_INSIGHT) continue;
@@ -174,9 +193,16 @@ function computeStateTrend(events: InsightEvent[]) {
       const previousCount = previous[state] ?? 0;
       const total = recentCount + previousCount;
       if (total < MIN_EVENTS_FOR_INSIGHT * 2 || previousCount === 0) {
-        return { state, recentCount, previousCount, changePercent: null as number | null };
+        return {
+          state,
+          recentCount,
+          previousCount,
+          changePercent: null as number | null,
+        };
       }
-      const changePercent = Math.round(((recentCount - previousCount) / previousCount) * 100);
+      const changePercent = Math.round(
+        ((recentCount - previousCount) / previousCount) * 100,
+      );
       return { state, recentCount, previousCount, changePercent };
     })
     .filter((row) => row.changePercent !== null)

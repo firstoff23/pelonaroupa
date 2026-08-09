@@ -4,6 +4,7 @@ import { type ModelMessage, streamText } from "ai";
 import { z } from "zod";
 
 const ALLOWED_AUDIT_ROLES = ["admin", "vet", "veterinarian", "clinic_admin"];
+
 import {
   type EmotionalState,
   type ModelUsed,
@@ -45,6 +46,7 @@ import {
   getEventPosture,
   getEventsForAnimalPaginated,
   getEventsPaginated,
+  getFeedbackAnnotations,
   getLatestBeliefState,
   getLicensing,
   getOtherTreatments,
@@ -57,34 +59,33 @@ import {
   getVaccinations,
   getWeeklyStats,
   insertEvent,
+  logAnalyticsEvent,
   recalculateAnimalBehaviorBaseline,
   removeAnimalShare,
   respondToInvitation,
+  reviewFeedbackAnnotation,
   saveBreedFeedback,
+  saveFeedbackAnnotation,
   savePostureForEvent,
   setActiveAnimal,
   updateAnimal,
   updateAnimalBaseline,
   updateBeliefStateForAnimal,
   updateEventAudio,
+  updateEventContextTags,
   updateEventFeedback,
   updateEventNotes,
-  updateEventContextTags,
   updateUser,
   uploadAudioToSupabase,
   upsertSettings,
   verifyAnimalOwner,
-  saveFeedbackAnnotation,
-  getFeedbackAnnotations,
-  reviewFeedbackAnnotation,
-  logAnalyticsEvent,
 } from "./db";
 import { familyRouter } from "./routers/family";
 import { foodsRouter } from "./routers/foods";
 import { healingRouter } from "./routers/healing";
 import { healthRouter } from "./routers/health";
-import { pushRouter } from "./routers/push";
 import { insightsRouter } from "./routers/insights";
+import { pushRouter } from "./routers/push";
 import { trendsRouter } from "./routers/trends";
 import { vetRouter } from "./routers/vet";
 
@@ -113,7 +114,9 @@ function base32Decode(base32: string): Uint8Array {
 function hotp(secretBytes: Uint8Array, counter: bigint): string {
   const buf = Buffer.alloc(8);
   buf.writeBigUInt64BE(counter);
-  const hmac = createHmac("sha1", Buffer.from(secretBytes)).update(buf).digest();
+  const hmac = createHmac("sha1", Buffer.from(secretBytes))
+    .update(buf)
+    .digest();
   const offset = hmac[19]! & 0x0f;
   const code =
     (((hmac[offset]! & 0x7f) << 24) |
@@ -449,15 +452,26 @@ const feedbackRouter = router({
 
   list: protectedProcedure
     .input(
-      z.object({
-        limit: z.number().min(1).max(50).default(20),
-        offset: z.number().min(0).default(0),
-        animal_type: z.string().optional(),
-        from: z.string().optional(),
-        to: z.string().optional(),
-        reviewed: z.enum(["all", "pending", "reviewed"]).default("all"),
-        predicted_state: z.enum(["distress", "attention", "excitement", "hunger", "alert", "relaxed"]).optional(),
-      }).optional(),
+      z
+        .object({
+          limit: z.number().min(1).max(50).default(20),
+          offset: z.number().min(0).default(0),
+          animal_type: z.string().optional(),
+          from: z.string().optional(),
+          to: z.string().optional(),
+          reviewed: z.enum(["all", "pending", "reviewed"]).default("all"),
+          predicted_state: z
+            .enum([
+              "distress",
+              "attention",
+              "excitement",
+              "hunger",
+              "alert",
+              "relaxed",
+            ])
+            .optional(),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const accessToken = ctx.accessToken;
@@ -470,7 +484,8 @@ const feedbackRouter = router({
       if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Acesso restrito a utilizadores com role veterinária ou administrativa.",
+          message:
+            "Acesso restrito a utilizadores com role veterinária ou administrativa.",
         });
       }
       const data = await getFeedbackAnnotations(accessToken, input);
@@ -494,11 +509,16 @@ const feedbackRouter = router({
       if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Acesso restrito a utilizadores com role veterinária ou administrativa.",
+          message:
+            "Acesso restrito a utilizadores com role veterinária ou administrativa.",
         });
       }
       const userId = await effectiveUserId(ctx.user);
-      const data = await reviewFeedbackAnnotation(accessToken, userId, input.feedbackId);
+      const data = await reviewFeedbackAnnotation(
+        accessToken,
+        userId,
+        input.feedbackId,
+      );
       return { success: true, data };
     }),
 });
@@ -611,10 +631,12 @@ export const appRouter = router({
     }),
     updateProfile: protectedProcedure
       .input(
-        z.object({
-          name: z.string().min(1).max(100).optional(),
-          email: z.string().email().optional(),
-        }).strict(),
+        z
+          .object({
+            name: z.string().min(1).max(100).optional(),
+            email: z.string().email().optional(),
+          })
+          .strict(),
       )
       .mutation(async ({ ctx, input }) => {
         const userId = await effectiveUserId(ctx.user);
@@ -751,7 +773,14 @@ export const appRouter = router({
     }),
 
     "mfa.verify": protectedProcedure
-      .input(z.object({ code: z.string().length(6).regex(/^\d{6}$/) }))
+      .input(
+        z.object({
+          code: z
+            .string()
+            .length(6)
+            .regex(/^\d{6}$/),
+        }),
+      )
       .mutation(async ({ ctx, input }) => {
         const userId = await effectiveUserId(ctx.user);
         const supabase = getSupabase();
@@ -993,13 +1022,22 @@ export const appRouter = router({
           // ── Push Notification ───────────────────────────────────────────────
           if (result.state === "distress" || result.state === "alert") {
             const animalName = targetAnimal?.name || "O seu animal";
-            const stateLabel = result.state === "distress" ? "angústia" : "alerta";
-            
+            const stateLabel =
+              result.state === "distress" ? "angústia" : "alerta";
+
             sendPushNotification(userId, {
               title: `PeloNaRoupa - Alerta de ${stateLabel}!`,
               body: `${animalName} está a mostrar sinais de ${stateLabel} (${Math.round(result.confidence * 100)}% de confiança).`,
-              data: { eventId: String(eventId), animalId: String(targetAnimalId) }
-            }).catch(err => console.error("[Push] Erro ao enviar notificação após classify:", err));
+              data: {
+                eventId: String(eventId),
+                animalId: String(targetAnimalId),
+              },
+            }).catch((err) =>
+              console.error(
+                "[Push] Erro ao enviar notificação após classify:",
+                err,
+              ),
+            );
           }
           // ────────────────────────────────────────────────────────────────────
 

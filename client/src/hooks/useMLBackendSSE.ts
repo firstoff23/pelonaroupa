@@ -30,7 +30,9 @@ type ClassificationEvent = {
   };
 };
 
-type SSEEvent = ClassificationEvent | { type: string; ts: string; data: unknown };
+type SSEEvent =
+  | ClassificationEvent
+  | { type: string; ts: string; data: unknown };
 
 const STATE_LABELS_PT: Record<string, string> = {
   distress: "Angústia",

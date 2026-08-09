@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { User } from "./User";
+import { describe, expect, it } from "vitest";
 import { InvalidEmailError } from "../errors/InvalidEmailError";
+import { User } from "./User";
 
 describe("User Entity", () => {
   it("should create a valid user", () => {
@@ -8,7 +8,7 @@ describe("User Entity", () => {
       id: "user-123",
       email: "test@example.com",
       roles: ["admin"],
-      mfaEnabled: true
+      mfaEnabled: true,
     });
 
     expect(user.id).toBe("user-123");
@@ -22,26 +22,30 @@ describe("User Entity", () => {
       id: "user-123",
       email: "TEST@EXAMPLE.COM",
       roles: [],
-      mfaEnabled: false
+      mfaEnabled: false,
     });
     expect(user.email).toBe("test@example.com");
   });
 
   it("should throw error for invalid email", () => {
-    expect(() => User.create({
-      id: "user-123",
-      email: "invalid-email",
-      roles: [],
-      mfaEnabled: false
-    })).toThrow(InvalidEmailError);
+    expect(() =>
+      User.create({
+        id: "user-123",
+        email: "invalid-email",
+        roles: [],
+        mfaEnabled: false,
+      }),
+    ).toThrow(InvalidEmailError);
   });
 
   it("should throw error if ID is empty", () => {
-    expect(() => User.create({
-      id: "",
-      email: "test@example.com",
-      roles: [],
-      mfaEnabled: false
-    })).toThrowError("ID do utilizador é obrigatório.");
+    expect(() =>
+      User.create({
+        id: "",
+        email: "test@example.com",
+        roles: [],
+        mfaEnabled: false,
+      }),
+    ).toThrowError("ID do utilizador é obrigatório.");
   });
 });

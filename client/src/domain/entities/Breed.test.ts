@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Breed } from "./Breed";
 
 describe("Breed Entity", () => {
@@ -7,7 +7,7 @@ describe("Breed Entity", () => {
       id: "breed-1",
       name: "Golden Retriever",
       group: "Sporting",
-      origin: "Scotland"
+      origin: "Scotland",
     });
 
     expect(breed.id).toBe("breed-1");
@@ -17,26 +17,32 @@ describe("Breed Entity", () => {
   });
 
   it("should throw error if ID is missing", () => {
-    expect(() => Breed.create({
-      id: "",
-      name: "Golden Retriever",
-      group: "Sporting"
-    })).toThrowError("ID da raça é obrigatório.");
+    expect(() =>
+      Breed.create({
+        id: "",
+        name: "Golden Retriever",
+        group: "Sporting",
+      }),
+    ).toThrowError("ID da raça é obrigatório.");
   });
 
   it("should throw error if name is missing", () => {
-    expect(() => Breed.create({
-      id: "breed-1",
-      name: "   ",
-      group: "Sporting"
-    })).toThrowError("Nome da raça é obrigatório.");
+    expect(() =>
+      Breed.create({
+        id: "breed-1",
+        name: "   ",
+        group: "Sporting",
+      }),
+    ).toThrowError("Nome da raça é obrigatório.");
   });
 
   it("should throw error if group is missing", () => {
-    expect(() => Breed.create({
-      id: "breed-1",
-      name: "Golden Retriever",
-      group: ""
-    })).toThrowError("Grupo da raça é obrigatório.");
+    expect(() =>
+      Breed.create({
+        id: "breed-1",
+        name: "Golden Retriever",
+        group: "",
+      }),
+    ).toThrowError("Grupo da raça é obrigatório.");
   });
 });

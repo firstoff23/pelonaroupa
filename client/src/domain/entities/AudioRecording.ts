@@ -23,11 +23,13 @@ export class AudioRecording {
   static create(props: AudioRecordingProps): AudioRecording {
     if (!props.id) throw new Error("ID da gravação é obrigatório.");
     if (!props.userId) throw new Error("ID do utilizador é obrigatório.");
-    
+
     if (props.duration <= 0) {
-      throw new Error("A duração da gravação de áudio deve ser maior que zero.");
+      throw new Error(
+        "A duração da gravação de áudio deve ser maior que zero.",
+      );
     }
-    
+
     if (props.timestamp > new Date()) {
       throw new Error("O timestamp da gravação não pode ser no futuro.");
     }
@@ -41,7 +43,7 @@ export class AudioRecording {
       props.duration,
       audioClassVO,
       confidenceVO,
-      props.timestamp
+      props.timestamp,
     );
   }
 }

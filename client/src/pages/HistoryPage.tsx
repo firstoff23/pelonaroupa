@@ -1,4 +1,3 @@
-import { motion, useMotionValue, useTransform } from "motion/react";
 import { jsPDF } from "jspdf";
 import {
   AlertCircle,
@@ -17,6 +16,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
+import { motion, useMotionValue, useTransform } from "motion/react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import {
   lazy,
@@ -308,7 +308,11 @@ const EventRow = memo(function EventRow({
             <div className="flex flex-wrap gap-1 mt-1">
               {event.contextTags.map((tagId) => {
                 const tagInfo = CONTEXT_TAGS_MAP[tagId];
-                const label = tagInfo ? (language === "pt" ? tagInfo.pt : tagInfo.en) : tagId;
+                const label = tagInfo
+                  ? language === "pt"
+                    ? tagInfo.pt
+                    : tagInfo.en
+                  : tagId;
                 return (
                   <span
                     key={tagId}
@@ -454,34 +458,33 @@ function RawEventDialog({
   );
 }
 
-
 function groupEventsByDay(events: HistoryEvent[], language: string) {
   const groups: Record<string, HistoryEvent[]> = {};
-  
+
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
-  const isSameDay = (d1: Date, d2: Date) => 
+
+  const isSameDay = (d1: Date, d2: Date) =>
     d1.getFullYear() === d2.getFullYear() &&
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
-  
+
   for (const event of events) {
     const date = new Date(event.createdAt);
     let label = "";
-    
+
     if (isSameDay(date, today)) {
       label = language === "pt" ? "Hoje" : "Today";
     } else if (isSameDay(date, yesterday)) {
       label = language === "pt" ? "Ontem" : "Yesterday";
     } else {
-      label = date.toLocaleDateString(
-        language === "pt" ? "pt-PT" : "en-US",
-        { day: "numeric", month: "long" }
-      );
+      label = date.toLocaleDateString(language === "pt" ? "pt-PT" : "en-US", {
+        day: "numeric",
+        month: "long",
+      });
     }
-    
+
     if (!groups[label]) {
       groups[label] = [];
     }
@@ -500,7 +503,11 @@ function EmptyState({ filtered }: { filtered: boolean }) {
         /* ─── Filtered Empty ─── */
         <>
           <div className="w-16 h-16 rounded-full bg-secondary/60 flex items-center justify-center">
-            <Search size={28} className="text-muted-foreground" aria-hidden="true" />
+            <Search
+              size={28}
+              className="text-muted-foreground"
+              aria-hidden="true"
+            />
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
@@ -528,23 +535,111 @@ function EmptyState({ filtered }: { filtered: boolean }) {
               aria-hidden="true"
             >
               {/* Paw body */}
-              <circle cx="48" cy="58" r="22" fill="currentColor" className="text-primary/20" />
-              <circle cx="48" cy="58" r="22" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/40" />
+              <circle
+                cx="48"
+                cy="58"
+                r="22"
+                fill="currentColor"
+                className="text-primary/20"
+              />
+              <circle
+                cx="48"
+                cy="58"
+                r="22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-primary/40"
+              />
               {/* Toes */}
-              <circle cx="36" cy="40" r="8" fill="currentColor" className="text-primary/15" />
-              <circle cx="36" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
-              <circle cx="48" cy="36" r="8" fill="currentColor" className="text-primary/15" />
-              <circle cx="48" cy="36" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
-              <circle cx="60" cy="40" r="8" fill="currentColor" className="text-primary/15" />
-              <circle cx="60" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary/35" />
+              <circle
+                cx="36"
+                cy="40"
+                r="8"
+                fill="currentColor"
+                className="text-primary/15"
+              />
+              <circle
+                cx="36"
+                cy="40"
+                r="8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-primary/35"
+              />
+              <circle
+                cx="48"
+                cy="36"
+                r="8"
+                fill="currentColor"
+                className="text-primary/15"
+              />
+              <circle
+                cx="48"
+                cy="36"
+                r="8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-primary/35"
+              />
+              <circle
+                cx="60"
+                cy="40"
+                r="8"
+                fill="currentColor"
+                className="text-primary/15"
+              />
+              <circle
+                cx="60"
+                cy="40"
+                r="8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-primary/35"
+              />
               {/* Sound waves */}
-              <path d="M72 52 Q80 58 72 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" className="text-primary/50" />
-              <path d="M78 46 Q90 58 78 70" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" className="text-primary/30" />
-              <path d="M24 52 Q16 58 24 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" className="text-primary/50" />
-              <path d="M18 46 Q6 58 18 70" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" className="text-primary/30" />
+              <path
+                d="M72 52 Q80 58 72 64"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                fill="none"
+                className="text-primary/50"
+              />
+              <path
+                d="M78 46 Q90 58 78 70"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                fill="none"
+                className="text-primary/30"
+              />
+              <path
+                d="M24 52 Q16 58 24 64"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                fill="none"
+                className="text-primary/50"
+              />
+              <path
+                d="M18 46 Q6 58 18 70"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                fill="none"
+                className="text-primary/30"
+              />
             </svg>
             {/* Pulse ring — respects prefers-reduced-motion */}
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20 motion-safe:animate-ping" style={{ animationDuration: "2.5s" }} aria-hidden="true" />
+            <div
+              className="absolute inset-0 rounded-full border-2 border-primary/20 motion-safe:animate-ping"
+              style={{ animationDuration: "2.5s" }}
+              aria-hidden="true"
+            />
           </div>
 
           <div className="space-y-2 max-w-xs">
@@ -559,11 +654,11 @@ function EmptyState({ filtered }: { filtered: boolean }) {
           </div>
 
           <Link href="/capturar">
-            <Button
-              className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6"
-            >
+            <Button className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6">
               <Mic size={16} className="animate-pulse" aria-hidden="true" />
-              {language === "pt" ? "Fazer primeira gravação" : "Make first recording"}
+              {language === "pt"
+                ? "Fazer primeira gravação"
+                : "Make first recording"}
             </Button>
           </Link>
         </>
@@ -684,7 +779,11 @@ export default function HistoryPage() {
     };
   }, []);
 
-  const isFiltered = stateFilter !== "all" || contextTagFilter !== "all" || dateFrom !== "" || dateTo !== "";
+  const isFiltered =
+    stateFilter !== "all" ||
+    contextTagFilter !== "all" ||
+    dateFrom !== "" ||
+    dateTo !== "";
   const hasAnimalFilter = typeof animalIdFilter === "number";
   const useAnimalEndpoint = hasAnimalFilter && !isFiltered;
 
@@ -746,7 +845,7 @@ export default function HistoryPage() {
     });
 
     const orderedKnownTags = Object.keys(CONTEXT_TAGS_MAP).filter((tag) =>
-      presentTagsSet.has(tag)
+      presentTagsSet.has(tag),
     );
 
     return orderedKnownTags.length > 0
@@ -776,10 +875,10 @@ export default function HistoryPage() {
       };
 
       const previousEvents = utils.events.list.getData(queryArgs);
-      let previousAnimalEvents;
-      if (typeof animalIdFilter === "number" && !Number.isNaN(animalIdFilter)) {
-        previousAnimalEvents = utils.events.listForAnimal.getData(animalQueryArgs);
-      }
+      const previousAnimalEvents =
+        typeof animalIdFilter === "number" && !Number.isNaN(animalIdFilter)
+          ? utils.events.listForAnimal.getData(animalQueryArgs)
+          : undefined;
 
       if (previousEvents) {
         utils.events.list.setData(queryArgs, (data) => {
@@ -789,7 +888,7 @@ export default function HistoryPage() {
             events: data.events.map((event) =>
               event.id === newFeedback.eventId
                 ? { ...event, feedback: newFeedback.feedback }
-                : event
+                : event,
             ),
           };
         });
@@ -803,20 +902,32 @@ export default function HistoryPage() {
             events: data.events.map((event) =>
               event.id === newFeedback.eventId
                 ? { ...event, feedback: newFeedback.feedback }
-                : event
+                : event,
             ),
           };
         });
       }
 
-      return { previousEvents, previousAnimalEvents, queryArgs, animalQueryArgs };
+      return {
+        previousEvents,
+        previousAnimalEvents,
+        queryArgs,
+        animalQueryArgs,
+      };
     },
     onError: (err, newFeedback, context) => {
       if (context?.previousEvents && context.queryArgs) {
         utils.events.list.setData(context.queryArgs, context.previousEvents);
       }
-      if (context?.previousAnimalEvents && context.animalQueryArgs && typeof animalIdFilter === "number") {
-        utils.events.listForAnimal.setData(context.animalQueryArgs, context.previousAnimalEvents);
+      if (
+        context?.previousAnimalEvents &&
+        context.animalQueryArgs &&
+        typeof animalIdFilter === "number"
+      ) {
+        utils.events.listForAnimal.setData(
+          context.animalQueryArgs,
+          context.previousAnimalEvents,
+        );
       }
       toast.error(
         language === "pt"
@@ -837,7 +948,6 @@ export default function HistoryPage() {
     },
   });
   const exportMutation = trpc.events.exportData.useMutation();
-
 
   const clearFilters = () => {
     setEmotionParam(null);
@@ -1286,7 +1396,6 @@ export default function HistoryPage() {
           </div>
         )}
 
-        
         {/* Filters panel */}
         {showFilters && (
           <div className="bg-card border border-border rounded-2xl p-4 space-y-4 page-enter">
@@ -1376,7 +1485,11 @@ export default function HistoryPage() {
                 </button>
                 {availableTags.map((tagId) => {
                   const tagInfo = CONTEXT_TAGS_MAP[tagId];
-                  const label = tagInfo ? (language === "pt" ? tagInfo.pt : tagInfo.en) : tagId;
+                  const label = tagInfo
+                    ? language === "pt"
+                      ? tagInfo.pt
+                      : tagInfo.en
+                    : tagId;
                   return (
                     <button
                       key={tagId}
@@ -1526,10 +1639,14 @@ export default function HistoryPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-rose-400">
-                    {language === "pt" ? "Erro ao carregar histórico" : "Error loading history"}
+                    {language === "pt"
+                      ? "Erro ao carregar histórico"
+                      : "Error loading history"}
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    {language === "pt" ? "Falha ao comunicar com o servidor." : "Failed to communicate with the server."}
+                    {language === "pt"
+                      ? "Falha ao comunicar com o servidor."
+                      : "Failed to communicate with the server."}
                   </p>
                 </div>
               </div>
@@ -1550,34 +1667,40 @@ export default function HistoryPage() {
               <EmptyState filtered={isFiltered} />
             </div>
           ) : (
-            Object.entries(groupEventsByDay(events, language)).map(([dateLabel, dayEvents], groupIndex) => (
-              <motion.div
-                key={dateLabel}
-                className="space-y-2"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.22,
-                  delay: groupIndex * 0.06,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-              >
-                <h3 className="text-sm font-bold text-muted-foreground px-2">{dateLabel}</h3>
-                <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-                  {dayEvents.map((event) => (
-                    <EventRow
-                      key={event.id}
-                      event={event}
-                      disabled={false}
-                      isPlaying={playingEventId === event.id}
-                      onPlayToggle={_handlePlayToggle}
-                      onOpenRawData={() => setRawEvent(event)}
-                      onFeedback={(eventId, feedback) => feedbackMutation.mutate({ eventId, feedback })}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            ))
+            Object.entries(groupEventsByDay(events, language)).map(
+              ([dateLabel, dayEvents], groupIndex) => (
+                <motion.div
+                  key={dateLabel}
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.22,
+                    delay: groupIndex * 0.06,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                >
+                  <h3 className="text-sm font-bold text-muted-foreground px-2">
+                    {dateLabel}
+                  </h3>
+                  <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+                    {dayEvents.map((event) => (
+                      <EventRow
+                        key={event.id}
+                        event={event}
+                        disabled={false}
+                        isPlaying={playingEventId === event.id}
+                        onPlayToggle={_handlePlayToggle}
+                        onOpenRawData={() => setRawEvent(event)}
+                        onFeedback={(eventId, feedback) =>
+                          feedbackMutation.mutate({ eventId, feedback })
+                        }
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              ),
+            )
           )}
         </div>
 

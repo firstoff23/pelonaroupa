@@ -500,7 +500,7 @@ function EmptyState({ filtered }: { filtered: boolean }) {
         /* ─── Filtered Empty ─── */
         <>
           <div className="w-16 h-16 rounded-full bg-secondary/60 flex items-center justify-center">
-            <Search size={28} className="text-muted-foreground" />
+            <Search size={28} className="text-muted-foreground" aria-hidden="true" />
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
@@ -543,8 +543,8 @@ function EmptyState({ filtered }: { filtered: boolean }) {
               <path d="M24 52 Q16 58 24 64" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" className="text-primary/50" />
               <path d="M18 46 Q6 58 18 70" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" className="text-primary/30" />
             </svg>
-            {/* Pulse ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: "2.5s" }} />
+            {/* Pulse ring — respects prefers-reduced-motion */}
+            <div className="absolute inset-0 rounded-full border-2 border-primary/20 motion-safe:animate-ping" style={{ animationDuration: "2.5s" }} aria-hidden="true" />
           </div>
 
           <div className="space-y-2 max-w-xs">
@@ -562,7 +562,7 @@ function EmptyState({ filtered }: { filtered: boolean }) {
             <Button
               className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6"
             >
-              <Mic size={16} className="animate-pulse" />
+              <Mic size={16} className="animate-pulse" aria-hidden="true" />
               {language === "pt" ? "Fazer primeira gravação" : "Make first recording"}
             </Button>
           </Link>

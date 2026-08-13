@@ -1249,10 +1249,13 @@ export default function HistoryPage() {
               variant={showExportActions ? "default" : "outline"}
               size="sm"
               onClick={() => setShowExportActions((v) => !v)}
+              disabled={total === 0}
+              title={total === 0 ? "Sem registos para exportar" : undefined}
               data-testid="history-export-toggle"
               className={cn(
                 "gap-1.5 h-8",
                 showExportActions && "bg-primary text-primary-foreground",
+                total === 0 && "cursor-not-allowed opacity-50",
               )}
             >
               <Download size={14} />

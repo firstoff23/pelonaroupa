@@ -146,34 +146,45 @@ export default function VetReport({
             Evolução emocional
           </h3>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={report.trend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: "#94a3b8", fontSize: 11 }}
-                />
-                <YAxis
-                  tick={{ fill: "#94a3b8", fontSize: 11 }}
-                  domain={[0, 1]}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#020617",
-                    border: "1px solid #1e293b",
-                    borderRadius: 8,
-                    color: "#e2e8f0",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="confidence"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: "#10b981" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {report.trend.length < 5 ? (
+              <div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-slate-800 bg-slate-950/50 p-6 text-center print:border-slate-300 print:bg-white">
+                <p className="text-sm font-semibold text-slate-400 print:text-slate-600">
+                  Dados insuficientes
+                </p>
+                <p className="mt-1 text-xs text-slate-500 print:text-slate-500">
+                  São necessárias pelo menos 5 gravações para gerar a linha de tendência (tem {report.trend.length}).
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={report.trend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                  />
+                  <YAxis
+                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    domain={[0, 1]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "#020617",
+                      border: "1px solid #1e293b",
+                      borderRadius: 8,
+                      color: "#e2e8f0",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="confidence"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "#10b981" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 

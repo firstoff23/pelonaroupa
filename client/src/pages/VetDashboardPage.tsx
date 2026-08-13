@@ -89,12 +89,14 @@ function KpiCard({
   helper,
   icon: Icon,
   tone,
+  noData = false,
 }: {
   title: string;
   value: number;
   helper: string;
   icon: LucideIcon;
   tone: "emerald" | "cyan" | "amber" | "rose";
+  noData?: boolean;
 }) {
   const toneClass = {
     emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
@@ -110,8 +112,11 @@ function KpiCard({
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {title}
           </p>
-          <p className="text-2xl font-bold leading-none text-foreground">
-            {value}
+          <p className={cn(
+            "text-2xl font-bold leading-none",
+            noData ? "text-muted-foreground" : "text-foreground",
+          )}>
+            {noData ? "—" : value}
           </p>
         </div>
         <span className={cn("rounded-xl border p-2", toneClass)}>
@@ -173,12 +178,16 @@ export default function VetDashboardPage() {
     { enabled: isVet },
   );
 
+  const dashboardLoaded = dashboardQuery.isSuccess;
+
   const summary = dashboardQuery.data?.summary ?? {
     animalsFollowed: 0,
     reportsReceived: 0,
     recentAlerts: 0,
     casesRequiringAttention: 0,
   };
+
+  const noAnimals = dashboardLoaded && summary.animalsFollowed === 0;
 
   const animals = petsQuery.data ?? dashboardQuery.data?.animals ?? [];
   const filteredAnimals = useMemo(() => {
@@ -261,6 +270,7 @@ export default function VetDashboardPage() {
           helper="Casos ativos partilhados consigo"
           icon={PawPrint}
           tone="emerald"
+          noData={noAnimals}
         />
         <KpiCard
           title="Relatórios recebidos"
@@ -268,6 +278,7 @@ export default function VetDashboardPage() {
           helper="Análises recentes nos últimos 30 dias"
           icon={ClipboardList}
           tone="cyan"
+          noData={noAnimals}
         />
         <KpiCard
           title="Alertas recentes"
@@ -275,6 +286,7 @@ export default function VetDashboardPage() {
           helper="Sinais clínicos calculados"
           icon={Bell}
           tone="amber"
+          noData={noAnimals}
         />
         <KpiCard
           title="Casos com atenção"
@@ -282,8 +294,31 @@ export default function VetDashboardPage() {
           helper="Prioridade clínica elevada"
           icon={AlertTriangle}
           tone="rose"
+          noData={noAnimals}
         />
       </section>
+
+      {/* ─── Tarefa 1 fix: banner explicativo quando sem animais partilhados ─── */}
+      {noAnimals && (
+        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+              <UserRound size={17} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Aguardando partilha de tutores
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Os contadores mostram <strong>—</strong> porque nenhum tutor
+                partilhou ainda um animal consigo. Peça ao tutor para ir a
+                <strong> Perfil → animal → Partilhar com Veterinário</strong>{" "}
+                e introduzir o seu email ou código profissional.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <nav className="grid grid-cols-3 rounded-2xl border border-border bg-secondary/50 p-1">
         {tabs.map(({ id, label, icon: Icon }) => (

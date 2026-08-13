@@ -611,6 +611,7 @@ export default function RecordingPage() {
     triggerStopRecording,
     triggerSaveSuccess,
     triggerCriticalError,
+    vibrate,
   } = useHaptic();
 
   useEffect(() => {
@@ -768,6 +769,24 @@ export default function RecordingPage() {
       setRecordState("idle");
       scheduleAutoRecording(1500);
     } else {
+      // Tarefa 4 – dismiss progress toast and show result
+      toast.dismiss("classify-progress");
+      const animalName = activeAnimal?.name;
+      const stateText = STATE_LABELS[res.state] ?? res.state;
+      const pct = Math.round(res.confidence * 100);
+      toast.success(
+        animalName
+          ? `${animalName} – ${stateText} ${pct}%`
+          : `${stateText} ${pct}%`,
+        { id: "classify-result", duration: 4000 },
+      );
+      // Small delay then confirm save
+      setTimeout(() => {
+        toast.info(
+          language === "pt" ? "Guardado no histórico." : "Saved to history.",
+          { duration: 3000 },
+        );
+      }, 600);
       triggerSaveSuccess();
       setRecordState("success");
     }
@@ -1049,6 +1068,11 @@ export default function RecordingPage() {
       if (curProgress >= 100) {
         clearInterval(interval);
         setRecordState("processing");
+        // Tarefa 4 – feedback de progresso
+        toast.loading(
+          language === "pt" ? "Gravação concluída – a analisar..." : "Recording done – analysing...",
+          { id: "classify-progress", duration: 15000 },
+        );
 
         if (isBrowserOffline()) {
           await enqueue({
@@ -1178,12 +1202,17 @@ export default function RecordingPage() {
 
   const handlePointerDown = (_e: React.PointerEvent) => {
     console.log("[E2E DEBUG] pointerDown");
+    // Tactile microinteraction for button press
+    vibrate(15);
+    
     if (isAutoModeRef.current) return;
     if (recordState !== "idle") return;
 
     isLongPressActiveRef.current = false;
     longPressTimerRef.current = setTimeout(() => {
       isLongPressActiveRef.current = true;
+      // Distinct feedback for continuous mode activation
+      vibrate([30, 50, 30]);
       enableAutoMode();
     }, 700);
   };

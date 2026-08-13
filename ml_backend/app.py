@@ -1,9 +1,8 @@
 import csv
 import os
 import subprocess
-import tempfile
-from typing import Dict, List, Optional, Tuple
-
+import io
+from typing import Dict, List, Optional, Tuple, Union, BinaryIO
 # Load environment variables from .env if present
 try:
     from dotenv import load_dotenv
@@ -181,6 +180,26 @@ async def startup():
         except Exception as e:
             logger.error("Redis connection failed", extra={"error": str(e)})
 
+    # Launch periodic cleanup of expired async tasks
+    asyncio.create_task(_cleanup_expired_tasks())
+
+
+async def _cleanup_expired_tasks():
+    """Periodically removes completed/errored tasks older than _TASK_TTL_SECONDS from _async_tasks."""
+    import time
+    while True:
+        await asyncio.sleep(60)  # run every minute
+        now = datetime.now(timezone.utc)
+        expired = [
+            tid for tid, t in list(_async_tasks.items())
+            if t["status"] in ("done", "error")
+            and (now - datetime.fromisoformat(t["created_at"])).total_seconds() > _TASK_TTL_SECONDS
+        ]
+        for tid in expired:
+            _async_tasks.pop(tid, None)
+        if expired:
+            logger.debug("Cleaned up expired async tasks", extra={"count": len(expired)})
+
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -197,6 +216,26 @@ class ClassificationResponse(BaseModel):
     confidence: float
     emoji: str
     model_used: str
+
+
+# ─── Async Task Store (in-memory) ─────────────────────────────────────────────
+# Maps task_id → {"status": pending|running|done|error, "result": dict|None, "error": str|None, "created_at": str}
+_async_tasks: Dict[str, Dict] = {}
+_TASK_TTL_SECONDS = 600  # 10 minutes
+
+
+class AsyncTaskResponse(BaseModel):
+    task_id: str
+    status: str  # pending | running | done | error
+    message: str
+
+
+class TaskStatusResponse(BaseModel):
+    task_id: str
+    status: str
+    result: Optional[ClassificationResponse] = None
+    error: Optional[str] = None
+    created_at: str
 
 
 STATE_EMOJIS = {
@@ -242,6 +281,14 @@ def convert_to_wav(input_path: str, output_path: str):
         error_msg = result.stderr.decode("utf-8", errors="ignore")
         raise Exception(f"FFmpeg conversion failed: {error_msg}")
 
+def convert_to_wav_bytes(audio_bytes: bytes) -> bytes:
+    cmd = ["ffmpeg", "-y", "-i", "pipe:0", "-ar", "16000", "-ac", "1", "-f", "wav", "pipe:1"]
+    result = subprocess.run(cmd, input=audio_bytes, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        error_msg = result.stderr.decode("utf-8", errors="ignore")
+        raise Exception(f"FFmpeg conversion failed: {error_msg}")
+    return result.stdout
+
 
 def _normalize_waveform(data: np.ndarray) -> np.ndarray:
     if data.ndim > 1:
@@ -260,9 +307,11 @@ def _normalize_waveform(data: np.ndarray) -> np.ndarray:
     return np.clip(waveform, -1.0, 1.0)
 
 
-def _read_waveform(wav_path: str) -> Tuple[int, np.ndarray]:
+def _read_waveform(wav_source: Union[str, BinaryIO, bytes]) -> Tuple[int, np.ndarray]:
     try:
-        sample_rate, data = wavfile.read(wav_path)
+        if isinstance(wav_source, bytes):
+            wav_source = io.BytesIO(wav_source)
+        sample_rate, data = wavfile.read(wav_source)
     except Exception as exc:
         raise Exception(f"Failed to read WAV file: {str(exc)}") from exc
     waveform = _normalize_waveform(data)
@@ -275,8 +324,8 @@ def _read_waveform(wav_path: str) -> Tuple[int, np.ndarray]:
     return sample_rate, waveform
 
 
-def _extract_signal_features(wav_path: str) -> Dict[str, float]:
-    sample_rate, waveform = _read_waveform(wav_path)
+def _extract_signal_features(wav_source: Union[str, BinaryIO, bytes]) -> Dict[str, float]:
+    sample_rate, waveform = _read_waveform(wav_source)
     if len(waveform) == 0:
         return {"rms": 0.0, "zcr": 0.0, "dom_freq": 0.0, "sample_rate": float(sample_rate)}
     rms = float(np.sqrt(np.mean(waveform**2)))
@@ -289,8 +338,8 @@ def _extract_signal_features(wav_path: str) -> Dict[str, float]:
     return {"rms": rms, "zcr": zcr, "dom_freq": dom_freq, "sample_rate": float(sample_rate)}
 
 
-def classify_with_signal_features(wav_path: str) -> Dict[str, object]:
-    features = _extract_signal_features(wav_path)
+def classify_with_signal_features(wav_source: Union[str, BinaryIO, bytes]) -> Dict[str, object]:
+    features = _extract_signal_features(wav_source)
     rms = features["rms"]
     zcr = features["zcr"]
     dom_freq = features["dom_freq"]
@@ -364,10 +413,10 @@ def _score_state_from_yamnet(top_predictions: List[Tuple[str, float]], signal_re
     return best_state, float(np.clip(confidence, 0.55, 0.97))
 
 
-def classify_with_yamnet(wav_path: str) -> Dict[str, object]:
+def classify_with_yamnet(wav_source: Union[str, BinaryIO, bytes]) -> Dict[str, object]:
     import tensorflow as tf
     model, class_names = load_yamnet_model()
-    _, waveform = _read_waveform(wav_path)
+    _, waveform = _read_waveform(wav_source)
     if len(waveform) == 0:
         return {"state": "relaxed", "confidence": 0.95, "model": "yamnet-tfhub"}
     scores, _, _ = model(tf.convert_to_tensor(waveform, dtype=tf.float32))
@@ -445,19 +494,13 @@ async def classify_audio(
         except Exception as redis_err:
             logger.warning("Redis cache read error", extra={"error": str(redis_err)})
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_in:
-        temp_in.write(audio_bytes)
-        temp_in_path = temp_in.name
-
-    temp_wav_path = temp_in_path + ".wav"
-
     try:
-        convert_to_wav(temp_in_path, temp_wav_path)
+        wav_bytes = convert_to_wav_bytes(audio_bytes)
         try:
-            analysis = classify_with_yamnet(temp_wav_path)
+            analysis = classify_with_yamnet(wav_bytes)
         except Exception as yamnet_error:
             logger.warning("YAMNet failed, using scipy fallback", extra={"error": str(yamnet_error)})
-            analysis = classify_with_signal_features(temp_wav_path)
+            analysis = classify_with_signal_features(wav_bytes)
 
         state = str(analysis["state"])
         confidence = float(analysis["confidence"])
@@ -498,10 +541,114 @@ async def classify_audio(
         logger.error("Audio classification failed", extra={"error": str(exc)})
         raise HTTPException(status_code=500, detail="Audio processing failed. Please try again.")
     finally:
-        if os.path.exists(temp_in_path):
-            os.remove(temp_in_path)
-        if os.path.exists(temp_wav_path):
-            os.remove(temp_wav_path)
+        pass
+
+
+# ─── Async Audio Classification ───────────────────────────────────────────────
+
+async def _run_classify_task(task_id: str, audio_bytes: bytes, filename: str):
+    """Background coroutine that processes audio and stores the result in _async_tasks."""
+    _async_tasks[task_id]["status"] = "running"
+    try:
+        wav_bytes = convert_to_wav_bytes(audio_bytes)
+        try:
+            analysis = classify_with_yamnet(wav_bytes)
+        except Exception as yamnet_error:
+            logger.warning("YAMNet failed (async), using scipy fallback", extra={"error": str(yamnet_error)})
+            analysis = classify_with_signal_features(wav_bytes)
+
+        state = str(analysis["state"])
+        confidence = float(analysis["confidence"])
+        emoji = STATE_EMOJIS.get(state, "⚫")
+        model_used = str(analysis["model"])
+
+        result = ClassificationResponse(
+            state=state, confidence=confidence, emoji=emoji, model_used=model_used,
+        )
+
+        _async_tasks[task_id]["status"] = "done"
+        _async_tasks[task_id]["result"] = result.dict()
+
+        # Reuse existing SSE broadcast so the frontend is notified instantly
+        _sse_broadcast("classification", {
+            "task_id": task_id,
+            "state": state,
+            "confidence": confidence,
+            "emoji": emoji,
+            "model_used": model_used,
+        })
+
+        # Persist to DB if available
+        if db_pool:
+            try:
+                async with db_pool.acquire() as conn:
+                    await conn.execute(
+                        "INSERT INTO classifications (filename, state, confidence, emoji, model_used) VALUES ($1, $2, $3, $4, $5)",
+                        filename, state, confidence, emoji, model_used
+                    )
+            except Exception as db_err:
+                logger.error("Failed to persist async classification to DB", extra={"error": str(db_err)})
+
+    except Exception as exc:
+        logger.error("Async audio classification failed", extra={"task_id": task_id, "error": str(exc)})
+        _async_tasks[task_id]["status"] = "error"
+        _async_tasks[task_id]["error"] = str(exc)
+
+
+@app.post("/classify-async", response_model=AsyncTaskResponse)
+@limiter.limit("10/15minutes")
+async def classify_audio_async(
+    request: Request,
+    file: UploadFile = File(...),
+    _user: dict = Depends(get_current_user),
+):
+    """
+    Non-blocking audio classification.
+    Returns a task_id immediately. Poll GET /task/{task_id} or listen on /sse for the result.
+    """
+    audio_bytes = await file.read()
+    filename = file.filename or "recording.webm"
+    task_id = str(uuid.uuid4())
+
+    _async_tasks[task_id] = {
+        "status": "pending",
+        "result": None,
+        "error": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Fire-and-forget: runs concurrently without blocking this request
+    asyncio.create_task(_run_classify_task(task_id, audio_bytes, filename))
+
+    return AsyncTaskResponse(
+        task_id=task_id,
+        status="pending",
+        message="Task queued. Poll GET /task/{task_id} or listen on /sse for the result.",
+    )
+
+
+@app.get("/task/{task_id}", response_model=TaskStatusResponse)
+async def get_task_status(
+    task_id: str,
+    _user: dict = Depends(get_current_user),
+):
+    """
+    Returns the current status of an async classification task.
+    Status values: pending | running | done | error
+    """
+    task = _async_tasks.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found. It may have expired (TTL=10min) or the task_id is invalid.")
+
+    result_model = ClassificationResponse(**task["result"]) if task.get("result") else None
+
+    return TaskStatusResponse(
+        task_id=task_id,
+        status=task["status"],
+        result=result_model,
+        error=task.get("error"),
+        created_at=task["created_at"],
+    )
 
 
 # ─── Breed Identification via local transformers pipeline ─────────────────────
@@ -859,15 +1006,9 @@ async def analyze_audio_advanced(
     ext = os.path.splitext(filename)[1].lower() or ".webm"
     audio_bytes = await file.read()
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp_in:
-        tmp_in.write(audio_bytes)
-        tmp_in_path = tmp_in.name
-
-    tmp_wav_path = tmp_in_path + ".wav"
-
     try:
-        convert_to_wav(tmp_in_path, tmp_wav_path)
-        sample_rate, waveform = _read_waveform(tmp_wav_path)
+        wav_bytes = convert_to_wav_bytes(audio_bytes)
+        sample_rate, waveform = _read_waveform(wav_bytes)
 
         if len(waveform) == 0:
             return AdvancedAudioMetrics(
@@ -921,10 +1062,7 @@ async def analyze_audio_advanced(
         logger.error("Advanced audio analysis failed", extra={"error": str(exc)})
         raise HTTPException(status_code=500, detail="Audio analysis failed. Please try again.")
     finally:
-        if os.path.exists(tmp_in_path):
-            os.remove(tmp_in_path)
-        if os.path.exists(tmp_wav_path):
-            os.remove(tmp_wav_path)
+        pass
 
 
 # ─── Vision Classifier (Species & Breed) ─────────────────────────────────────

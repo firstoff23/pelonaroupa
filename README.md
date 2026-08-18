@@ -1,59 +1,61 @@
-# PeloNaRoupa
+<p align="center">
+  <img src="./assets/pelonaroupa-banner.png" alt="Silhuetas de cão e gato com onda sonora" width="100%" />
+</p>
 
-PeloNaRoupa is a web app that helps pet owners understand their pets a little better.
-Understand what your pet is trying to tell you. PeloNaRoupa combines AI-assisted behavior interpretation with your observations to create explanations that improve over time.
-All explanations act as a helpful second opinion, not a medical or veterinary diagnosis.
+<h1 align="center">PeloNaRoupa</h1>
 
-> **Project Status:** MVP / early beta.
+<p align="center">
+  <strong>Uma aplicação para registar observações, explorar comportamentos e compreender melhor o quotidiano dos animais de companhia.</strong>
+</p>
 
-## Key Features
+<p align="center">
+  <a href="https://animalmind.vercel.app">Demonstração</a> ·
+  <a href="#-setup-local">Começar</a> ·
+  <a href="#-arquitetura-e-operação">Arquitetura</a> ·
+  <a href="#-cuidados-e-limites">Cuidados e limites</a>
+</p>
 
-- **AI-Assisted Interpretation:** Interprets behavior and vocalizations to provide a clearer sense of what an animal may be trying to communicate.
-- **Human Feedback Loop:** Allows users to rate and correct predictions, helping refine explanations over time.
-- **Transparent Audit Panel:** A dedicated area for admins and vets to review and moderate user-submitted corrections.
-- **Behavior History:** Tracks emotional evolution and observations over time.
-- **Support, Not Diagnosis:** Every feature is designed as a second opinion, not a replacement for veterinary care.
+<p align="center">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+</p>
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|---|---|
-| Frontend | React, TypeScript |
-| API | tRPC |
-| Validation | Zod |
-| Database | Supabase (Postgres) |
-| Authentication | Supabase Auth |
-| Hosting | Vercel |
+## Visão geral
 
-tRPC and Zod keep the client and server aligned through end-to-end type safety and input validation.
+O **PeloNaRoupa** é uma aplicação web/PWA em estado de MVP que combina observações do tutor com interpretação assistida de comportamento e áudio. A proposta é ajudar a organizar sinais do quotidiano, acompanhar a evolução e criar um ponto de partida mais informado para compreender o animal ao longo do tempo.
 
-## Security & Access Control
+> **Importante:** a aplicação oferece apoio interpretativo e não substitui aconselhamento, diagnóstico ou cuidados médico-veterinários.
 
-- **Database-Level Protection (RLS):** Supabase Row-Level Security (RLS) controls which rows can be accessed directly in the database.
-- **Protected Routes:** Authenticated flows are enforced on the server through tRPC procedures, not just hidden in the UI.
-- **Role-Based Access:** Admin and vet-only areas are gated by backend role checks before data is returned.
+| Área | O que oferece |
+| --- | --- |
+| **Interpretação assistida** | Contexto para observações comportamentais e vocalizações. |
+| **Histórico do animal** | Registo de observações e evolução emocional ao longo do tempo. |
+| **Ciclo de feedback** | Possibilidade de avaliar e corrigir interpretações. |
+| **Auditoria responsável** | Área de revisão e moderação para perfis autorizados. |
+| **Experiência multiplataforma** | Aplicação React/PWA com caminho para dispositivos móveis via Capacitor. |
 
-## Roadmap
+## Tecnologias
 
-- **Phase 1 — Core Analysis:** Improve interpretation quality and make analysis outputs easier to understand.
-- **Phase 2 — Feedback Review:** Strengthen the audit workflow and add clearer ways to track feedback quality over time.
-- **Phase 3 — Broader Inputs:** Support additional input types and refine how the system handles more pet behaviors and contexts.
+| Camada | Ferramentas principais |
+| --- | --- |
+| **Interface** | React, TypeScript, Vite, Tailwind CSS e Radix UI |
+| **Dados e API** | tRPC, React Query, SuperJSON e Zod |
+| **Serviços** | Node.js, Express e Supabase (Auth, PostgreSQL e Storage) |
+| **Áudio e ML** | MediaRecorder, Web Audio API, FastAPI e YAMNet |
+| **Qualidade** | Vitest, Playwright, TypeScript e Biome |
+| **Entrega** | Vercel para web/gateway e Hugging Face Spaces para o serviço ML |
 
-## Screenshots
+## Cuidados e limites
 
-| Landing Page | Analysis Screen |
-|---|---|
-| _Add screenshot_ | _Add screenshot_ |
+O PeloNaRoupa não afirma diagnosticar estados clínicos ou substituir profissionais. Qualquer resultado deve ser entendido como um apoio à observação do tutor. Em caso de sinais de sofrimento, alteração súbita de comportamento ou preocupação com a saúde do animal, consulta um médico-veterinário.
 
-| Feedback Flow | Audit Panel |
-|---|---|
-| _Add screenshot_ | _Add screenshot_ |
+## Arquitetura e operação
 
-## Contact & Links
 
-- **Repository:** _Add repo link_
-- **Live Application:** _Add deployment link_
-- **Contact:** _Add public contact email or website_
 
 O PeloNaRoupa é uma aplicação **React/PWA** com um gateway **Node.js + Express + tRPC** e um backend de ML separado em **FastAPI**. O frontend fala com o gateway por `/api/trpc`, o gateway valida sessão e permissões, persiste dados no **Supabase**, envia áudio para classificação acústica e devolve resultados tipados ao cliente.
 

@@ -22,7 +22,7 @@ REQUIRED_VARS=(
 # The deployment runner does not expose project secrets as shell variables.
 # Query Vercel's production environment by name instead of checking stale
 # Next.js variable names locally.
-if ! VERCEL_ENV_VARS="$(vercel env ls production --yes --token="$VERCEL_TOKEN")"; then
+if ! VERCEL_ENV_VARS="$(vercel env ls production --token="$VERCEL_TOKEN")"; then
     echo "❌ Não foi possível consultar as variáveis de ambiente no Vercel."
     exit 1
 fi

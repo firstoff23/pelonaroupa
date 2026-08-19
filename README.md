@@ -29,6 +29,9 @@
   <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml">
     <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml/badge.svg" alt="Estado do workflow de tipos e compilação" />
   </a>
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/client-coverage.yml">
+    <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffirstoff23%2Fpelonaroupa%2Fmain%2Fbadges%2Fclient-coverage.json" alt="Cobertura dos testes de cliente" />
+  </a>
 </p>
 
 ---

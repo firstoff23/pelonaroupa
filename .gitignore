@@ -94,3 +94,6 @@ models/
 .aider.input.history
 .aider.llm.history
 .aider*
+
+# Relatórios transitórios de cobertura
+coverage/

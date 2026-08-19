@@ -1,0 +1,63 @@
+name: Quality checks
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+      - "server/**"
+      - "shared/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "vite.config.*"
+      - ".github/workflows/quality-checks.yml"
+  push:
+    paths:
+      - "client/**"
+      - "server/**"
+      - "shared/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "vite.config.*"
+      - ".github/workflows/quality-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-and-build:
+    name: Validar tipos e compilar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+          run_install: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar tipos TypeScript
+        run: pnpm run check
+
+      - name: Compilar para produção
+        run: pnpm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096

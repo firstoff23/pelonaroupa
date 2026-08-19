@@ -26,6 +26,9 @@
   <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml">
     <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml/badge.svg" alt="Estado do workflow README checks" />
   </a>
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml">
+    <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml/badge.svg" alt="Estado do workflow de tipos e compilação" />
+  </a>
 </p>
 
 ---

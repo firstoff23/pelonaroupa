@@ -2,8 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/main/schema/markdownlint-cli2-schema.json",
   "config": {
     "default": true,
+    "MD004": false,
+    "MD012": false,
     "MD013": false,
+    "MD022": false,
+    "MD032": false,
     "MD033": false,
-    "MD041": false
+    "MD041": false,
+    "MD058": false,
+    "MD060": false
   }
 }

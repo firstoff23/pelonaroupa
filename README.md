@@ -22,6 +22,12 @@
   <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml">
+    <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml/badge.svg" alt="Estado do workflow README checks" />
+  </a>
+</p>
+
 ---
 
 ## Visão geral

@@ -10,6 +10,8 @@ export type LiveAudioStatus =
   | "error";
 
 const EMPTY_WAVEFORM = Array.from({ length: 16 }, () => 0);
+const E2E_AUDIO_BLOB = "animalmind-e2e-audio";
+const isE2ETestBuild = import.meta.env.VITE_E2E === "true";
 
 type WebkitWindow = Window &
   typeof globalThis & {
@@ -90,6 +92,16 @@ export function useLiveAudioStream() {
     blob: Blob;
     mimeType: string;
   } | null> => {
+    if (isE2ETestBuild) {
+      cleanupStream(true);
+      setStatus("idle");
+      const mimeType = "audio/webm";
+      return Promise.resolve({
+        blob: new Blob([E2E_AUDIO_BLOB], { type: mimeType }),
+        mimeType,
+      });
+    }
+
     return new Promise((resolve) => {
       const mr = mediaRecorderRef.current;
       if (!mr || mr.state === "inactive") {
@@ -123,6 +135,17 @@ export function useLiveAudioStream() {
   }, [cleanupStream]);
 
   const start = useCallback(async () => {
+    // Headless Chromium has no dependable physical audio device. The E2E-only
+    // bundle still exercises the recording review and classification flow using
+    // a deterministic audio payload; all production builds use real media APIs.
+    if (isE2ETestBuild) {
+      cleanupStream(true);
+      setLevel(0.25);
+      setWaveform(Array.from({ length: 16 }, (_, index) => 0.2 + index / 80));
+      setStatus("streaming");
+      return true;
+    }
+
     if (
       typeof navigator === "undefined" ||
       !navigator.mediaDevices?.getUserMedia

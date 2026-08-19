@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { Species } from "./Species";
+import { describe, expect, it } from "vitest";
 import { InvalidSpeciesError } from "../errors/InvalidSpeciesError";
+import { Species } from "./Species";
 
 describe("Species Value Object", () => {
   it("should create valid species", () => {

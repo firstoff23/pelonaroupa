@@ -1,5 +1,4 @@
-﻿import { motion } from "motion/react";
-import {
+﻿import {
   Activity,
   AlertCircle,
   Bell,
@@ -23,6 +22,7 @@ import {
   User,
   Wrench,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -48,7 +48,11 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/ui/Logo";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSelfHealing } from "@/contexts/SelfHealingContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -112,11 +116,15 @@ export default function SettingsPage() {
   // MFA state
   const [mfaDialogOpen, setMfaDialogOpen] = useState(false);
   const [mfaStep, setMfaStep] = useState<"qr" | "verify" | "done">("qr");
-  const [mfaSetupData, setMfaSetupData] = useState<{ secret: string; otpAuthUri: string } | null>(null);
+  const [mfaSetupData, setMfaSetupData] = useState<{
+    secret: string;
+    otpAuthUri: string;
+  } | null>(null);
   const [mfaCode, setMfaCode] = useState("");
   const [mfaCodeError, setMfaCodeError] = useState("");
 
-  const { data: mfaStatus, refetch: refetchMfaStatus } = trpc.auth["mfa.status"].useQuery();
+  const { data: mfaStatus, refetch: refetchMfaStatus } =
+    trpc.auth["mfa.status"].useQuery();
 
   const mfaSetupMutation = trpc.auth["mfa.setup"].useMutation({
     onSuccess: (data) => {
@@ -124,17 +132,28 @@ export default function SettingsPage() {
       setMfaStep("qr");
       setMfaDialogOpen(true);
     },
-    onError: (err) => toast.error(err.message || (language === "pt" ? "Erro ao iniciar MFA." : "Error starting MFA.")),
+    onError: (err) =>
+      toast.error(
+        err.message ||
+          (language === "pt" ? "Erro ao iniciar MFA." : "Error starting MFA."),
+      ),
   });
 
   const mfaVerifyMutation = trpc.auth["mfa.verify"].useMutation({
     onSuccess: () => {
       setMfaStep("done");
       refetchMfaStatus();
-      toast.success(language === "pt" ? "MFA ativado com sucesso!" : "MFA enabled successfully!");
+      toast.success(
+        language === "pt"
+          ? "MFA ativado com sucesso!"
+          : "MFA enabled successfully!",
+      );
     },
     onError: (err) => {
-      setMfaCodeError(err.message || (language === "pt" ? "CÃ³digo invÃ¡lido." : "Invalid code."));
+      setMfaCodeError(
+        err.message ||
+          (language === "pt" ? "CÃ³digo invÃ¡lido." : "Invalid code."),
+      );
     },
   });
 
@@ -143,7 +162,13 @@ export default function SettingsPage() {
       refetchMfaStatus();
       toast.success(language === "pt" ? "MFA desativado." : "MFA disabled.");
     },
-    onError: (err) => toast.error(err.message || (language === "pt" ? "Erro ao desativar MFA." : "Error disabling MFA.")),
+    onError: (err) =>
+      toast.error(
+        err.message ||
+          (language === "pt"
+            ? "Erro ao desativar MFA."
+            : "Error disabling MFA."),
+      ),
   });
 
   const deleteAccountMutation = trpc.auth.deleteAccount.useMutation({
@@ -214,7 +239,9 @@ export default function SettingsPage() {
         ? "Apenas alertas de alta confianÃ§a (â‰¥85%)"
         : "Only high confidence alerts (â‰¥85%)",
     medium:
-      language === "pt" ? "Alertas moderados (â‰¥75%)" : "Moderate alerts (â‰¥75%)",
+      language === "pt"
+        ? "Alertas moderados (â‰¥75%)"
+        : "Moderate alerts (â‰¥75%)",
     high:
       language === "pt"
         ? "Alertas frequentes (â‰¥65%)"
@@ -474,7 +501,9 @@ export default function SettingsPage() {
               <div className="pt-2 pb-4 border-b border-border/50">
                 <Button
                   type="submit"
-                  disabled={updateProfileMutation.isPending || !profileHasChanges}
+                  disabled={
+                    updateProfileMutation.isPending || !profileHasChanges
+                  }
                   className="w-full text-xs h-9 active-scale tap-highlight-none"
                 >
                   {updateProfileMutation.isPending ? (
@@ -517,7 +546,9 @@ export default function SettingsPage() {
               }}
               className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none gap-1.5"
             >
-              {language === "pt" && <Check className="w-3.5 h-3.5 stroke-[2.5px]" />}
+              {language === "pt" && (
+                <Check className="w-3.5 h-3.5 stroke-[2.5px]" />
+              )}
               PortuguÃªs (PT)
             </Button>
             <Button
@@ -528,7 +559,9 @@ export default function SettingsPage() {
               }}
               className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none gap-1.5"
             >
-              {language === "en" && <Check className="w-3.5 h-3.5 stroke-[2.5px]" />}
+              {language === "en" && (
+                <Check className="w-3.5 h-3.5 stroke-[2.5px]" />
+              )}
               English (EN)
             </Button>
           </CardContent>
@@ -860,7 +893,11 @@ export default function SettingsPage() {
                   <TooltipTrigger asChild>
                     <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
                       <span className="text-muted-foreground flex items-center gap-1">
-                        API Backend: <Info className="w-2.5 h-2.5 opacity-50" aria-hidden="true" />
+                        API Backend:{" "}
+                        <Info
+                          className="w-2.5 h-2.5 opacity-50"
+                          aria-hidden="true"
+                        />
                       </span>
                       <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Operational
@@ -880,7 +917,11 @@ export default function SettingsPage() {
                   <TooltipTrigger asChild>
                     <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
                       <span className="text-muted-foreground flex items-center gap-1">
-                        Camera System: <Info className="w-2.5 h-2.5 opacity-50" aria-hidden="true" />
+                        Camera System:{" "}
+                        <Info
+                          className="w-2.5 h-2.5 opacity-50"
+                          aria-hidden="true"
+                        />
                       </span>
                       <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Ready
@@ -900,7 +941,11 @@ export default function SettingsPage() {
                   <TooltipTrigger asChild>
                     <div className="border border-border/30 rounded-lg p-2 bg-background/50 flex flex-col justify-between cursor-help">
                       <span className="text-muted-foreground flex items-center gap-1">
-                        Audio / YAMNet: <Info className="w-2.5 h-2.5 opacity-50" aria-hidden="true" />
+                        Audio / YAMNet:{" "}
+                        <Info
+                          className="w-2.5 h-2.5 opacity-50"
+                          aria-hidden="true"
+                        />
                       </span>
                       <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Online
@@ -1306,7 +1351,9 @@ export default function SettingsPage() {
           <CardHeader className="pb-3 border-b border-border bg-primary/5">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <KeyRound className="w-4 h-4 text-primary" />
-              {language === "pt" ? "AutenticaÃ§Ã£o em 2 Fatores" : "Two-Factor Authentication"}
+              {language === "pt"
+                ? "AutenticaÃ§Ã£o em 2 Fatores"
+                : "Two-Factor Authentication"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
@@ -1322,8 +1369,12 @@ export default function SettingsPage() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {mfaStatus?.enabled
-                    ? (language === "pt" ? "MFA ativo e a proteger a tua conta" : "MFA active and protecting your account")
-                    : (language === "pt" ? "MFA nÃ£o configurado" : "MFA not configured")}
+                    ? language === "pt"
+                      ? "MFA ativo e a proteger a tua conta"
+                      : "MFA active and protecting your account"
+                    : language === "pt"
+                      ? "MFA nÃ£o configurado"
+                      : "MFA not configured"}
                 </p>
               </div>
               <div className="flex items-center gap-1.5">
@@ -1348,7 +1399,9 @@ export default function SettingsPage() {
                 onClick={() => mfaDisableMutation.mutate()}
                 disabled={mfaDisableMutation.isPending}
               >
-                {mfaDisableMutation.isPending && <Loader2 className="w-3 h-3 animate-spin" />}
+                {mfaDisableMutation.isPending && (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                )}
                 {language === "pt" ? "Desativar MFA" : "Disable MFA"}
               </Button>
             ) : (
@@ -1359,7 +1412,11 @@ export default function SettingsPage() {
                 onClick={() => mfaSetupMutation.mutate()}
                 disabled={mfaSetupMutation.isPending}
               >
-                {mfaSetupMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Shield className="w-3 h-3" />}
+                {mfaSetupMutation.isPending ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Shield className="w-3 h-3" />
+                )}
                 {language === "pt" ? "Configurar MFA" : "Set Up MFA"}
               </Button>
             )}
@@ -1371,7 +1428,12 @@ export default function SettingsPage() {
       <Dialog
         open={mfaDialogOpen}
         onOpenChange={(open) => {
-          if (!open) { setMfaDialogOpen(false); setMfaStep("qr"); setMfaCode(""); setMfaCodeError(""); }
+          if (!open) {
+            setMfaDialogOpen(false);
+            setMfaStep("qr");
+            setMfaCode("");
+            setMfaCodeError("");
+          }
         }}
       >
         <DialogContent className="max-w-sm border-border bg-card text-card-foreground">
@@ -1381,9 +1443,18 @@ export default function SettingsPage() {
               {language === "pt" ? "Configurar MFA" : "Set Up MFA"}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              {mfaStep === "qr" && (language === "pt" ? "Passo 1 de 2 â€” Escaneia o QR code" : "Step 1 of 2 â€” Scan the QR code")}
-              {mfaStep === "verify" && (language === "pt" ? "Passo 2 de 2 â€” Confirma o cÃ³digo" : "Step 2 of 2 â€” Confirm the code")}
-              {mfaStep === "done" && (language === "pt" ? "MFA configurado com sucesso!" : "MFA set up successfully!")}
+              {mfaStep === "qr" &&
+                (language === "pt"
+                  ? "Passo 1 de 2 â€” Escaneia o QR code"
+                  : "Step 1 of 2 â€” Scan the QR code")}
+              {mfaStep === "verify" &&
+                (language === "pt"
+                  ? "Passo 2 de 2 â€” Confirma o cÃ³digo"
+                  : "Step 2 of 2 â€” Confirm the code")}
+              {mfaStep === "done" &&
+                (language === "pt"
+                  ? "MFA configurado com sucesso!"
+                  : "MFA set up successfully!")}
             </DialogDescription>
           </DialogHeader>
 
@@ -1404,12 +1475,19 @@ export default function SettingsPage() {
                     : "Open Google Authenticator or Authy and scan the code. Alternatively, enter the secret manually:"}
                 </p>
                 <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
-                  <code className="flex-1 text-[11px] font-mono text-foreground break-all">{mfaSetupData.secret}</code>
+                  <code className="flex-1 text-[11px] font-mono text-foreground break-all">
+                    {mfaSetupData.secret}
+                  </code>
                 </div>
               </div>
               <DialogFooter className="w-full">
-                <Button className="w-full text-xs" onClick={() => setMfaStep("verify")}>
-                  {language === "pt" ? "JÃ¡ escaniei â€” Continuar" : "I scanned it â€” Continue"}
+                <Button
+                  className="w-full text-xs"
+                  onClick={() => setMfaStep("verify")}
+                >
+                  {language === "pt"
+                    ? "JÃ¡ escaniei â€” Continuar"
+                    : "I scanned it â€” Continue"}
                 </Button>
               </DialogFooter>
             </div>
@@ -1429,7 +1507,10 @@ export default function SettingsPage() {
                   maxLength={6}
                   placeholder="000000"
                   value={mfaCode}
-                  onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, "")); setMfaCodeError(""); }}
+                  onChange={(e) => {
+                    setMfaCode(e.target.value.replace(/\D/g, ""));
+                    setMfaCodeError("");
+                  }}
                   className="text-center tracking-[0.4em] font-mono text-lg h-12"
                   autoFocus
                 />
@@ -1446,10 +1527,19 @@ export default function SettingsPage() {
                   disabled={mfaCode.length !== 6 || mfaVerifyMutation.isPending}
                   onClick={() => mfaVerifyMutation.mutate({ code: mfaCode })}
                 >
-                  {mfaVerifyMutation.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-                  {language === "pt" ? "Verificar e Ativar" : "Verify and Enable"}
+                  {mfaVerifyMutation.isPending && (
+                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                  )}
+                  {language === "pt"
+                    ? "Verificar e Ativar"
+                    : "Verify and Enable"}
                 </Button>
-                <Button variant="ghost" size="sm" className="text-xs" onClick={() => setMfaStep("qr")}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => setMfaStep("qr")}
+                >
                   {language === "pt" ? "â† Voltar" : "â† Back"}
                 </Button>
               </DialogFooter>
@@ -1471,7 +1561,13 @@ export default function SettingsPage() {
                     : "Your account is now protected with two-factor authentication."}
                 </p>
               </div>
-              <Button className="w-full text-xs" onClick={() => { setMfaDialogOpen(false); setMfaStep("qr"); }}>
+              <Button
+                className="w-full text-xs"
+                onClick={() => {
+                  setMfaDialogOpen(false);
+                  setMfaStep("qr");
+                }}
+              >
                 {language === "pt" ? "Fechar" : "Close"}
               </Button>
             </div>
@@ -1587,4 +1683,3 @@ export default function SettingsPage() {
     </motion.div>
   );
 }
-

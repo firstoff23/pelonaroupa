@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { FCM } from "@capacitor-community/fcm";
-import { useAuth } from "../contexts/AuthContext";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "../contexts/AuthContext";
 
 export function usePushNotifications() {
   const { user } = useAuth();
@@ -32,7 +32,10 @@ export function usePushNotifications() {
         await PushNotifications.register();
 
         PushNotifications.addListener("registration", (token) => {
-          console.log("Push registration success (APNs/Native token):", token.value);
+          console.log(
+            "Push registration success (APNs/Native token):",
+            token.value,
+          );
         });
 
         PushNotifications.addListener("registrationError", (error: any) => {
@@ -40,13 +43,20 @@ export function usePushNotifications() {
         });
 
         // Ouvinte de eventos passivos - o utilizador clica na notificação
-        PushNotifications.addListener("pushNotificationActionPerformed", (notification) => {
-          console.log("Ação da notificação", notification.actionId, notification.inputValue);
-        });
+        PushNotifications.addListener(
+          "pushNotificationActionPerformed",
+          (notification) => {
+            console.log(
+              "Ação da notificação",
+              notification.actionId,
+              notification.inputValue,
+            );
+          },
+        );
 
         // Extrair o token do Firebase Cloud Messaging para centralizar Push
         const { token } = await FCM.getToken();
-        
+
         if (isMounted) {
           setFcmToken(token);
         }

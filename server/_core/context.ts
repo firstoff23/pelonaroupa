@@ -14,7 +14,7 @@ export async function createContext(
   opts: CreateExpressContextOptions,
 ): Promise<TrpcContext> {
   let user: User | null = null;
-  let accessToken: string | undefined = undefined;
+  let accessToken: string | undefined;
 
   // 1. Try to authenticate via Authorization header (Supabase JWT token)
   const authHeader = opts.req.headers.authorization;

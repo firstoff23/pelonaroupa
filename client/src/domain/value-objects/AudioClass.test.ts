@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { AudioClass } from "./AudioClass";
+import { describe, expect, it } from "vitest";
 import { InvalidAudioClassError } from "../errors/InvalidAudioClassError";
+import { AudioClass } from "./AudioClass";
 
 describe("AudioClass Value Object", () => {
   it("should create valid audio classes", () => {

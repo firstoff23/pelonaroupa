@@ -8,8 +8,10 @@ test.describe("login", () => {
 
     await expect(page.getByText("Bobi").first()).toBeVisible();
     await page.goto("/definicoes");
-    await expect(
-      page.getByRole("button", { name: /terminar sessão|sign out/i }),
-    ).toBeVisible();
+    const logoutButton = page.getByRole("button", {
+      name: /terminar sess|sign out/i,
+    });
+    await logoutButton.scrollIntoViewIfNeeded();
+    await expect(logoutButton).toBeVisible();
   });
 });

@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
+  Activity,
   Apple,
   BarChart2,
   Camera,
@@ -8,13 +8,14 @@ import {
   History,
   LogOut,
   MessageCircle,
-  Activity,
   PawPrint,
   Settings,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { prefetch } from "@/App";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/Logo";
@@ -22,7 +23,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { prefetch } from "@/App";
 
 // Prefetch map: path → dynamic import factory
 const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
@@ -145,7 +145,9 @@ export function Sidebar() {
             <button
               key={path}
               onClick={() => navigate(path)}
-              onMouseEnter={PREFETCH_MAP[path] ? prefetch(PREFETCH_MAP[path]) : undefined}
+              onMouseEnter={
+                PREFETCH_MAP[path] ? prefetch(PREFETCH_MAP[path]) : undefined
+              }
               aria-label={label}
               aria-current={active ? "page" : undefined}
               title={collapsed ? label : undefined}

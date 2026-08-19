@@ -156,8 +156,12 @@ export default function VerifyOtpPage() {
               maxLength={1}
               autoComplete="one-time-code"
               value={digit}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value, index)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(e, index)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange(e.target.value, index)
+              }
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                handleKeyDown(e, index)
+              }
               initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{

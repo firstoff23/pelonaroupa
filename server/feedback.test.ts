@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { saveBreedFeedback, updateEventFeedback, saveFeedbackAnnotation, reviewFeedbackAnnotation } from "./db";
+import {
+  reviewFeedbackAnnotation,
+  saveBreedFeedback,
+  saveFeedbackAnnotation,
+  updateEventFeedback,
+} from "./db";
 
 // Mock the getSupabase or direct supabase client calls
 vi.mock("@supabase/supabase-js", async (importOriginal) => {
@@ -115,7 +120,7 @@ describe("Feedback loop annotations (Supabase)", () => {
         predictedBreed: "Labrador Retriever",
         confirmedBreed: "Labrador Retriever",
         confidence: 0.92,
-      })
+      }),
     ).resolves.not.toThrow();
   });
 
@@ -126,7 +131,13 @@ describe("Feedback loop annotations (Supabase)", () => {
     const upsertMock = vi.fn().mockImplementation(() => ({
       select: vi.fn().mockImplementation(() => ({
         single: vi.fn().mockResolvedValue({
-          data: { id: 777, classification_event_id: 123, user_id: 2, confirmed_state: "relaxed", comment: "Muito calmo" },
+          data: {
+            id: 777,
+            classification_event_id: 123,
+            user_id: 2,
+            confirmed_state: "relaxed",
+            comment: "Muito calmo",
+          },
           error: null,
         }),
       })),
@@ -154,7 +165,7 @@ describe("Feedback loop annotations (Supabase)", () => {
       },
       {
         onConflict: "classification_event_id, user_id",
-      }
+      },
     );
     expect(result).toEqual({
       id: 777,
@@ -192,7 +203,7 @@ describe("Feedback loop annotations (Supabase)", () => {
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         reviewed_by: 99,
-      })
+      }),
     );
     expect(result).toEqual({ id: 777, reviewed_by: 99 });
   });

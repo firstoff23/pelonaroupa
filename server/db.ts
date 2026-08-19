@@ -36,9 +36,7 @@ export function getSupabase(accessToken?: string) {
     const key =
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
     if (!key) {
-      throw new Error(
-        "Missing SUPABASE_SERVICE_ROLE_KEY/SUPABASE_ANON_KEY",
-      );
+      throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY/SUPABASE_ANON_KEY");
     }
     _supabase = createClient<any>(url, key);
   }
@@ -458,21 +456,22 @@ export async function insertEvent(data: {
 export async function logAnalyticsEvent(
   userId: number,
   eventName: string,
-  properties: any = {}
+  properties: any = {},
 ) {
   const supabase = getSupabase();
-  const { error } = await supabase
-    .from("analytics_events")
-    .insert([
-      {
-        event_name: eventName,
-        user_id: userId,
-        properties: properties || {},
-      },
-    ]);
+  const { error } = await supabase.from("analytics_events").insert([
+    {
+      event_name: eventName,
+      user_id: userId,
+      properties: properties || {},
+    },
+  ]);
 
   if (error) {
-    console.error(`[Analytics] Failed to log event "${eventName}":`, error.message);
+    console.error(
+      `[Analytics] Failed to log event "${eventName}":`,
+      error.message,
+    );
   }
 }
 
@@ -4081,7 +4080,8 @@ export async function getFeedbackAnnotations(
   const limit = filters?.limit ?? 20;
   const offset = filters?.offset ?? 0;
 
-  let query = supabase.from("feedback_annotations").select(`
+  let query = supabase.from("feedback_annotations").select(
+    `
       id,
       classification_event_id,
       user_id,
@@ -4099,7 +4099,9 @@ export async function getFeedbackAnnotations(
           breed
         )
       )
-    `, { count: "exact" });
+    `,
+    { count: "exact" },
+  );
 
   if (filters?.animal_type && filters.animal_type !== "all") {
     query = query.eq(
@@ -4142,7 +4144,9 @@ export async function getFeedbackAnnotations(
         animal_type: item.classification_events?.animals?.species || null,
         predicted_breed: item.classification_events?.animals?.breed || null,
         confirmed_breed: null,
-        audioUrl: await getSignedAudioUrl(item.classification_events?.audio_url),
+        audioUrl: await getSignedAudioUrl(
+          item.classification_events?.audio_url,
+        ),
       })),
     ),
     total: count || 0,

@@ -37,7 +37,7 @@ export class Breed {
       props.temperament,
       props.origin,
       props.lifeExpectancy,
-      props.averageWeight
+      props.averageWeight,
     );
   }
 }

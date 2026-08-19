@@ -1,4 +1,4 @@
-import { expect, test, loginAsMockUser, mockUserEmail } from "./fixtures";
+import { expect, loginAsMockUser, test } from "./fixtures";
 
 test.describe("Account Deletion", () => {
   test("can delete account and get redirected", async ({ page }) => {
@@ -7,23 +7,20 @@ test.describe("Account Deletion", () => {
 
     await page.goto("/definicoes");
 
-    // Click on Danger Zone Delete
-    await page.getByRole("button", { name: /^Apagar Conta$|^Delete Account$/i }).first().click();
+    // Open the danger-zone confirmation dialog.
+    const deleteAccountButton = page.getByRole("button", {
+      name: /^Apagar Conta$|^Delete Account$/i,
+    });
+    await deleteAccountButton.scrollIntoViewIfNeeded();
+    await deleteAccountButton.click();
 
-    // Confirm dialog (does not require email)
-    await page.getByRole("button", { name: /Sim, apagar conta|Yes, delete account/i }).click();
+    // The current flow has one final confirmation; the mutation then signs out.
+    const confirmButton = page.getByRole("button", {
+      name: /^Apagar conta$|^Delete account$/i,
+    });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
 
-    // Should open the confirmation dialog requiring email
-    const confirmInput = page.getByPlaceholder(/O teu email|Your email/i);
-    await expect(confirmInput).toBeVisible({ timeout: 10_000 });
-    await confirmInput.fill(mockUserEmail);
-
-    // Click confirm
-    const confirmBtn = page.getByRole("button", { name: /Sim, Apagar Definitivamente|Yes, Delete Permanently/i });
-    await expect(confirmBtn).toBeVisible();
-    await confirmBtn.click();
-
-    // Should redirect to login or landing page
-    await expect(page).toHaveURL(/(\/login|\/)/);
+    await expect(page).toHaveURL(/\/login$/);
   });
 });

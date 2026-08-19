@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   Apple,
@@ -9,6 +8,7 @@ import {
   ShieldAlert,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import {
@@ -57,11 +57,7 @@ export default function FoodSearchPage() {
   }, [activeAnimal]);
 
   // Query foods
-  const {
-    data: foods = [],
-    isLoading,
-    error,
-  } = trpc.foods.search.useQuery(
+  const { data: foods = [], isLoading } = trpc.foods.search.useQuery(
     {
       query,
       species: selectedSpecies,

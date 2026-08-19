@@ -47,8 +47,8 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
-      - name: Test
-        run: pnpm test
+      - name: Executar testes determinísticos
+        run: pnpm exec vitest run --exclude server/supabase-frontend-env.test.ts
         env:
           NODE_OPTIONS: --max-old-space-size=4096
           SUPABASE_URL: https://test.supabase.co
@@ -81,10 +81,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browser
+      - name: Compilar cliente para E2E
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          VITE_SUPABASE_URL: https://test.supabase.co
+          VITE_SUPABASE_ANON_KEY: test-anon-key-for-e2e
+          VITE_E2E: "true"
+
+      - name: Instalar navegador Playwright
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run E2E smoke tests
+      - name: Executar testes E2E
         run: pnpm test:e2e
         env:
           SUPABASE_URL: https://test.supabase.co

@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
   Bell,
@@ -13,11 +12,12 @@ import {
   Sparkles,
   Volume2,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/Logo";
 import { Card } from "@/components/ui/card";
+import { Logo } from "@/components/ui/Logo";
 import { trpc } from "@/lib/trpc";
 
 export function OnboardingFlow() {
@@ -230,9 +230,9 @@ export function OnboardingFlow() {
                 Conhece o teu animal
               </h2>
               <p className="text-neutral-400 text-base leading-relaxed mb-8 max-w-md">
-                Cada cão e gato tem vocalizações únicas. O PeloNaRoupa analisa o tom e
-                a acústica para criar um perfil emocional detalhado do teu pet,
-                ajudando-te a responder às suas necessidades reais.
+                Cada cão e gato tem vocalizações únicas. O PeloNaRoupa analisa o
+                tom e a acústica para criar um perfil emocional detalhado do teu
+                pet, ajudando-te a responder às suas necessidades reais.
               </p>
 
               <div className="w-full flex gap-3 justify-center">
@@ -481,7 +481,8 @@ export function OnboardingFlow() {
                 {[
                   {
                     icon: Plus,
-                    color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                    color:
+                      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
                     title: "Adicionar o teu pet",
                     desc: "Cria o perfil do teu cão ou gato com foto e raça.",
                     path: "/perfil",
@@ -521,14 +522,23 @@ export function OnboardingFlow() {
                       }}
                       className="w-full flex items-center gap-4 p-4 rounded-2xl border border-neutral-800 bg-neutral-950 hover:border-neutral-700 hover:bg-neutral-900 transition-colors text-left group"
                     >
-                      <div className={`p-3 rounded-xl border ${item.color} shrink-0`}>
+                      <div
+                        className={`p-3 rounded-xl border ${item.color} shrink-0`}
+                      >
                         <Icon size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-neutral-200">{item.title}</p>
-                        <p className="text-xs text-neutral-400 leading-relaxed">{item.desc}</p>
+                        <p className="text-sm font-bold text-neutral-200">
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-neutral-400 leading-relaxed">
+                          {item.desc}
+                        </p>
                       </div>
-                      <ArrowRight size={14} className="text-neutral-600 group-hover:text-neutral-400 shrink-0 transition-colors" />
+                      <ArrowRight
+                        size={14}
+                        className="text-neutral-600 group-hover:text-neutral-400 shrink-0 transition-colors"
+                      />
                     </motion.button>
                   );
                 })}
@@ -539,7 +549,9 @@ export function OnboardingFlow() {
                 disabled={completeOnboardingMutation.isPending}
                 className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform duration-200"
               >
-                {completeOnboardingMutation.isPending ? "A entrar..." : "Ir para o Dashboard"}
+                {completeOnboardingMutation.isPending
+                  ? "A entrar..."
+                  : "Ir para o Dashboard"}
               </Button>
             </motion.div>
           )}

@@ -152,7 +152,9 @@ export function AuthShell({
                   </p>
                 </div>
                 <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.075] p-4 backdrop-blur">
-                  <p className="font-semibold text-white">Nativo no PeloNaRoupa</p>
+                  <p className="font-semibold text-white">
+                    Nativo no PeloNaRoupa
+                  </p>
                   <p className="mt-1">
                     Componentes, espaçamento e estados seguem a linguagem
                     mobile-first da app.

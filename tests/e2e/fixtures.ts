@@ -213,7 +213,11 @@ function procedureData(procedure: string, input: any) {
     case "auth.mfa.status":
       return { enabled: false };
     case "auth.mfa.setup":
-      return { secret: "JBSWY3DPEHPK3PXP", otpAuthUri: "otpauth://totp/AnimalMind?secret=JBSWY3DPEHPK3PXP&issuer=AnimalMind" };
+      return {
+        secret: "JBSWY3DPEHPK3PXP",
+        otpAuthUri:
+          "otpauth://totp/AnimalMind?secret=JBSWY3DPEHPK3PXP&issuer=AnimalMind",
+      };
     case "animals.list":
       return [mockAnimal];
     case "animals.get":
@@ -290,12 +294,16 @@ function procedureData(procedure: string, input: any) {
         state: "relaxed",
         confidence: 0.92,
         emoji: "⚪",
-        model_used: procedure === "classify.saveVisionEvent" ? "vision-v1" : "yamnet-e2e",
+        model_used:
+          procedure === "classify.saveVisionEvent" ? "vision-v1" : "yamnet-e2e",
         cached: false,
         eventId: mockEvent.id,
         posture: input?.posture ?? "standing",
         species: procedure === "classify.saveVisionEvent" ? "dog" : undefined,
-        breed: procedure === "classify.saveVisionEvent" ? "Serra da Estrela" : undefined,
+        breed:
+          procedure === "classify.saveVisionEvent"
+            ? "Serra da Estrela"
+            : undefined,
       };
     case "classify.detectPosture":
       return {
@@ -401,7 +409,10 @@ async function installBrowserMocks(page: Page) {
 
     // Disable WebGL in E2E to prevent headless crashes of Three.js / Canvas
     const originalGetContext = HTMLCanvasElement.prototype.getContext;
-    (HTMLCanvasElement.prototype as any).getContext = function (type: string, ...args: any[]) {
+    (HTMLCanvasElement.prototype as any).getContext = function (
+      type: string,
+      ...args: any[]
+    ) {
       if (type === "webgl" || type === "experimental-webgl") {
         return null;
       }

@@ -152,7 +152,8 @@ export default function VetReport({
                   Dados insuficientes
                 </p>
                 <p className="mt-1 text-xs text-slate-500 print:text-slate-500">
-                  São necessárias pelo menos 5 gravações para gerar a linha de tendência (tem {report.trend.length}).
+                  São necessárias pelo menos 5 gravações para gerar a linha de
+                  tendência (tem {report.trend.length}).
                 </p>
               </div>
             ) : (

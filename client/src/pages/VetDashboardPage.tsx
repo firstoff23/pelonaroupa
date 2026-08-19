@@ -112,10 +112,12 @@ function KpiCard({
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {title}
           </p>
-          <p className={cn(
-            "text-2xl font-bold leading-none",
-            noData ? "text-muted-foreground" : "text-foreground",
-          )}>
+          <p
+            className={cn(
+              "text-2xl font-bold leading-none",
+              noData ? "text-muted-foreground" : "text-foreground",
+            )}
+          >
             {noData ? "—" : value}
           </p>
         </div>
@@ -312,8 +314,8 @@ export default function VetDashboardPage() {
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
                 Os contadores mostram <strong>—</strong> porque nenhum tutor
                 partilhou ainda um animal consigo. Peça ao tutor para ir a
-                <strong> Perfil → animal → Partilhar com Veterinário</strong>{" "}
-                e introduzir o seu email ou código profissional.
+                <strong> Perfil → animal → Partilhar com Veterinário</strong> e
+                introduzir o seu email ou código profissional.
               </p>
             </div>
           </div>

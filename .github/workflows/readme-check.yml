@@ -42,6 +42,9 @@ jobs:
   links:
     name: Verificar ligações do README
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Obter o repositório
         uses: actions/checkout@v5
@@ -68,8 +71,6 @@ jobs:
 
       - name: Criar issue para ligações quebradas
         if: github.event_name == 'schedule' && steps.weekly_links.outputs.exit_code != 0
-        permissions:
-          issues: write
         uses: actions/github-script@v8
         env:
           REPORT_PATH: lychee/report.md

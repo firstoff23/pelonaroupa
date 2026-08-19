@@ -1,0 +1,101 @@
+name: README checks
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".markdownlint-cli2.jsonc"
+      - ".github/workflows/readme-check.yml"
+  push:
+    paths:
+      - "README.md"
+      - "assets/**"
+      - ".markdownlint-cli2.jsonc"
+      - ".github/workflows/readme-check.yml"
+  schedule:
+    - cron: "17 09 * * 1"
+      timezone: "Europe/Lisbon"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: readme-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdown:
+    name: Validar Markdown do README
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Validar sintaxe e estilo Markdown
+        uses: DavidAnson/markdownlint-cli2-action@v24
+        with:
+          config: ".markdownlint-cli2.jsonc"
+          globs: "README.md"
+
+  links:
+    name: Verificar ligações do README
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Verificar ligações em alterações e pull requests
+        if: github.event_name != 'schedule'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--no-progress --verbose README.md"
+          fail: true
+          format: markdown
+          jobSummary: true
+
+      - name: Rever ligações semanalmente
+        id: weekly_links
+        if: github.event_name == 'schedule'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: "--no-progress --verbose README.md"
+          fail: false
+          format: markdown
+          jobSummary: true
+          output: "lychee/report.md"
+
+      - name: Criar issue para ligações quebradas
+        if: github.event_name == 'schedule' && steps.weekly_links.outputs.exit_code != 0
+        permissions:
+          issues: write
+        uses: actions/github-script@v8
+        env:
+          REPORT_PATH: lychee/report.md
+        with:
+          script: |
+            const fs = require("fs");
+            const title = "README: rever ligações quebradas";
+            const report = fs.existsSync(process.env.REPORT_PATH)
+              ? fs.readFileSync(process.env.REPORT_PATH, "utf8")
+              : "A verificação semanal encontrou ligações que precisam de revisão. Consulta os registos do workflow para obter detalhes.";
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100,
+            });
+            const alreadyOpen = issues.some(
+              (issue) => !issue.pull_request && issue.title === title,
+            );
+            if (alreadyOpen) {
+              core.notice("Já existe uma issue aberta para ligações quebradas.");
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: `A revisão semanal detetou uma ou mais ligações quebradas no README.\n\n${report}`,
+            });

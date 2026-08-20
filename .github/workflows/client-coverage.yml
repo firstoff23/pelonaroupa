@@ -1,0 +1,108 @@
+name: Client test coverage
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+      - "shared/**"
+      - "scripts/update-client-coverage-badge.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "vitest.config.ts"
+      - ".github/workflows/client-coverage.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "client/**"
+      - "shared/**"
+      - "scripts/update-client-coverage-badge.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "vitest.config.ts"
+      - ".github/workflows/client-coverage.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: client-coverage-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Gerar cobertura de cliente
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+          run_install: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Executar testes de cliente com cobertura
+        run: pnpm run test:coverage:client
+
+      - name: Guardar relatório de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage-report
+          path: coverage/
+          if-no-files-found: error
+
+  publish-badge:
+    name: Publicar badge de cobertura de cliente
+    needs: coverage
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+          run_install: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Obter resumo de cobertura
+        uses: actions/download-artifact@v5
+        with:
+          name: client-coverage-report
+          path: coverage
+
+      - name: Atualizar badge
+        run: pnpm run coverage:badge:client
+
+      - name: Publicar alteração do badge
+        run: |
+          if git diff --quiet -- badges/client-coverage.json; then
+            echo "O badge já está atualizado."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add badges/client-coverage.json
+          git commit -m "ci: update client coverage badge"
+          git push

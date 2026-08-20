@@ -1,0 +1,32 @@
+name: Software bill of materials
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - .github/workflows/sbom.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate SPDX inventory
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          artifact-name: sbom-${{ github.event.repository.name }}-${{ github.run_id }}
+          upload-artifact-retention: 30

@@ -1,10 +1,11 @@
-import { AnimatePresence, motion } from "motion/react";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import {
   AlertCircle,
   Camera as CameraIcon,
   Check,
   RefreshCw as LoopIcon,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -16,9 +17,12 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { trpc } from "@/lib/trpc";
 import type { EmotionalState } from "../../../shared/types";
 import { STATE_COLORS } from "../../../shared/types";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 type UploadState = "idle" | "uploading" | "processing" | "success" | "error";
+
+const E2E_TEST_IMAGE =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9JDsYAAAAASUVORK5CYII=";
+const isE2ETestBuild = import.meta.env.VITE_E2E === "true";
 
 export default function CameraPage() {
   const { t, language } = useLanguage();
@@ -33,6 +37,15 @@ export default function CameraPage() {
   const saveVisionMutation = trpc.classify.saveVisionEvent.useMutation();
 
   const openCamera = async () => {
+    // Browser E2E has no physical camera. The test-only build injects a
+    // deterministic image, while normal web and native builds use Capacitor.
+    if (isE2ETestBuild) {
+      setCapturedImage(E2E_TEST_IMAGE);
+      setUploadState("idle");
+      setErrorMessage(null);
+      return;
+    }
+
     try {
       const image = await Camera.getPhoto({
         quality: 60,
@@ -42,17 +55,22 @@ export default function CameraPage() {
       });
 
       if (image.base64String) {
-        setCapturedImage(`data:image/${image.format};base64,${image.base64String}`);
+        setCapturedImage(
+          `data:image/${image.format};base64,${image.base64String}`,
+        );
         setUploadState("idle");
         setErrorMessage(null);
       }
     } catch (err: any) {
-      if (err.message !== "User cancelled photos app" && err.message !== "User cancelled") {
+      if (
+        err.message !== "User cancelled photos app" &&
+        err.message !== "User cancelled"
+      ) {
         console.error("Camera error:", err);
         setErrorMessage(
           language === "pt"
             ? "Erro ao abrir a câmara."
-            : "Error opening camera."
+            : "Error opening camera.",
         );
         toast.error(err.message);
       }
@@ -302,9 +320,7 @@ export default function CameraPage() {
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
                 <CameraIcon className="w-10 h-10 text-muted-foreground animate-pulse mb-1" />
                 <h3 className="font-bold text-foreground text-sm">
-                  {language === "pt"
-                    ? "Tirar Foto"
-                    : "Take a Photo"}
+                  {language === "pt" ? "Tirar Foto" : "Take a Photo"}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
                   {language === "pt"
@@ -316,7 +332,9 @@ export default function CameraPage() {
                   onClick={openCamera}
                   className="bg-primary text-primary-foreground font-semibold text-xs h-10 px-5 rounded-xl active-scale"
                 >
-                  {language === "pt" ? "Abrir Câmara / Galeria" : "Open Camera / Gallery"}
+                  {language === "pt"
+                    ? "Abrir Câmara / Galeria"
+                    : "Open Camera / Gallery"}
                 </Button>
               </div>
             </motion.div>

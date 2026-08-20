@@ -18,7 +18,6 @@ export default function CookiePolicyPage() {
 
   return (
     <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans">
-      
       {/* Header */}
       <header className="w-full max-w-4xl mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900 z-10">
         <div
@@ -54,37 +53,65 @@ export default function CookiePolicyPage() {
             Política de Cookies
           </h1>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Esta política explica como a <strong>PeloNaRoupa</strong> utiliza cookies e tecnologias semelhantes para o reconhecer quando visita o nosso website.
+            Esta política explica como a <strong>PeloNaRoupa</strong> utiliza
+            cookies e tecnologias semelhantes para o reconhecer quando visita o
+            nosso website.
           </p>
         </div>
 
         <div className="prose prose-invert max-w-none space-y-6 text-sm text-slate-300 leading-relaxed">
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-white">1. O que são cookies?</h2>
+            <h2 className="text-lg font-bold text-white">
+              1. O que são cookies?
+            </h2>
             <p>
-              Cookies são pequenos ficheiros de texto que são descarregados para o seu computador ou dispositivo móvel quando visita um website. São amplamente utilizados para fazer com que os websites funcionem, ou funcionem de forma mais eficiente, bem como para fornecer informações aos proprietários do site.
+              Cookies são pequenos ficheiros de texto que são descarregados para
+              o seu computador ou dispositivo móvel quando visita um website.
+              São amplamente utilizados para fazer com que os websites
+              funcionem, ou funcionem de forma mais eficiente, bem como para
+              fornecer informações aos proprietários do site.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-white">2. Por que utilizamos cookies?</h2>
+            <h2 className="text-lg font-bold text-white">
+              2. Por que utilizamos cookies?
+            </h2>
             <p>
-              Utilizamos cookies por vários motivos. Alguns cookies são necessários por razões técnicas para que o nosso website funcione (designados "cookies essenciais"). Outros cookies permitem-nos monitorizar o desempenho e melhorar a experiência do utilizador.
+              Utilizamos cookies por vários motivos. Alguns cookies são
+              necessários por razões técnicas para que o nosso website funcione
+              (designados "cookies essenciais"). Outros cookies permitem-nos
+              monitorizar o desempenho e melhorar a experiência do utilizador.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-white">3. Tipos de cookies que utilizamos</h2>
+            <h2 className="text-lg font-bold text-white">
+              3. Tipos de cookies que utilizamos
+            </h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Essenciais:</strong> Necessários para permitir a autenticação do utilizador, a segurança das sessões e o suporte a funcionalidades offline.</li>
-              <li><strong>Desempenho e Funcionalidade:</strong> Utilizados para lembrar as suas preferências (como a língua selecionada) e analisar o comportamento da aplicação.</li>
+              <li>
+                <strong>Essenciais:</strong> Necessários para permitir a
+                autenticação do utilizador, a segurança das sessões e o suporte
+                a funcionalidades offline.
+              </li>
+              <li>
+                <strong>Desempenho e Funcionalidade:</strong> Utilizados para
+                lembrar as suas preferências (como a língua selecionada) e
+                analisar o comportamento da aplicação.
+              </li>
             </ul>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-white">4. Como posso controlar os cookies?</h2>
+            <h2 className="text-lg font-bold text-white">
+              4. Como posso controlar os cookies?
+            </h2>
             <p>
-              Tem o direito de decidir se aceita ou rejeita cookies. Pode gerir as suas preferências de cookies a qualquer momento clicando no link "Preferências de Consentimento" no rodapé das nossas páginas, ou definindo os controlos do seu navegador.
+              Tem o direito de decidir se aceita ou rejeita cookies. Pode gerir
+              as suas preferências de cookies a qualquer momento clicando no
+              link "Preferências de Consentimento" no rodapé das nossas páginas,
+              ou definindo os controlos do seu navegador.
             </p>
           </section>
         </div>
@@ -93,7 +120,10 @@ export default function CookiePolicyPage() {
       {/* Footer */}
       <footer className="w-full border-t border-slate-900 z-10 bg-slate-950/80 backdrop-blur-md mt-12">
         <div className="max-w-4xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} PeloNaRoupa. Todos os direitos reservados.</p>
+          <p>
+            © {new Date().getFullYear()} PeloNaRoupa. Todos os direitos
+            reservados.
+          </p>
         </div>
       </footer>
     </div>

@@ -1,0 +1,60 @@
+name: Dependency security
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/dependency-security.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/dependency-security.yml"
+  schedule:
+    - cron: "23 9 * * 1"
+      timezone: "Europe/Lisbon"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Rever dependências da pull request
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rever novas dependências vulneráveis
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+
+  audit:
+    name: Auditar vulnerabilidades conhecidas
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v5
+
+      - name: Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+          run_install: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Auditar dependências de severidade alta ou crítica
+        run: pnpm audit --audit-level high

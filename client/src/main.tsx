@@ -128,7 +128,7 @@ createRoot(document.getElementById("root")!).render(
 // Measures LCP, FCP, CLS, TTFB, and INP. Logs to console in dev mode.
 // Extend `reportVital` to send metrics to your analytics endpoint in prod.
 // ─────────────────────────────────────────────────────────────────────────────
-import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+import { type Metric, onCLS, onFCP, onINP, onLCP, onTTFB } from "web-vitals";
 
 function reportVital(metric: Metric) {
   if (import.meta.env.DEV) {

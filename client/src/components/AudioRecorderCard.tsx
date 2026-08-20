@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import type React from "react";
+import { useRef, useState } from "react";
 import { P5AudioVisualizer } from "./P5AudioVisualizer";
 
 export interface AudioClassificationResult {
@@ -53,14 +54,18 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
       // Simulate live waveform motion
       const interval = setInterval(() => {
         if (mediaRecorder.state === "recording") {
-          setWaveform(Array.from({ length: 16 }, () => Math.random() * 0.8 + 0.1));
+          setWaveform(
+            Array.from({ length: 16 }, () => Math.random() * 0.8 + 0.1),
+          );
         } else {
           clearInterval(interval);
         }
       }, 100);
     } catch (err) {
       console.error("Microphone access error:", err);
-      alert("Não foi possível aceder ao microfone. Verifica as permissões do navegador.");
+      alert(
+        "Não foi possível aceder ao microfone. Verifica as permissões do navegador.",
+      );
     }
   };
 
@@ -85,12 +90,18 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
           <span className="text-xs uppercase tracking-wider font-semibold text-emerald-400">
             🎙️ Áudio • Vocalização Pet
           </span>
-          <h3 className="text-xl font-bold text-white">Gravador de Latidos & Miados</h3>
+          <h3 className="text-xl font-bold text-white">
+            Gravador de Latidos & Miados
+          </h3>
         </div>
         <div className="text-right">
-          <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
-            isRecording ? "bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse" : "bg-slate-800 text-slate-400 border-slate-700"
-          }`}>
+          <span
+            className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
+              isRecording
+                ? "bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse"
+                : "bg-slate-800 text-slate-400 border-slate-700"
+            }`}
+          >
             {isRecording ? "🔴 A Gravar..." : "Pronto"}
           </span>
         </div>
@@ -98,7 +109,9 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
 
       {/* Live Waveform Canvas */}
       <P5AudioVisualizer
-        emotion={result?.vocalization_class || (isRecording ? "happy" : "neutral")}
+        emotion={
+          result?.vocalization_class || (isRecording ? "happy" : "neutral")
+        }
         waveform={waveform}
         isActive={isRecording}
         level={isRecording ? 0.8 : 0.1}
@@ -144,25 +157,36 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
       {result && (
         <div className="pt-3 border-t border-slate-800 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-400">Vocalização Identificada:</span>
+            <span className="text-xs text-slate-400">
+              Vocalização Identificada:
+            </span>
             <span className="text-sm font-bold text-emerald-400 uppercase tracking-wide">
-              {result.vocalization_class} ({(result.confidence * 100).toFixed(1)}%)
+              {result.vocalization_class} (
+              {(result.confidence * 100).toFixed(1)}%)
             </span>
           </div>
 
           {result.top3 && result.top3.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[11px] font-medium text-slate-400">Top 3 Diagnósticos Fónicos:</p>
+              <p className="text-[11px] font-medium text-slate-400">
+                Top 3 Diagnósticos Fónicos:
+              </p>
               {result.top3.map((item, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300 capitalize">{item.vocalization}</span>
-                    <span className="text-slate-400">{(item.confidence * 100).toFixed(1)}%</span>
+                    <span className="text-slate-300 capitalize">
+                      {item.vocalization}
+                    </span>
+                    <span className="text-slate-400">
+                      {(item.confidence * 100).toFixed(1)}%
+                    </span>
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(item.confidence * 100, 2)}%` }}
+                      style={{
+                        width: `${Math.max(item.confidence * 100, 2)}%`,
+                      }}
                     />
                   </div>
                 </div>

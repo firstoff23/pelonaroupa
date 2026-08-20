@@ -20,14 +20,14 @@ export function ConfidenceRing({
 }: ConfidenceRingProps) {
   const { t, language } = useLanguage();
   const isPt = language === "pt";
-  
+
   // Confidences are 0-1
   let bars = 1;
   let levelEn = "Low";
   let levelPt = "Baixa";
   let color = "bg-rose-500";
   let textColor = "text-rose-500";
-  
+
   if (confidence >= 0.75) {
     bars = 3;
     levelEn = "High";
@@ -42,8 +42,18 @@ export function ConfidenceRing({
     textColor = "text-yellow-500";
   }
 
-  const prefixEn = confidence >= 0.75 ? "Seems like" : confidence >= 0.5 ? "May be feeling" : "Might be";
-  const prefixPt = confidence >= 0.75 ? "Parece estar" : confidence >= 0.5 ? "Talvez esteja" : "Poderá estar";
+  const prefixEn =
+    confidence >= 0.75
+      ? "Seems like"
+      : confidence >= 0.5
+        ? "May be feeling"
+        : "Might be";
+  const prefixPt =
+    confidence >= 0.75
+      ? "Parece estar"
+      : confidence >= 0.5
+        ? "Talvez esteja"
+        : "Poderá estar";
   const prefix = isPt ? prefixPt : prefixEn;
 
   return (
@@ -60,13 +70,19 @@ export function ConfidenceRing({
         >
           {emoji}
         </span>
-        
+
         <div className="flex gap-1.5 mb-2">
-          <div className={`w-4 h-1.5 rounded-full ${bars >= 1 ? color : 'bg-muted/50'}`} />
-          <div className={`w-4 h-1.5 rounded-full ${bars >= 2 ? color : 'bg-muted/50'}`} />
-          <div className={`w-4 h-1.5 rounded-full ${bars >= 3 ? color : 'bg-muted/50'}`} />
+          <div
+            className={`w-4 h-1.5 rounded-full ${bars >= 1 ? color : "bg-muted/50"}`}
+          />
+          <div
+            className={`w-4 h-1.5 rounded-full ${bars >= 2 ? color : "bg-muted/50"}`}
+          />
+          <div
+            className={`w-4 h-1.5 rounded-full ${bars >= 3 ? color : "bg-muted/50"}`}
+          />
         </div>
-        
+
         <span
           className={`font-bold tracking-normal uppercase text-xs ${textColor}`}
         >

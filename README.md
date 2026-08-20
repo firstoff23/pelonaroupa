@@ -1,12 +1,19 @@
-# PeloNaRoupa
+<p align="center">
+  <img src="./assets/pelonaroupa-banner.png" alt="Silhuetas de cão e gato com onda sonora" width="100%" />
+</p>
 
-PeloNaRoupa is a web app that helps pet owners understand their pets a little better.
-Understand what your pet is trying to tell you. PeloNaRoupa combines AI-assisted behavior interpretation with your observations to create explanations that improve over time.
-All explanations act as a helpful second opinion, not a medical or veterinary diagnosis.
+<h1 align="center">PeloNaRoupa</h1>
 
-> **Project Status:** MVP / early beta.
+<p align="center">
+  <strong>Uma aplicação para registar observações, explorar comportamentos e compreender melhor o quotidiano dos animais de companhia.</strong>
+</p>
 
-## Key Features
+<p align="center">
+  <a href="https://animalmind.vercel.app">Demonstração</a> ·
+  <a href="#-setup-local">Começar</a> ·
+  <a href="#-arquitetura-e-operação">Arquitetura</a> ·
+  <a href="#-cuidados-e-limites">Cuidados e limites</a>
+</p>
 
 - **AI-Assisted Audio Classification:** Interprets pet vocalizations in real-time using YAMNet + FastAPI to identify emotional states (distress, excitement, hunger, alert, relaxed).
 - **Breed Recognition via Camera:** Identifies cat and dog breeds from photos using computer vision.
@@ -19,42 +26,54 @@ All explanations act as a helpful second opinion, not a medical or veterinary di
 - **Behavior History & Export:** Tracks emotional evolution over time; exports full history as PDF or CSV.
 - **Support, Not Diagnosis:** Every feature is designed as a second opinion, not a replacement for veterinary care.
 
-## Tech Stack
+<p align="center">
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml">
+    <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/readme-check.yml/badge.svg" alt="Estado do workflow README checks" />
+  </a>
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml">
+    <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/quality-checks.yml/badge.svg" alt="Estado do workflow de tipos e compilação" />
+  </a>
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/client-coverage.yml">
+    <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffirstoff23%2Fpelonaroupa%2Fmain%2Fbadges%2Fclient-coverage.json" alt="Cobertura dos testes de cliente" />
+  </a>
+  <a href="https://github.com/firstoff23/pelonaroupa/actions/workflows/dependency-security.yml">
+    <img src="https://github.com/firstoff23/pelonaroupa/actions/workflows/dependency-security.yml/badge.svg" alt="Estado da auditoria de dependências" />
+  </a>
+</p>
 
-| Layer | Technology |
-|---|---|
-| Frontend | React, TypeScript |
-| API | tRPC |
-| Validation | Zod |
-| Database | Supabase (Postgres) |
-| Authentication | Supabase Auth |
-| Hosting | Vercel |
+---
 
-tRPC and Zod keep the client and server aligned through end-to-end type safety and input validation.
+## Visão geral
 
-## Security & Access Control
+O **PeloNaRoupa** é uma aplicação web/PWA em estado de MVP que combina observações do tutor com interpretação assistida de comportamento e áudio. A proposta é ajudar a organizar sinais do quotidiano, acompanhar a evolução e criar um ponto de partida mais informado para compreender o animal ao longo do tempo.
 
-- **Database-Level Protection (RLS):** Supabase Row-Level Security (RLS) controls which rows can be accessed directly in the database.
-- **Protected Routes:** Authenticated flows are enforced on the server through tRPC procedures, not just hidden in the UI.
-- **Role-Based Access:** Admin and vet-only areas are gated by backend role checks before data is returned.
+> **Importante:** a aplicação oferece apoio interpretativo e não substitui aconselhamento, diagnóstico ou cuidados médico-veterinários.
 
-## Roadmap
+| Área | O que oferece |
+| --- | --- |
+| **Interpretação assistida** | Contexto para observações comportamentais e vocalizações. |
+| **Histórico do animal** | Registo de observações e evolução emocional ao longo do tempo. |
+| **Ciclo de feedback** | Possibilidade de avaliar e corrigir interpretações. |
+| **Auditoria responsável** | Área de revisão e moderação para perfis autorizados. |
+| **Experiência multiplataforma** | Aplicação React/PWA com caminho para dispositivos móveis via Capacitor. |
 
-- **Phase 1 — Core Analysis:** Improve interpretation quality and make analysis outputs easier to understand.
-- **Phase 2 — Feedback Review:** Strengthen the audit workflow and add clearer ways to track feedback quality over time.
-- **Phase 3 — Broader Inputs:** Support additional input types and refine how the system handles more pet behaviors and contexts.
+## Tecnologias
 
-## Screenshots
+| Camada | Ferramentas principais |
+| --- | --- |
+| **Interface** | React, TypeScript, Vite, Tailwind CSS e Radix UI |
+| **Dados e API** | tRPC, React Query, SuperJSON e Zod |
+| **Serviços** | Node.js, Express e Supabase (Auth, PostgreSQL e Storage) |
+| **Áudio e ML** | MediaRecorder, Web Audio API, FastAPI e YAMNet |
+| **Qualidade** | Vitest, Playwright, TypeScript e Biome |
+| **Entrega** | Vercel para web/gateway e Hugging Face Spaces para o serviço ML |
 
-| Landing Page | Analysis Screen |
-|---|---|
-| _Add screenshot_ | _Add screenshot_ |
+## Cuidados e limites
 
-| Feedback Flow | Audit Panel |
-|---|---|
-| _Add screenshot_ | _Add screenshot_ |
+O PeloNaRoupa não afirma diagnosticar estados clínicos ou substituir profissionais. Qualquer resultado deve ser entendido como um apoio à observação do tutor. Em caso de sinais de sofrimento, alteração súbita de comportamento ou preocupação com a saúde do animal, consulta um médico-veterinário.
 
-## Contact & Links
+## Arquitetura e operação
+
 
 - **Repository:** [github.com/firstoff23/pelonaroupa](https://github.com/firstoff23/pelonaroupa)
 - **Live Application:** [pelonaroupa.vercel.app](https://pelonaroupa.vercel.app)
@@ -301,8 +320,8 @@ O **PeloNaRoupa** baseia-se num classificador acústico genérico (YAMNet) e em 
 * **Commit 5bdec92d:** Adiciona o ficheiro `roadmap.md` na raiz para o rastreamento das metas de desenvolvimento e prioridades futuras do projeto.
 * **Commit b98868a9:** Atualiza o README.md com a documentação do Voice-to-Text.
 * **Commit ad82e941:** Adiciona a funcionalidade de *Voice-to-Text* (Ditado por voz) para Notas de Observação com persistência local em `notes.json` e integração no fluxo de gravação e histórico.
-* **Commit 832f0e79:** Migra o gesto do *Swipe to Classify* no histórico ([HistoryPage.tsx](file:///client/src/pages/HistoryPage.tsx)) para `framer-motion` com física de arrastamento e mola de alta fidelidade e aceleração por GPU. Cria o README.md personalizado.
-* **Commit 641581f9:** Adiciona o modo *Auto Classify* (Modo Automático contínuo estilo Shazam) na gravação de áudio com Long-press e banner de alternância em [RecordingPage.tsx](file:///client/src/pages/RecordingPage.tsx).
+* **Commit 832f0e79:** Migra o gesto do *Swipe to Classify* no histórico ([HistoryPage.tsx](./client/src/pages/HistoryPage.tsx)) para `framer-motion` com física de arrastamento e mola de alta fidelidade e aceleração por GPU. Cria o README.md personalizado.
+* **Commit 641581f9:** Adiciona o modo *Auto Classify* (Modo Automático contínuo estilo Shazam) na gravação de áudio com Long-press e banner de alternância em [RecordingPage.tsx](./client/src/pages/RecordingPage.tsx).
 * **Commit feeb5d5d:** Corrige os tipos do cliente Supabase para impedir a inferência de `never` nas tabelas no TypeScript e resolve conflitos de tipagem de parâmetros.
 * **Commit 37e2f4eb:** Implementa o Modo Família multi-utilizador, permitindo a co-tutoria de animais através de convites de e-mail e permissões diferenciadas (Leitura/Escrita) persistidas em `family_shares.json` sem DDL.
 * **Commit fbdcddda:** Implementa a contextualização temporal POMDP (Belief State), deteção visual de postura (com overlay dinâmico simulado sobre WebRTC) e Modo Veterinário para diagnóstico clínico.

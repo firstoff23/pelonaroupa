@@ -1,0 +1,42 @@
+name: Propor melhoria
+description: Sugere uma funcionalidade, melhoria de experiência ou evolução técnica.
+title: "[Melhoria]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Explica o problema a resolver e o resultado para quem utiliza ou mantém o projeto. Evita descrever apenas uma implementação antes de justificar a necessidade.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema ou oportunidade
+      description: Que necessidade existe hoje? Quem é afetado?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Resultado desejado
+      description: Como saberemos que a melhoria resolveu o problema?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta inicial
+      description: Descreve uma abordagem possível, incluindo limites e alternativas consideradas.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceitação
+      description: Lista comportamentos, testes ou documentação necessários para considerar o trabalho concluído.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional
+      description: Inclui maquetas, referências, dependências, riscos de privacidade, acessibilidade ou compatibilidade, se aplicável.

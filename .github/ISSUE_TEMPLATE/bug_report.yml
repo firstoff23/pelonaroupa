@@ -1,0 +1,47 @@
+name: Reportar erro
+description: Comunica um comportamento incorreto ou uma regressão reproduzível.
+title: "[Erro]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado pelo reporte. Não incluas palavras-passe, tokens, dados pessoais ou detalhes exploráveis de vulnerabilidades. Para problemas de segurança, segue `SECURITY.md`.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Resumo do problema
+      description: Explica de forma objetiva o que aconteceu e qual era o impacto.
+      placeholder: Ao guardar uma observação, a página permanece em carregamento.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Passos para reproduzir
+      description: Lista os passos mínimos e consistentes para observar o problema.
+      placeholder: |
+        1. Abrir ...
+        2. Selecionar ...
+        3. Clicar em ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado e resultado observado
+      description: Compara o comportamento esperado com o que realmente aconteceu.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Indica navegador, sistema operativo, versão do projeto ou outra informação útil.
+      placeholder: Chrome 136, Android 15, versão publicada em 2026-08-20
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidência adicional
+      description: Anexa logs ou imagens sem dados sensíveis. Indica se o problema é intermitente.

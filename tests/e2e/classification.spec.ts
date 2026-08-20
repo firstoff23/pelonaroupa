@@ -1,4 +1,4 @@
-import { expect, test, loginAsMockUser } from "./fixtures";
+import { expect, loginAsMockUser, test } from "./fixtures";
 
 test.describe("Visual Classification", () => {
   test("capture image, classify, and show results", async ({ page }) => {
@@ -8,27 +8,24 @@ test.describe("Visual Classification", () => {
 
     await page.goto("/camera");
 
-    // Click "Ativar Câmara" / "Enable Camera" if prompted
-    const enableCameraBtn = page.getByRole("button", { name: /Ativar Câmara|Enable Camera/i });
-    if (await enableCameraBtn.isVisible()) {
-      await enableCameraBtn.click();
-    }
+    // E2E builds expose a deterministic image instead of opening a physical camera.
+    const openCameraButton = page.getByRole("button", {
+      name: /Abrir Câmara \/ Galeria|Open Camera \/ Gallery/i,
+    });
+    await expect(openCameraButton).toBeVisible();
+    await openCameraButton.click();
 
-    // Check that the animal name/species is visible in the camera stream overlay
-    await expect(page.getByText(/Cão|Dog/i).first()).toBeVisible();
-
-    // Click to capture photo
-    const captureBtn = page.getByRole("button", { name: /Tirar foto|Take photo/i }).first();
-    await expect(captureBtn).toBeVisible({ timeout: 10_000 });
-    await captureBtn.click();
-
-    // Now wait for the Confirm button
-    const confirmBtn = page.getByRole("button", { name: /Confirmar|Confirm/i }).first();
+    // The deterministic image is now available for review.
+    const confirmBtn = page
+      .getByRole("button", { name: /Confirmar|Confirm/i })
+      .first();
     await expect(confirmBtn).toBeVisible({ timeout: 5000 });
     await confirmBtn.click();
 
     // Wait for mock result
-    await expect(page.getByText(/92%/).first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/92%/).first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText(/RELAX/i).first()).toBeVisible();
   });
 });

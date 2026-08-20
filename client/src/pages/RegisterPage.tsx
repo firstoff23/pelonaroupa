@@ -53,7 +53,8 @@ export default function RegisterPage() {
   const isDisposable = emailValidationResult.errorKey === "disposable";
 
   const isNameValid = name.trim().length > 1;
-  const isFormValid = isNameValid && isEmailValid && isPasswordValid && ageConfirmed;
+  const isFormValid =
+    isNameValid && isEmailValid && isPasswordValid && ageConfirmed;
 
   const passwordRequirements = useMemo(
     () => [
@@ -198,12 +199,19 @@ export default function RegisterPage() {
             disabled={loading}
             className="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-900 text-primary focus:ring-primary focus:ring-offset-slate-950 accent-primary cursor-pointer disabled:opacity-50"
           />
-          <label htmlFor="register-age-gate" className="text-xs text-muted-foreground leading-snug select-none cursor-pointer">
+          <label
+            htmlFor="register-age-gate"
+            className="text-xs text-muted-foreground leading-snug select-none cursor-pointer"
+          >
             Confirmo que tenho 16 ou mais anos
           </label>
         </div>
 
-        <AuthSubmitButton loading={loading} loadingLabel="A criar conta..." disabled={!ageConfirmed}>
+        <AuthSubmitButton
+          loading={loading}
+          loadingLabel="A criar conta..."
+          disabled={!ageConfirmed}
+        >
           Criar conta
         </AuthSubmitButton>
         <p className="text-center text-[10px] sm:text-xs leading-relaxed text-muted-foreground mt-4">

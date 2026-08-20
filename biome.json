@@ -12,6 +12,10 @@
       "!!**/dist",
       "!!**/build",
       "!!**/.gemini",
+      "!!ios/App/App/public",
+      "!!android/app/src/main/assets",
+      "!!ml_backend/data/breed_knowledge",
+      "!!ml_backend/training",
       "!!**/client/public/__manus__",
       "!!**/client/src/components/ui"
     ]

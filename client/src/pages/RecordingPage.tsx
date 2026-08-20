@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   Check,
@@ -17,13 +16,15 @@ import {
   Trash2,
   Volume2,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { ConfidenceRing } from "@/components/ConfidenceRing";
 import { ContextTagsSheet } from "@/components/ContextTagsSheet";
 import { P5AudioVisualizer } from "@/components/P5AudioVisualizer";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -32,10 +33,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-
+import { GlowingButton } from "@/components/ui/GlowingButton";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useHaptic } from "@/hooks/useHaptic";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useLiveAudioStream } from "@/hooks/useLiveAudioStream";
@@ -47,7 +51,6 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/appStore";
 import type { EmotionalState } from "../../../shared/types";
 import { STATE_COLORS, STATE_LABELS } from "../../../shared/types";
-import { GlowingButton } from "@/components/ui/GlowingButton";
 
 const MotionButton = motion.create(Button);
 
@@ -94,19 +97,21 @@ function buildSummaryPhrase(
   confidence: number,
   language: string,
   t: (key: any) => string,
-  animalName?: string | null
+  animalName?: string | null,
 ): string {
-  const stateStr = (t(`states.${state}` as any) || STATE_LABELS[state]).toLowerCase();
-  
+  const stateStr = (
+    t(`states.${state}` as any) || STATE_LABELS[state]
+  ).toLowerCase();
+
   if (language === "pt") {
     if (confidence >= 0.75) {
-      return animalName 
-        ? `${animalName} parece claramente ${stateStr}.` 
+      return animalName
+        ? `${animalName} parece claramente ${stateStr}.`
         : `Parece claramente que está ${stateStr}.`;
     }
-    if (confidence >= 0.50) {
-      return animalName 
-        ? `Há alguns sinais de que ${animalName} está ${stateStr}.` 
+    if (confidence >= 0.5) {
+      return animalName
+        ? `Há alguns sinais de que ${animalName} está ${stateStr}.`
         : `Parece que há alguns sinais de que está ${stateStr}.`;
     }
     return `É difícil ter a certeza, mas pode haver sinais de ${stateStr}.`;
@@ -117,7 +122,7 @@ function buildSummaryPhrase(
       ? `${animalName} clearly seems ${stateStr}.`
       : `Clearly seems to be ${stateStr}.`;
   }
-  if (confidence >= 0.50) {
+  if (confidence >= 0.5) {
     return animalName
       ? `There are some signs that ${animalName} is ${stateStr}.`
       : `There seems to be some signs of being ${stateStr}.`;
@@ -145,7 +150,9 @@ function ResultCard({
   const recognitionRef = useRef<any>(null);
 
   const [comment, setComment] = useState("");
-  const [confirmedState, setConfirmedState] = useState<EmotionalState>(result.state);
+  const [confirmedState, setConfirmedState] = useState<EmotionalState>(
+    result.state,
+  );
   const [showCorrectionForm, setShowCorrectionForm] = useState(false);
 
   const utils = trpc.useUtils();
@@ -181,7 +188,11 @@ function ResultCard({
       });
     },
     onError: (err: any) => {
-      toast.error((language === "pt" ? "Erro ao guardar feedback: " : "Error saving feedback: ") + err.message);
+      toast.error(
+        (language === "pt"
+          ? "Erro ao guardar feedback: "
+          : "Error saving feedback: ") + err.message,
+      );
     },
   });
 
@@ -277,11 +288,17 @@ function ResultCard({
 
       <div className="text-center mt-2 px-4">
         <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-          {buildSummaryPhrase(result.state, result.confidence, language, t, activeAnimal?.name)}
+          {buildSummaryPhrase(
+            result.state,
+            result.confidence,
+            language,
+            t,
+            activeAnimal?.name,
+          )}
         </p>
         <p className="text-xs text-muted-foreground/60 text-center mt-1">
-          {language === "pt" 
-            ? "Isto é uma segunda opinião. Não substitui um veterinário." 
+          {language === "pt"
+            ? "Isto é uma segunda opinião. Não substitui um veterinário."
             : "This is a second opinion. It does not replace a vet."}
         </p>
       </div>
@@ -301,7 +318,11 @@ function ResultCard({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{language === "pt" ? "Confirmar predição do modelo" : "Confirm model prediction"}</p>
+            <p>
+              {language === "pt"
+                ? "Confirmar predição do modelo"
+                : "Confirm model prediction"}
+            </p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -318,7 +339,11 @@ function ResultCard({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{language === "pt" ? "Corrigir predição incorreta" : "Correct wrong prediction"}</p>
+            <p>
+              {language === "pt"
+                ? "Corrigir predição incorreta"
+                : "Correct wrong prediction"}
+            </p>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -332,34 +357,57 @@ function ResultCard({
           onClick={() => setShowCorrectionForm(!showCorrectionForm)}
         >
           <Sparkles size={14} />
-          {showCorrectionForm 
-            ? (language === "pt" ? "Ocultar Correção" : "Hide Correction") 
-            : (language === "pt" ? "Confirmar / Corrigir Detalhes" : "Confirm / Correct Details")}
+          {showCorrectionForm
+            ? language === "pt"
+              ? "Ocultar Correção"
+              : "Hide Correction"
+            : language === "pt"
+              ? "Confirmar / Corrigir Detalhes"
+              : "Confirm / Correct Details"}
         </Button>
 
         {showCorrectionForm && (
-          <form onSubmit={handleSaveFeedback} className="space-y-3 p-3 rounded-xl bg-secondary/20 border border-border">
+          <form
+            onSubmit={handleSaveFeedback}
+            className="space-y-3 p-3 rounded-xl bg-secondary/20 border border-border"
+          >
             <div className="space-y-1">
-              <label htmlFor="feedback-comment-input" className="text-xs font-semibold text-muted-foreground block">
-                {language === "pt" ? "Observações Contextuais (Opcional)" : "Contextual Notes (Optional)"}
+              <label
+                htmlFor="feedback-comment-input"
+                className="text-xs font-semibold text-muted-foreground block"
+              >
+                {language === "pt"
+                  ? "Observações Contextuais (Opcional)"
+                  : "Contextual Notes (Optional)"}
               </label>
               <textarea
                 id="feedback-comment-input"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder={language === "pt" ? "Ex: Estava a chover, próximo da hora da refeição..." : "Ex: It was raining, close to mealtime..."}
+                placeholder={
+                  language === "pt"
+                    ? "Ex: Estava a chover, próximo da hora da refeição..."
+                    : "Ex: It was raining, close to mealtime..."
+                }
                 className="w-full bg-secondary/40 border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary/50 min-h-[60px] resize-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="confirmed-state-select" className="text-xs font-semibold text-muted-foreground block">
-                {language === "pt" ? "Como descreveria o estado real?" : "How would you describe it?"}
+              <label
+                htmlFor="confirmed-state-select"
+                className="text-xs font-semibold text-muted-foreground block"
+              >
+                {language === "pt"
+                  ? "Como descreveria o estado real?"
+                  : "How would you describe it?"}
               </label>
               <select
                 id="confirmed-state-select"
                 value={confirmedState}
-                onChange={(e) => setConfirmedState(e.target.value as EmotionalState)}
+                onChange={(e) =>
+                  setConfirmedState(e.target.value as EmotionalState)
+                }
                 className="w-full bg-secondary/40 border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary/50"
               >
                 {Object.entries(STATE_LABELS).map(([val, label]) => (
@@ -376,9 +424,13 @@ function ResultCard({
               className="w-full text-xs font-semibold h-8 rounded-xl"
               disabled={saveFeedback.isPending}
             >
-              {saveFeedback.isPending 
-                ? (language === "pt" ? "A guardar..." : "Saving...") 
-                : (language === "pt" ? "Submeter Feedback" : "Submit Feedback")}
+              {saveFeedback.isPending
+                ? language === "pt"
+                  ? "A guardar..."
+                  : "Saving..."
+                : language === "pt"
+                  ? "Submeter Feedback"
+                  : "Submit Feedback"}
             </Button>
           </form>
         )}
@@ -386,14 +438,16 @@ function ResultCard({
 
       <div className="space-y-3 pt-3 border-t border-border">
         <label className="text-xs font-semibold text-muted-foreground block text-center">
-          {language === "pt" ? "Adicionar contexto rápido" : "Add quick context"}
+          {language === "pt"
+            ? "Adicionar contexto rápido"
+            : "Add quick context"}
         </label>
         <div className="flex flex-wrap gap-2 justify-center">
           {[
             { id: "Playing", en: "Playing", pt: "A brincar" },
             { id: "Alone", en: "Alone", pt: "Sozinho" },
             { id: "Near the door", en: "Near the door", pt: "À porta" },
-            { id: "Mealtime", en: "Mealtime", pt: "Hora da refeição" }
+            { id: "Mealtime", en: "Mealtime", pt: "Hora da refeição" },
           ].map((tag) => {
             const isSelected = notes.includes(tag.id);
             const label = language === "pt" ? tag.pt : tag.en;
@@ -403,7 +457,9 @@ function ResultCard({
                 type="button"
                 onClick={() => {
                   if (isSelected) {
-                    setNotes(notes.replace(tag.id, "").replace("  ", " ").trim());
+                    setNotes(
+                      notes.replace(tag.id, "").replace("  ", " ").trim(),
+                    );
                   } else {
                     setNotes(notes ? `${notes} ${tag.id}` : tag.id);
                   }
@@ -412,7 +468,7 @@ function ResultCard({
                   "text-[11px] px-3 py-1.5 rounded-full font-medium transition-all",
                   isSelected
                     ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border",
                 )}
               >
                 {label}
@@ -420,7 +476,7 @@ function ResultCard({
             );
           })}
         </div>
-        
+
         {notes.length > 0 && (
           <Button
             size="sm"
@@ -594,8 +650,6 @@ export default function RecordingPage() {
   const [dominantFreq, setDominantFreq] = useState<number>(0);
   const [spectralEnergy, setSpectralEnergy] = useState<number>(0);
   const [tonalBrightness, setTonalBrightness] = useState<number>(0);
-  
-
 
   const utils = trpc.useUtils();
   const { data: activeAnimalData } = trpc.animals.getActive.useQuery();
@@ -652,7 +706,9 @@ export default function RecordingPage() {
   const startRecordingCycle = async () => {
     try {
       if (navigator.permissions && navigator.permissions.query) {
-        const perm = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        const perm = await navigator.permissions.query({
+          name: "microphone" as PermissionName,
+        });
         if (perm.state === "prompt") {
           setShowMicPrompt(true);
           return;
@@ -977,7 +1033,9 @@ export default function RecordingPage() {
       setCountdown((c) => {
         console.log("[E2E DEBUG] Timer tick, current c:", c);
         if (c <= 1) {
-          console.log("[E2E DEBUG] Timer finished, calling stopAndGetBlobLiveAudio");
+          console.log(
+            "[E2E DEBUG] Timer finished, calling stopAndGetBlobLiveAudio",
+          );
           clearInterval(interval);
 
           void (async () => {
@@ -1070,7 +1128,9 @@ export default function RecordingPage() {
         setRecordState("processing");
         // Tarefa 4 – feedback de progresso
         toast.loading(
-          language === "pt" ? "Gravação concluída – a analisar..." : "Recording done – analysing...",
+          language === "pt"
+            ? "Gravação concluída – a analisar..."
+            : "Recording done – analysing...",
           { id: "classify-progress", duration: 15000 },
         );
 
@@ -1177,7 +1237,10 @@ export default function RecordingPage() {
   }, [stopLiveAudio, recordedAudioUrl, clearAutoRecordingTimer]);
 
   const handleButtonClick = () => {
-    console.log("[E2E DEBUG] handleButtonClick called, recordState:", recordState);
+    console.log(
+      "[E2E DEBUG] handleButtonClick called, recordState:",
+      recordState,
+    );
     if (isAutoModeRef.current) {
       disableAutoMode();
       return;
@@ -1204,7 +1267,7 @@ export default function RecordingPage() {
     console.log("[E2E DEBUG] pointerDown");
     // Tactile microinteraction for button press
     vibrate(15);
-    
+
     if (isAutoModeRef.current) return;
     if (recordState !== "idle") return;
 
@@ -1218,7 +1281,10 @@ export default function RecordingPage() {
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    console.log("[E2E DEBUG] pointerUp, isLongPressActive:", isLongPressActiveRef.current);
+    console.log(
+      "[E2E DEBUG] pointerUp, isLongPressActive:",
+      isLongPressActiveRef.current,
+    );
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
     }
@@ -1379,10 +1445,14 @@ export default function RecordingPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{language === "pt" ? "Apagar e recomeçar" : "Delete and restart"}</p>
+                  <p>
+                    {language === "pt"
+                      ? "Apagar e recomeçar"
+                      : "Delete and restart"}
+                  </p>
                 </TooltipContent>
               </Tooltip>
-              
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -1396,7 +1466,11 @@ export default function RecordingPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{language === "pt" ? "Ouvir gravação de novo" : "Listen to recording again"}</p>
+                  <p>
+                    {language === "pt"
+                      ? "Ouvir gravação de novo"
+                      : "Listen to recording again"}
+                  </p>
                 </TooltipContent>
               </Tooltip>
 
@@ -1412,7 +1486,11 @@ export default function RecordingPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{language === "pt" ? "Enviar para análise" : "Send for analysis"}</p>
+                  <p>
+                    {language === "pt"
+                      ? "Enviar para análise"
+                      : "Send for analysis"}
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -1605,9 +1683,13 @@ export default function RecordingPage() {
                 {/* ─── Veterinary Disclaimer (before button) ─── */}
                 <div className="w-full px-1">
                   <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-start gap-2 text-left">
-                    <span className="text-sm select-none shrink-0 mt-0.5">⚠️</span>
+                    <span className="text-sm select-none shrink-0 mt-0.5">
+                      ⚠️
+                    </span>
                     <p className="leading-relaxed">
-                      <strong>{language === "pt" ? "Aviso:" : "Notice:"}</strong>{" "}
+                      <strong>
+                        {language === "pt" ? "Aviso:" : "Notice:"}
+                      </strong>{" "}
                       {language === "pt"
                         ? "PeloNaRoupa não substitui avaliação veterinária. Os resultados são estimativas comportamentais."
                         : "PeloNaRoupa does not replace veterinary evaluation. Results are behavioral estimates."}
@@ -1643,7 +1725,11 @@ export default function RecordingPage() {
                         }
                         transition={
                           recordState === "recording" || isAutoMode
-                            ? { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+                            ? {
+                                repeat: Infinity,
+                                duration: 1.5,
+                                ease: "easeInOut",
+                              }
                             : { duration: 0.2 }
                         }
                         active={recordState === "recording" || isAutoMode}
@@ -1666,7 +1752,11 @@ export default function RecordingPage() {
                       </GlowingButton>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{language === "pt" ? "Manter premido para gravação contínua" : "Hold for continuous recording"}</p>
+                      <p>
+                        {language === "pt"
+                          ? "Manter premido para gravação contínua"
+                          : "Hold for continuous recording"}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -1836,7 +1926,6 @@ export default function RecordingPage() {
           ))}
         </div>
       )}
-
     </div>
   );
 }

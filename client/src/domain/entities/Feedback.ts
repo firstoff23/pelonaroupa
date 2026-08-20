@@ -35,7 +35,9 @@ export class Feedback {
     const confidenceVO = Confidence.create(props.confidence);
 
     if (!props.isCorrect && !props.correctLabel) {
-      throw new Error("Se a previsão estiver incorreta, o rótulo correto deve ser fornecido.");
+      throw new Error(
+        "Se a previsão estiver incorreta, o rótulo correto deve ser fornecido.",
+      );
     }
 
     return new Feedback(
@@ -47,7 +49,7 @@ export class Feedback {
       props.isCorrect,
       props.correctLabel,
       props.imagePath,
-      props.feedbackText
+      props.feedbackText,
     );
   }
 }

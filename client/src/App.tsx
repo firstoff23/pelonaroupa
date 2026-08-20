@@ -1,8 +1,11 @@
-import { AnimatePresence, motion } from "motion/react";
-import Lenis from "lenis";
+import { App as CapApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import Lenis from "lenis";
+import { AnimatePresence, motion } from "motion/react";
 import { lazy, Suspense, useEffect } from "react";
+import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 import { Redirect, Route, Switch, useLocation } from "wouter";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import { CommandPalette } from "@/components/CommandPalette";
@@ -13,25 +16,22 @@ import { cn } from "@/lib/utils";
 import NotFound from "@/pages/NotFound";
 import { useAppStore } from "@/store/appStore";
 import { BottomNav } from "./components/BottomNav";
+import { CookieBanner } from "./components/CookieBanner";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { GlobalFallback } from "./components/GlobalFallback";
 import { Header } from "./components/Header";
 import { MobileOnlyGate } from "./components/MobileOnlyGate";
 import { OfflineActionsSyncer } from "./components/OfflineActionsSyncer";
 import { OnboardingFlow } from "./components/OnboardingFlow";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Sidebar } from "./components/Sidebar";
-import { CookieBanner } from "./components/CookieBanner";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MoodProvider } from "./contexts/MoodContext";
 import { SelfHealingProvider } from "./contexts/SelfHealingContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { useRealtimeNotifications } from "./hooks/useRealtimeNotifications";
 import { useMLBackendSSE } from "./hooks/useMLBackendSSE";
-import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
-import { GlobalFallback } from "./components/GlobalFallback";
 import { usePushNotifications } from "./hooks/usePushNotifications";
-import { Capacitor } from "@capacitor/core";
-import { App as CapApp } from "@capacitor/app";
+import { useRealtimeNotifications } from "./hooks/useRealtimeNotifications";
 
 const AnimalDetailPage = lazy(() => import("./pages/AnimalDetailPage"));
 const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
@@ -63,7 +63,11 @@ const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
 const VetPage = lazy(() => import("./pages/VetPage"));
 const VetPetDetailPage = lazy(() => import("./pages/VetPetDetailPage"));
 const MonitorPage = lazy(() => import("./pages/MonitorPage"));
-const SurveillancePage = lazy(() => import("./pages/SurveillancePage").then(m => ({ default: m.SurveillancePage })));
+const SurveillancePage = lazy(() =>
+  import("./pages/SurveillancePage").then((m) => ({
+    default: m.SurveillancePage,
+  })),
+);
 
 // ─── Route Prefetch Helper ───────────────────────────────────────────────────
 // Call this on onMouseEnter / onFocus to pre-load a lazy page chunk before
@@ -194,7 +198,6 @@ function Router() {
         !isAuthenticated && "flex-col",
       )}
     >
-
       <RealtimeNotificationsBridge enabled={isAuthenticated} />
       <PushNotificationsBridge enabled={isAuthenticated} />
       <MLBackendSSEBridge enabled={isAuthenticated} />
@@ -247,7 +250,7 @@ function Router() {
                 <Route path="/auth/callback" component={AuthCallbackPage} />
                 <Route path="/verify-otp" component={VerifyOtpPage} />
                 <Route path="/verify-email" component={VerifyEmailPage} />
-                
+
                 {/* Public Policy Pages */}
                 <Route path="/privacy-policy" component={PrivacyPolicyPage} />
                 <Route path="/cookie-policy" component={CookiePolicyPage} />
@@ -263,7 +266,7 @@ function Router() {
                 <Route path="/vigilancia">
                   <LazyRoute component={SurveillancePage} isProtected />
                 </Route>
-      <Route path="/">
+                <Route path="/">
                   <LazyRoute component={LandingPage} variant="content" />
                 </Route>
                 <Route path="/privacidade">
@@ -497,7 +500,10 @@ function App() {
     if (Capacitor.isNativePlatform()) {
       CapApp.addListener("appUrlOpen", (event) => {
         const url = new URL(event.url);
-        if (url.hostname === "pelonaroupa.app" || url.hostname === "animalmind.vercel.app") {
+        if (
+          url.hostname === "pelonaroupa.app" ||
+          url.hostname === "animalmind.vercel.app"
+        ) {
           // Use search params as well
           setLocation(url.pathname + url.search);
         }

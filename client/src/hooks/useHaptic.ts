@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
 import { Capacitor } from "@capacitor/core";
+import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
+import { useCallback } from "react";
 
 export function useHaptic() {
   const vibrate = useCallback(async (pattern: number | number[]) => {

@@ -4,7 +4,6 @@ import {
   BarChart2,
   Camera,
   History,
-  MessageCircle,
   MoreHorizontal,
   Activity,
   PawPrint,
@@ -48,16 +47,11 @@ export function BottomNav() {
       icon: MoreHorizontal,
       label: language === "pt" ? "Mais" : "More",
       isAction: true,
-      activePaths: ["/mindi", "/alimentos", "/definicoes", "/monitor", "/vigilancia"],
+      activePaths: ["/alimentos", "/definicoes", "/monitor", "/vigilancia"],
     },
   ];
 
   const MORE_ITEMS = [
-    { 
-      path: "/mindi", 
-      icon: MessageCircle, 
-      label: "Mindi" 
-    },
     {
       path: "/alimentos",
       icon: Apple,

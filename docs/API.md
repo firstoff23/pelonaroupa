@@ -2,6 +2,10 @@
 
 Referencia dos procedimentos tRPC e das principais funcoes de persistencia usadas pelo servidor.
 
+> **Versão:** Produção (Agosto 2026)  
+> **Base URL (tRPC):** `/api/trpc`  
+> **Base URL (FastAPI ML):** `https://firstoff-animalmind-backend.hf.space`
+
 ## Transporte
 
 - Endpoint HTTP: `/api/trpc`
@@ -58,6 +62,13 @@ Referencia dos procedimentos tRPC e das principais funcoes de persistencia usada
 | `vet.getReport` | query | autenticado com role `vet` ou `admin` | `{ animalId: number; days?: number }` | Relatorio clinico agregado |
 | `vet.saveNotes` | mutation | autenticado com role `vet` ou `admin` | `{ animalId: number; notes: string }` | Guarda notas clinicas |
 | `vet.shareReport` | mutation | autenticado; requer ownership do animal | `{ animalId: number; name: string; email: string; note?: string }` | Partilha relatorio com veterinario |
+| `foods.search` | query | publico | `{ query: string; species: "dog" \| "cat" }` | Lista alimentos filtrados por pesquisa e espécie |
+| `foods.getById` | query | publico | `{ id: string; species?: string }` | Alimento por ID com severidade computada |
+| `foods.getAll` | query | publico | `{ species?: string }` opcional | Todos os alimentos com severidade computada |
+| `mfa.setup` | mutation | autenticado | nenhum | Gera segredo TOTP e QR code para configuração de MFA |
+| `mfa.verify` | mutation | autenticado | `{ code: string }` | Valida o código TOTP e ativa o MFA |
+| `mfa.disable` | mutation | autenticado | `{ code: string }` | Desativa o MFA após validação do código |
+| `mfa.check` | query | autenticado | nenhum | Verifica se o MFA está ativo para o utilizador |
 
 ## Fluxos Principais
 
@@ -168,6 +179,19 @@ As rotas veterinarias usam `protectedProcedure` e validam explicitamente a role 
 | `getFamilyAnimalsForUser(userId)` | Lista animais acessiveis por familia. |
 | `getFamilyActivityForUser(userId)` | Lista atividade familiar recente. |
 
+## FastAPI ML Backend
+
+O backend de ML expõe os seguintes endpoints REST em `https://firstoff-animalmind-backend.hf.space`:
+
+| Endpoint | Método | Descricao |
+| --- | --- | --- |
+| `/health` | GET | Health check. Devolve `{"status": "ok"}` |
+| `/classify` | POST | Classifica audio (form-data `file`). Devolve estado emocional, confiança e probabilidades. |
+| `/classify-breed` | POST | Classifica raça pela imagem (form-data `file`). |
+| `/sse` | GET | Server-Sent Events para feedback em tempo real após classificação. |
+
+**Autenticação FastAPI:** Header `X-API-Key` ou variável de ambiente `ENVIRONMENT=production` + `SUPABASE_JWT_SECRET` para validar JWT.
+
 ## Erros Relevantes
 
 - `UNAUTHORIZED`: nao ha utilizador autenticado e nao existe fallback demo.
@@ -179,6 +203,8 @@ As rotas veterinarias usam `protectedProcedure` e validam explicitamente a role 
 - `server/routers.ts`
 - `server/routers/family.ts`
 - `server/routers/vet.ts`
+- `server/routers/foods.ts`
+- `server/routers/mfa.ts`
 - `server/_core/systemRouter.ts`
 - `server/db.ts`
-
+- `ml_backend/app.py`

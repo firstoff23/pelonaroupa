@@ -1,8 +1,10 @@
+import logging
 import os
 from typing import Optional
 from fastapi import Header, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+logger = logging.getLogger(__name__)
 
 security_bearer = HTTPBearer(auto_error=False)
 
@@ -19,19 +21,26 @@ def verify_jwt(token: str) -> Optional[dict]:
     """Verifies Supabase JWT token using SUPABASE_JWT_SECRET environment variable."""
     jwt_secret = os.environ.get("SUPABASE_JWT_SECRET")
     if not jwt_secret:
+        logger.warning("verify_jwt: SUPABASE_JWT_SECRET is not set; cannot verify token.")
         return None
     try:
-        from jose import jwt
+        from jose import jwt, JWTError
         payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
         return payload
-    except Exception:
-        # Fallback to PyJWT if jose is not present
-        try:
-            import jwt as pyjwt
-            payload = pyjwt.decode(token, jwt_secret, algorithms=["HS256"])
-            return payload
-        except Exception:
-            return None
+    except ImportError:
+        # python-jose not available; fall through to PyJWT
+        logger.debug("python-jose not installed; trying PyJWT.")
+    except Exception as exc:
+        logger.warning("verify_jwt (jose): token validation failed: %s", exc)
+        return None
+    try:
+        import jwt as pyjwt
+        from jwt import PyJWTError
+        payload = pyjwt.decode(token, jwt_secret, algorithms=["HS256"])
+        return payload
+    except Exception as exc:
+        logger.warning("verify_jwt (PyJWT): token validation failed: %s", exc)
+        return None
 
 
 async def get_current_user(

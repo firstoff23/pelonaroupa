@@ -47,7 +47,6 @@ const HealthPage = lazy(() => import("./pages/HealthPage"));
 const HistoryPage = lazy(() => import("./pages/HistoryPage"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
-const MindiPage = lazy(() => import("./pages/MindiPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const CookiePolicyPage = lazy(() => import("./pages/CookiePolicyPage"));
 const TermsOfUsePage = lazy(() => import("./pages/TermsOfUsePage"));
@@ -98,8 +97,7 @@ function LazyRoute({
     | "health"
     | "family"
     | "vet"
-    | "content"
-    | "mindi";
+    | "content";
   isProtected?: boolean;
   [key: string]: any;
 }) {
@@ -357,16 +355,6 @@ function Router() {
                     <LazyRoute
                       component={DashboardPage}
                       variant="dashboard"
-                      isProtected
-                      {...params}
-                    />
-                  )}
-                </Route>
-                <Route path="/mindi">
-                  {(params) => (
-                    <LazyRoute
-                      component={MindiPage}
-                      variant="mindi"
                       isProtected
                       {...params}
                     />

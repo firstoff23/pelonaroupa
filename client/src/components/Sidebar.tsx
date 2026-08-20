@@ -7,7 +7,6 @@ import {
   ChevronRight,
   History,
   LogOut,
-  MessageCircle,
   Activity,
   PawPrint,
   Settings,
@@ -30,7 +29,6 @@ const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
   "/perfil": () => import("../pages/ProfilePage"),
   "/capturar": () => import("../pages/CapturePortalPage"),
   "/historico": () => import("../pages/HistoryPage"),
-  "/mindi": () => import("../pages/MindiPage"),
   "/alimentos": () => import("../pages/FoodSearchPage"),
   "/definicoes": () => import("../pages/SettingsPage"),
   "/monitor": () => import("../pages/MonitorPage"),
@@ -64,7 +62,6 @@ export function Sidebar() {
       icon: History,
       label: language === "pt" ? "Histórico" : "History",
     },
-    { path: "/mindi", icon: MessageCircle, label: "Mindi" },
     {
       path: "/alimentos",
       icon: Apple,

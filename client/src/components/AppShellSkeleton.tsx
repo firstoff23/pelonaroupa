@@ -12,8 +12,7 @@ type AppShellSkeletonVariant =
   | "health"
   | "family"
   | "vet"
-  | "content"
-  | "mindi";
+  | "content";
 
 type AppShellSkeletonProps = {
   mode?: "shell" | "content";
@@ -339,38 +338,6 @@ function VetSkeleton() {
   );
 }
 
-function MindiSkeleton() {
-  return (
-    <div className="flex flex-col gap-4 px-4 pt-4 pb-24 max-w-lg mx-auto">
-      {/* Header area */}
-      <div className="flex items-center gap-3 mb-2">
-        <Skeleton className="h-10 w-10 rounded-full" />
-        <div className="flex-1 space-y-1.5">
-          <Skeleton className="h-4 w-28 rounded-md" />
-          <Skeleton className="h-3 w-20 rounded-md" />
-        </div>
-      </div>
-      {/* Assistant bubble */}
-      <div className="flex items-end gap-2 max-w-[85%]">
-        <Skeleton className="h-8 w-8 rounded-full shrink-0" />
-        <Skeleton className="h-16 flex-1 rounded-2xl rounded-bl-sm" />
-      </div>
-      {/* User bubble */}
-      <div className="flex items-end gap-2 max-w-[70%] self-end">
-        <Skeleton className="h-10 flex-1 rounded-2xl rounded-br-sm" />
-      </div>
-      {/* Assistant reply */}
-      <div className="flex items-end gap-2 max-w-[85%]">
-        <Skeleton className="h-8 w-8 rounded-full shrink-0" />
-        <Skeleton className="h-24 flex-1 rounded-2xl rounded-bl-sm" />
-      </div>
-      {/* Input bar */}
-      <div className="fixed bottom-20 left-0 right-0 px-4">
-        <Skeleton className="h-12 w-full rounded-xl" />
-      </div>
-    </div>
-  );
-}
 
 function GenericContentSkeleton() {
   return (
@@ -401,7 +368,6 @@ function ContentSkeleton({
       {variant === "family" && <FamilySkeleton />}
       {variant === "vet" && <VetSkeleton />}
       {variant === "content" && <GenericContentSkeleton />}
-      {variant === "mindi" && <MindiSkeleton />}
     </div>
   );
 }

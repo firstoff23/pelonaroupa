@@ -37,7 +37,6 @@ export function Header() {
     "/dashboard",
     "/perfil",
     "/capturar",
-    "/mindi",
     "/alimentos",
     "/historico",
     "/definicoes",
@@ -90,7 +89,6 @@ export function Header() {
       return language === "pt" ? "Gravar Áudio" : "Record Audio";
     if (location === "/camera")
       return language === "pt" ? "Câmara Visão" : "Vision Camera";
-    if (location === "/mindi") return "Mindi AI Chat";
     if (location.startsWith("/animal/"))
       return translatedOr("animalDetail.title", "Detalhes", "Details");
     if (location.startsWith("/vet/animal/")) return "Paciente";

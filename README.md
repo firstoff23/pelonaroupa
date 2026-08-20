@@ -8,10 +8,15 @@ All explanations act as a helpful second opinion, not a medical or veterinary di
 
 ## Key Features
 
-- **AI-Assisted Interpretation:** Interprets behavior and vocalizations to provide a clearer sense of what an animal may be trying to communicate.
-- **Human Feedback Loop:** Allows users to rate and correct predictions, helping refine explanations over time.
-- **Transparent Audit Panel:** A dedicated area for admins and vets to review and moderate user-submitted corrections.
-- **Behavior History:** Tracks emotional evolution and observations over time.
+- **AI-Assisted Audio Classification:** Interprets pet vocalizations in real-time using YAMNet + FastAPI to identify emotional states (distress, excitement, hunger, alert, relaxed).
+- **Breed Recognition via Camera:** Identifies cat and dog breeds from photos using computer vision.
+- **Passive Listening & Surveillance Mode:** Continuous background monitoring with foreground service on Android, SSE push notifications, and auto-classify mode.
+- **Veterinary Mode:** Secure role-gated dashboard for vets to review shared clinical reports, trends, and notes per animal.
+- **Family Mode:** Multi-user co-tutoring via invite codes with granular read/write permissions per animal.
+- **Food Safety Dictionary:** Searchable database of safe and toxic foods per species (dog/cat), with clinical severity, symptoms and first-aid guidance.
+- **Multi-Factor Authentication (MFA):** TOTP-based 2FA (RFC 6238) compatible with Google Authenticator and Authy.
+- **Human Feedback Loop:** Users can rate and correct AI predictions, improving the system over time via swipe gestures.
+- **Behavior History & Export:** Tracks emotional evolution over time; exports full history as PDF or CSV.
 - **Support, Not Diagnosis:** Every feature is designed as a second opinion, not a replacement for veterinary care.
 
 ## Tech Stack
@@ -51,9 +56,10 @@ tRPC and Zod keep the client and server aligned through end-to-end type safety a
 
 ## Contact & Links
 
-- **Repository:** _Add repo link_
-- **Live Application:** _Add deployment link_
-- **Contact:** _Add public contact email or website_
+- **Repository:** [github.com/firstoff23/pelonaroupa](https://github.com/firstoff23/pelonaroupa)
+- **Live Application:** [pelonaroupa.vercel.app](https://pelonaroupa.vercel.app)
+- **ML Backend (HF Space):** [firstoff-animalmind-backend.hf.space](https://firstoff-animalmind-backend.hf.space/health)
+- **Contact:** _firstoff23 · GitHub_
 
 O PeloNaRoupa é uma aplicação **React/PWA** com um gateway **Node.js + Express + tRPC** e um backend de ML separado em **FastAPI**. O frontend fala com o gateway por `/api/trpc`, o gateway valida sessão e permissões, persiste dados no **Supabase**, envia áudio para classificação acústica e devolve resultados tipados ao cliente.
 

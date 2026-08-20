@@ -1,7 +1,9 @@
 import {
   AlertCircle,
   Apple,
+  BookOpenText,
   CheckCircle,
+  ExternalLink,
   Info,
   PawPrint,
   Search,
@@ -27,6 +29,8 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
 type SpeciesKey = "dog" | "cat";
+type SeverityKey = "safe" | "caution" | "dangerous" | "toxic";
+type SeverityFilter = "all" | SeverityKey;
 
 const SUGGESTIONS = [
   "Cenoura",
@@ -37,10 +41,61 @@ const SUGGESTIONS = [
   "Frango",
 ];
 
+function FoodSources({
+  sources,
+  language,
+}: {
+  sources: string[] | null;
+  language: string;
+}) {
+  if (!sources?.length) return null;
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="border-t border-border/30 pt-2"
+    >
+      <AccordionItem value="sources" className="border-0">
+        <AccordionTrigger className="py-2 text-[11px] font-semibold text-muted-foreground hover:no-underline hover:text-foreground">
+          <span className="flex items-center gap-1.5">
+            <BookOpenText className="h-3.5 w-3.5" />
+            {language === "pt"
+              ? "Fontes e referências"
+              : "Sources and references"}
+          </span>
+        </AccordionTrigger>
+        <AccordionContent className="space-y-1.5 pt-1.5 pb-1 text-[11px] text-muted-foreground">
+          {sources.map((source) => {
+            const isUrl =
+              source.startsWith("https://") || source.startsWith("http://");
+            return isUrl ? (
+              <a
+                key={source}
+                href={source}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 break-all text-primary underline-offset-2 hover:underline"
+              >
+                <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
+                {source}
+              </a>
+            ) : (
+              <p key={source}>{source}</p>
+            );
+          })}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
+
 export default function FoodSearchPage() {
   const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [selectedSpecies, setSelectedSpecies] = useState<SpeciesKey>("dog");
+  const [selectedSeverity, setSelectedSeverity] =
+    useState<SeverityFilter>("all");
 
   // Get active pet to pre-select species
   const { data: activeAnimal } = trpc.animals.getActive.useQuery();
@@ -116,6 +171,17 @@ export default function FoodSearchPage() {
     { key: "dog" as const, label: language === "pt" ? "Cão" : "Dog" },
     { key: "cat" as const, label: language === "pt" ? "Gato" : "Cat" },
   ];
+  const severityFilters: Array<{ key: SeverityFilter; label: string }> = [
+    { key: "all", label: language === "pt" ? "Todos" : "All" },
+    { key: "safe", label: language === "pt" ? "Seguro" : "Safe" },
+    { key: "caution", label: language === "pt" ? "Atenção" : "Caution" },
+    { key: "dangerous", label: language === "pt" ? "Perigoso" : "Dangerous" },
+    { key: "toxic", label: language === "pt" ? "Tóxico" : "Toxic" },
+  ];
+  const visibleFoods = foods.filter(
+    (food) =>
+      selectedSeverity === "all" || food.computedSeverity === selectedSeverity,
+  );
 
   if (isLoading && foods.length === 0) {
     return <AppShellSkeleton mode="content" variant="content" />;
@@ -196,6 +262,34 @@ export default function FoodSearchPage() {
         </div>
       </section>
 
+      <section
+        className="mb-6 space-y-2"
+        aria-label={
+          language === "pt" ? "Filtrar por segurança" : "Filter by safety"
+        }
+      >
+        <p className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          {language === "pt" ? "Filtrar por segurança" : "Filter by safety"}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {severityFilters.map((filter) => {
+            const active = selectedSeverity === filter.key;
+            return (
+              <Button
+                key={filter.key}
+                type="button"
+                size="sm"
+                variant={active ? "default" : "outline"}
+                onClick={() => setSelectedSeverity(filter.key)}
+                className="h-8 rounded-xl px-3 text-[11px] font-semibold"
+              >
+                {filter.label}
+              </Button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Results List */}
       <section className="flex-1 flex flex-col gap-6">
         {!query.trim() ? (
@@ -216,10 +310,10 @@ export default function FoodSearchPage() {
               </p>
             </div>
           </div>
-        ) : foods.length > 0 ? (
+        ) : visibleFoods.length > 0 ? (
           <div className="space-y-6">
             {/* Safe Foods */}
-            {foods.some((f) => f.computedSeverity === "safe") && (
+            {visibleFoods.some((f) => f.computedSeverity === "safe") && (
               <div className="space-y-3">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-500/80 flex items-center gap-1.5 px-1">
                   <CheckCircle className="h-3.5 w-3.5" />
@@ -227,7 +321,7 @@ export default function FoodSearchPage() {
                 </h2>
                 <div className="flex flex-col gap-3 p-3.5 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.02]">
                   <AnimatePresence mode="popLayout">
-                    {foods
+                    {visibleFoods
                       .filter((f) => f.computedSeverity === "safe")
                       .map((food) => {
                         const config = getSeverityConfig(food.computedSeverity);
@@ -276,6 +370,11 @@ export default function FoodSearchPage() {
                                 <p className="text-xs text-muted-foreground leading-relaxed">
                                   {food.reason}
                                 </p>
+
+                                <FoodSources
+                                  sources={food.sources}
+                                  language={language}
+                                />
                               </div>
                             </Card>
                           </motion.div>
@@ -287,7 +386,7 @@ export default function FoodSearchPage() {
             )}
 
             {/* Dangerous Foods */}
-            {foods.some((f) => f.computedSeverity !== "safe") && (
+            {visibleFoods.some((f) => f.computedSeverity !== "safe") && (
               <div className="space-y-3">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-rose-500/80 flex items-center gap-1.5 px-1">
                   <AlertCircle className="h-3.5 w-3.5" />
@@ -297,7 +396,7 @@ export default function FoodSearchPage() {
                 </h2>
                 <div className="flex flex-col gap-3 p-3.5 rounded-2xl border border-rose-500/10 bg-rose-500/[0.02]">
                   <AnimatePresence mode="popLayout">
-                    {foods
+                    {visibleFoods
                       .filter((f) => f.computedSeverity !== "safe")
                       .map((food) => {
                         const config = getSeverityConfig(food.computedSeverity);
@@ -348,6 +447,11 @@ export default function FoodSearchPage() {
                                 <p className="text-xs text-muted-foreground leading-relaxed">
                                   {food.reason}
                                 </p>
+
+                                <FoodSources
+                                  sources={food.sources}
+                                  language={language}
+                                />
 
                                 {food.symptoms && food.symptoms.length > 0 && (
                                   <Accordion
@@ -407,12 +511,22 @@ export default function FoodSearchPage() {
         ) : (
           <EmptyState
             title={
-              language === "pt" ? "Nenhum alimento encontrado" : "No food found"
+              language === "pt"
+                ? selectedSeverity === "all"
+                  ? "Nenhum alimento encontrado"
+                  : "Nenhum alimento nesta categoria"
+                : selectedSeverity === "all"
+                  ? "No food found"
+                  : "No food in this category"
             }
             description={
               language === "pt"
-                ? "Tenta pesquisar com outros termos ou seleciona uma das sugestões abaixo."
-                : "Try searching with other terms or choose one of the suggestions below."
+                ? selectedSeverity === "all"
+                  ? "Tenta pesquisar com outros termos ou seleciona uma das sugestões abaixo."
+                  : "Tenta outro filtro de segurança ou seleciona uma das sugestões abaixo."
+                : selectedSeverity === "all"
+                  ? "Try searching with other terms or choose one of the suggestions below."
+                  : "Try another safety filter or choose one of the suggestions below."
             }
             icon={<Apple className="h-8 w-8 text-primary" />}
             className="py-12"

@@ -7,7 +7,6 @@ import {
   ChevronRight,
   History,
   LogOut,
-  Activity,
   PawPrint,
   Settings,
 } from "lucide-react";

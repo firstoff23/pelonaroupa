@@ -3,12 +3,14 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import { clientsClaim } from "workbox-core";
+import { ExpirationPlugin } from "workbox-expiration";
 import {
   cleanupOutdatedCaches,
   createHandlerBoundToURL,
   precacheAndRoute,
 } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
+import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
 import {
   getOfflineQueueAuth,
   OFFLINE_QUEUE_SYNC_TAG,
@@ -31,9 +33,56 @@ type SyncCapableRegistration = ServiceWorkerRegistration & {
 self.skipWaiting();
 clientsClaim();
 
+// Precache essential app shell
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 registerRoute(new NavigationRoute(createHandlerBoundToURL("/index.html")));
+
+// Runtime Cache: Google Fonts Stylesheets & Webfonts
+registerRoute(
+  ({ url }) =>
+    url.origin === "https://fonts.googleapis.com" ||
+    url.origin === "https://fonts.gstatic.com",
+  new CacheFirst({
+    cacheName: "google-fonts",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 20,
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+      }),
+    ],
+  }),
+);
+
+// Runtime Cache: Images and SVGs
+registerRoute(
+  ({ request }) => request.destination === "image",
+  new StaleWhileRevalidate({
+    cacheName: "images-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+      }),
+    ],
+  }),
+);
+
+// Runtime Cache: Secondary JS & CSS chunks
+registerRoute(
+  ({ request, url }) =>
+    (request.destination === "script" || request.destination === "style") &&
+    url.pathname.startsWith("/assets/"),
+  new StaleWhileRevalidate({
+    cacheName: "dynamic-assets-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 40,
+        maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+      }),
+    ],
+  }),
+);
 
 async function notifyClients(message: unknown) {
   const clients = await self.clients.matchAll({

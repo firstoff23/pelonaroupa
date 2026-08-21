@@ -162,8 +162,16 @@ const plugins = [
     srcDir: "src",
     filename: "sw.ts",
     injectManifest: {
-      globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-      maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+      globPatterns: [
+        "index.html",
+        "manifest.webmanifest",
+        "assets/index-*.{js,css}",
+        "assets/vendor-react-*.js",
+        "icons/*.png",
+        "icon.svg",
+        "qr-code.svg",
+      ],
+      maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
     },
     manifest: {
       name: "PeloNaRoupa",

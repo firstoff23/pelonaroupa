@@ -321,51 +321,74 @@ function procedureData(procedure: string, input: any) {
 }
 
 async function mockSupabase(page: Page) {
-  await page.route("https://test.supabase.co/**", async (route) => {
-    const request = route.request();
-    const url = new URL(request.url());
+  const isSupabaseUrl = (url: URL) =>
+    url.hostname.includes("supabase.co") ||
+    url.hostname.includes("supabase.in") ||
+    url.pathname.includes("/auth/v1/");
 
-    if (request.method() === "OPTIONS") {
-      await route.fulfill({ status: 204 });
-      return;
-    }
+  await page.route(
+    (url) => isSupabaseUrl(url),
+    async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
 
-    if (
-      url.pathname.includes("/auth/v1/token") ||
-      url.pathname.includes("/auth/v1/verify")
-    ) {
+      if (request.method() === "OPTIONS") {
+        await route.fulfill({
+          status: 204,
+          headers: {
+            "access-control-allow-origin": "*",
+            "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "access-control-allow-headers": "*",
+          },
+        });
+        return;
+      }
+
+      if (
+        url.pathname.includes("/auth/v1/token") ||
+        url.pathname.includes("/auth/v1/verify") ||
+        url.pathname.includes("/auth/v1/signup")
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify(supabaseSession()),
+        });
+        return;
+      }
+
+      if (url.pathname.includes("/auth/v1/user")) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: JSON.stringify({ user: supabaseUser }),
+        });
+        return;
+      }
+
+      if (
+        url.pathname.includes("/auth/v1/logout") ||
+        url.pathname.includes("/auth/v1/recover")
+      ) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: { "access-control-allow-origin": "*" },
+          body: "{}",
+        });
+        return;
+      }
+
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify(supabaseSession()),
-      });
-      return;
-    }
-
-    if (url.pathname.includes("/auth/v1/user")) {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ user: supabaseUser }),
-      });
-      return;
-    }
-
-    if (url.pathname.includes("/auth/v1/logout")) {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
+        headers: { "access-control-allow-origin": "*" },
         body: "{}",
       });
-      return;
-    }
-
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: "{}",
-    });
-  });
+    },
+  );
 }
 
 async function mockTrpc(page: Page) {
@@ -400,6 +423,8 @@ async function mockTrpc(page: Page) {
 
 async function installBrowserMocks(page: Page) {
   await page.addInitScript(() => {
+    (window as any).__E2E__ = true;
+    (window as any).playwright = true;
     localStorage.setItem("animalmind-onboarding-seen", "true");
     localStorage.setItem("pawra-onboarding-seen", "true");
     localStorage.setItem("theme", "dark");

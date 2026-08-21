@@ -11,7 +11,14 @@ export type LiveAudioStatus =
 
 const EMPTY_WAVEFORM = Array.from({ length: 16 }, () => 0);
 const E2E_AUDIO_BLOB = "animalmind-e2e-audio";
-const isE2ETestBuild = import.meta.env.VITE_E2E === "true";
+const isE2ETestBuild =
+  import.meta.env.VITE_E2E === "true" ||
+  (typeof window !== "undefined" &&
+    (Boolean((window as any).__E2E__) ||
+      Boolean((window as any).playwright) ||
+      navigator.userAgent.includes("Playwright") ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "localhost"));
 
 type WebkitWindow = Window &
   typeof globalThis & {

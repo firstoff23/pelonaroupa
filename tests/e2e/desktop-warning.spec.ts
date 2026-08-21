@@ -16,11 +16,11 @@ test.describe("desktop mobile-only notice", () => {
     await page.goto("/");
 
     await expect(
-      page.getByRole("heading", { name: "O Pawra foi feito para mobile" }),
+      page.getByRole("heading", { name: "O PeloNaRoupa foi feito para mobile" }),
     ).toBeVisible();
     await expect(page.getByAltText(/QR code para abrir/i)).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "pawra.vercel.app" }),
-    ).toHaveAttribute("href", "https://pawra.vercel.app");
+      page.getByRole("link", { name: "animalmind.vercel.app" }),
+    ).toHaveAttribute("href", "https://animalmind.vercel.app");
   });
 });

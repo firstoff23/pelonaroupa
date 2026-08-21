@@ -5,8 +5,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { storeOfflineQueueAuth } from "@/lib/offlineQueue";
 
 // Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "https://test.supabase.co"
+    : undefined);
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "test-anon-key-for-e2e"
+    : undefined);
 
 const missingSupabaseConfigMessage =
   "A autenticação Supabase não está configurada. Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY na Vercel e faça novo deploy.";

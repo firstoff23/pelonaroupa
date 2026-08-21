@@ -182,6 +182,18 @@ VALUES
     ARRAY['Inquietação', 'Vómitos', 'Taquicardia', 'Tremores', 'Dificuldade respiratória'],
     'Não deixe o animal beber chá. Em caso de ingestão significativa, contacte o veterinário de imediato.',
     ARRAY['Pet Poison Helpline', 'ASPCA']
+  ),
+  (
+    'Bocados de Abóbora',
+    ARRAY['pumpkin bites', 'pumpkin treats', 'abobora snacks', 'abóbora em cubos'],
+    ARRAY['dog', 'cat', 'rabbit']::TEXT[],
+    ARRAY[]::TEXT[],
+    ARRAY[]::TEXT[],
+    'safe',
+    'Excelente fonte de fibra solúvel, betacaroteno e vitaminas. Ajuda a regular a digestão e trânsito intestinal de cães e gatos.',
+    ARRAY[]::TEXT[],
+    'Sirva cozida ao vapor sem sal, açúcar ou condimentos. Excelente snack de treino saudável.',
+    ARRAY['AKC', 'Veterinary Partner']
   )
 ON CONFLICT (name) DO NOTHING;
 

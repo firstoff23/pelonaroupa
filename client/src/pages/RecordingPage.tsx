@@ -1009,12 +1009,16 @@ export default function RecordingPage() {
       if (micSource) {
         try {
           micSource.disconnect();
-        } catch (_e) {}
+        } catch (e) {
+          console.debug("[AudioCleanup] micSource disconnect ignored:", e);
+        }
       }
       if (analyser) {
         try {
           analyser.dispose();
-        } catch (_e) {}
+        } catch (e) {
+          console.debug("[AudioCleanup] analyser dispose ignored:", e);
+        }
       }
     };
   }, [recordState, liveAudioStream]);

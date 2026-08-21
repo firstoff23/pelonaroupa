@@ -63,7 +63,9 @@ export function useLiveAudioStream() {
       ) {
         try {
           mediaRecorderRef.current.stop();
-        } catch (_e) {}
+        } catch (e) {
+          console.debug("[AudioCleanup] MediaRecorder stop ignored:", e);
+        }
       }
       mediaRecorderRef.current = null;
       chunksRef.current = [];

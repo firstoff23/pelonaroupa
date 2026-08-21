@@ -179,24 +179,124 @@ As rotas veterinarias usam `protectedProcedure` e validam explicitamente a role 
 | `getFamilyAnimalsForUser(userId)` | Lista animais acessiveis por familia. |
 | `getFamilyActivityForUser(userId)` | Lista atividade familiar recente. |
 
-## FastAPI ML Backend
+## FastAPI ML Backend (REST API)
 
-O backend de ML expõe os seguintes endpoints REST em `https://firstoff-animalmind-backend.hf.space`:
+O backend de ML em Python/FastAPI expõe endpoints REST em `https://firstoff-animalmind-backend.hf.space` (com fallback para `https://animalmind-backend.fly.dev`):
 
-| Endpoint | Método | Descricao |
-| --- | --- | --- |
-| `/health` | GET | Health check. Devolve `{"status": "ok"}` |
-| `/classify` | POST | Classifica audio (form-data `file`). Devolve estado emocional, confiança e probabilidades. |
-| `/classify-breed` | POST | Classifica raça pela imagem (form-data `file`). |
-| `/sse` | GET | Server-Sent Events para feedback em tempo real após classificação. |
+### Autenticação e Headers
 
-**Autenticação FastAPI:** Header `X-API-Key` ou variável de ambiente `ENVIRONMENT=production` + `SUPABASE_JWT_SECRET` para validar JWT.
+- **Produção:** Requer token JWT de utilizador autenticado (`Authorization: Bearer <SUPABASE_JWT_TOKEN>`) validado através de `SUPABASE_JWT_SECRET` com algoritmo `HS256`.
+- **Inter-serviços / M2M:** Header `X-API-Key: <ML_BACKEND_API_KEY>` para comunicação segura entre o Node.js gateway e o serviço FastAPI.
+- **Rastreabilidade:** Header `X-Correlation-ID` opcional (gerado automaticamente se omitido).
 
-## Erros Relevantes
+### Tabela de Endpoints REST
 
-- `UNAUTHORIZED`: nao ha utilizador autenticado e nao existe fallback demo.
-- `FORBIDDEN`: role insuficiente para endpoints admin/vet.
-- `NOT_FOUND`: recurso inexistente ou fora do escopo do utilizador.
+| Endpoint | Método | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `/health` ou `/v1/health` | `GET` | Pública | Health check do serviço e modelos. Devolve `{"status": "ok", "version": "1.4.0"}` |
+| `/classify` ou `/v1/classify-audio` | `POST` | JWT / API Key | Classifica áudio de vocalização pet (WAV, MP3, WebM, OGG). Devolve estado emocional, confiança, probabilidades e modelo YAMNet. |
+| `/classify-breed` ou `/v1/classify-breed` | `POST` | JWT / API Key | Identifica raça de cão ou gato a partir de imagem (JPEG, PNG, WebP) com ViT / MobileNetV3. |
+| `/detect-posture` | `POST` | JWT / API Key | Deteta postura do animal (lying, sitting, standing, alert) com YOLOv8-pose. |
+| `/detect-species` | `POST` | JWT / API Key | Identifica espécie (cão vs gato) por visão computacional. |
+| `/feedback` ou `/v1/feedback` | `POST` | JWT / API Key | Regista anotações e correções de utilizadores para loop de aprendizagem contínua. |
+| `/sse` ou `/v1/sse` | `GET` | Pública / JWT | Stream Server-Sent Events para notificações e telemetria de eventos em tempo real. |
+
+---
+
+### Exemplos de Utilização (cURL)
+
+#### 1. Health Check
+```bash
+curl -X GET https://firstoff-animalmind-backend.hf.space/health
+```
+**Resposta (200 OK):**
+```json
+{
+  "status": "ok",
+  "version": "1.4.0",
+  "models": {
+    "yamnet": true,
+    "breed_classifier": true,
+    "yolov8_pose": true
+  }
+}
+```
+
+#### 2. Classificação de Áudio (`/classify` ou `/v1/classify-audio`)
+```bash
+curl -X POST https://firstoff-animalmind-backend.hf.space/classify \
+  -H "X-API-Key: sua-chave-de-api" \
+  -F "file=@miado_gato.wav" \
+  -F "species=cat"
+```
+**Resposta (200 OK):**
+```json
+{
+  "state": "hunger",
+  "confidence": 0.94,
+  "emoji": "🥣",
+  "model_used": "yamnet",
+  "cached": false,
+  "probabilities": {
+    "hunger": 0.94,
+    "attention": 0.04,
+    "distress": 0.01,
+    "relaxed": 0.01
+  }
+}
+```
+
+#### 3. Classificação de Raça (`/classify-breed` ou `/v1/classify-breed`)
+```bash
+curl -X POST https://firstoff-animalmind-backend.hf.space/classify-breed \
+  -H "X-API-Key: sua-chave-de-api" \
+  -F "file=@foto_animal.jpg"
+```
+**Resposta (200 OK):**
+```json
+{
+  "breed": "Golden Retriever",
+  "species": "dog",
+  "confidence": 0.91,
+  "top_breeds": [
+    { "breed": "Golden Retriever", "confidence": 0.91 },
+    { "breed": "Labrador Retriever", "confidence": 0.06 }
+  ]
+}
+```
+
+#### 4. Submissão de Feedback (`/feedback` ou `/v1/feedback`)
+```bash
+curl -X POST https://firstoff-animalmind-backend.hf.space/feedback \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: sua-chave-de-api" \
+  -d '{
+    "event_id": 1234,
+    "user_feedback": "correct",
+    "corrected_state": null,
+    "notes": "Classificação correta, o cão estava a pedir ração"
+  }'
+```
+**Resposta (200 OK):**
+```json
+{
+  "success": true,
+  "logged_at": "2026-08-21T01:50:00Z"
+}
+```
+
+---
+
+## Erros e Códigos HTTP Relevantes
+
+- `400 Bad Request`: Ficheiro com formato inválido ou parâmetros ausentes.
+- `401 Unauthorized`: Token JWT expirado, ausente ou API Key inválida.
+- `403 Forbidden`: Permissões insuficientes para a ação requerida.
+- `404 Not Found`: Recurso, animal ou evento inexistente.
+- `429 Too Many Requests`: Limite de taxa de requisições excedido (`slowapi` / RateLimit).
+- `502 Bad Gateway`: Fallback ativado quando o serviço ML primário está temporariamente offline.
+
+---
 
 ## Ficheiros Fonte
 
@@ -208,3 +308,4 @@ O backend de ML expõe os seguintes endpoints REST em `https://firstoff-animalmi
 - `server/_core/systemRouter.ts`
 - `server/db.ts`
 - `ml_backend/app.py`
+- `ml_backend/utils/auth.py`

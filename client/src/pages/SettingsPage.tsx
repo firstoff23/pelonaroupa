@@ -60,31 +60,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { getVeterinaryRoleLabel, isVeterinaryRole } from "@/lib/roles";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { CrashingComponent, SettingsSectionLabel } from '@/components/settings/SettingsHelpers';
 
 type Sensitivity = "low" | "medium" | "high";
-
-function CrashingComponent(): null {
-  throw new Error(
-    "Erro Simulado de UI: Falha crÃ­tica na renderizaÃ§Ã£o do componente de teste.",
-  );
-}
-
-function SettingsSectionLabel({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="space-y-1 pt-2">
-      <p className="text-xs font-semibold uppercase text-primary">{title}</p>
-      <p className="text-[11px] leading-relaxed text-muted-foreground">
-        {description}
-      </p>
-    </div>
-  );
-}
 
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage();

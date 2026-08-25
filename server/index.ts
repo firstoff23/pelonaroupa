@@ -1,5 +1,6 @@
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import { createServer } from "http";
 import { createContext } from "./_core/context";
 import { registerOAuthRoutes } from "./_core/oauth";
@@ -94,9 +95,25 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 registerStorageProxy(app);
 registerOAuthRoutes(app);
 
+// ── Rate Limiting ───────────────────────────────────────────────────────────
+// General API: 100 requests per 15 min per IP (well above normal usage)
+// Stricter limit is enforced at the auth layer (Supabase handles login throttling)
+const apiRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Demasiadas tentativas. Tenta novamente em 15 minutos." },
+  skip: (req) => {
+    // Skip rate limiting in development and test environments
+    return process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+  },
+});
+
 // tRPC API
 app.use(
   "/api/trpc",
+  apiRateLimit,
   createExpressMiddleware({
     router: appRouter,
     createContext,

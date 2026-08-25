@@ -1,6 +1,6 @@
-# AnimalMind 🐾 — Roadmap de Desenvolvimento
+# PeloNaRoupa 🐾 — Roadmap de Desenvolvimento
 
-Este documento descreve as prioridades de desenvolvimento da aplicação AnimalMind, categorizadas por fases de maturidade do projeto.
+Este documento descreve as prioridades de desenvolvimento da aplicação PeloNaRoupa (anteriormente AnimalMind/Pawra), categorizadas por fases de maturidade do projeto.
 
 ---
 
@@ -44,12 +44,26 @@ Este documento descreve as prioridades de desenvolvimento da aplicação AnimalM
 - [x] **11. Notificações Push**
   - [x] Configurar Service Worker, chaves VAPID, persistência de subscrições e rotas de envio com anti-spam (limite de 10 min).
 - [ ] **12. Submissão às lojas**
-  - Empacotamento do frontend (ex: Capacitor/PWA) e publicação na Google Play Store e Apple App Store.
+  - Empacotamento do frontend com Capacitor. Scripts `pnpm build:android` / `pnpm build:android:aab` disponíveis.
+  - `appId` actualizado para `com.pelonaroupa.app`.
 
-### 📋 Prioridade 4 — Próximas Features (Planeado pós-produção 2026-06-08)
-- [ ] **11. Dicionário de Alimentos**
+### 📋 Prioridade 4 — Features V3.0 (2026)
+- [x] **13. Dicionário de Alimentos**
   - Risco baixo, valor alto. Consulta rápida de alimentos permitidos, proibidos ou moderados para cães e gatos.
-- [ ] **12. Registo de Sintomas (Symptom Logger) & Exportação PDF**
-  - Painel para registar vômitos, letargia, coceira, etc., com geração de PDF formatado para veterinários.
-- [ ] **13. Calendário Preventivo de Saúde**
-  - Gestão e alertas para vacinação, desparasitação interna/externa e consultas.
+- [x] **14. Registo de Sintomas (Symptom Logger)**
+  - Página `/sintomas` com checklist de 18 sintomas, severidade, notas e histórico. Usa `health.addHealthRecord`.
+- [x] **15. Calendário Preventivo de Saúde**
+  - Página `/calendario` com grid mensal CSS, event dots por categoria, modal de adição e lista de próximos eventos. Sem dependências externas.
+- [x] **16. Comparação de Animais**
+  - Página `/comparison` com bar chart, radar chart e tabela comparativa entre animais do mesmo tutor.
+- [x] **17. Rate Limiting**
+  - `express-rate-limit` no endpoint `/api/trpc`: 100 req/15 min por IP em produção.
+- [x] **18. Refactoring de Routers**
+  - `feedbackRouter`, `analyticsRouter` e `settingsRouter` extraídos para `server/routers/`.
+
+### 📋 Backlog (planeado)
+- [ ] **Offline Queue completa** — sincronização automática de gravações feitas sem ligação.
+- [ ] **Push Deep Links** — notificações que abrem o animal/evento directamente na app.
+- [ ] **i18n completo** — extractar todas as strings hardcoded para um sistema de tradução.
+- [ ] **Dark/Light toggle** — actualmente deliberadamente dark-only por decisão de design.
+- [ ] **ML Async (BullMQ)** — ver `docs/ADR-ml-async.md` para o plano de migração.

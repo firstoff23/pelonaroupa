@@ -63,6 +63,8 @@ const DeleteAccountPage = lazy(() => import("./pages/DeleteAccountPage"));
 const VetPage = lazy(() => import("./pages/VetPage"));
 const VetPetDetailPage = lazy(() => import("./pages/VetPetDetailPage"));
 const MonitorPage = lazy(() => import("./pages/MonitorPage"));
+const SymptomsPage = lazy(() => import("./pages/SymptomsPage"));
+const HealthCalendarPage = lazy(() => import("./pages/HealthCalendarPage"));
 const SurveillancePage = lazy(() =>
   import("./pages/SurveillancePage").then((m) => ({
     default: m.SurveillancePage,
@@ -442,6 +444,26 @@ function Router() {
                     <LazyRoute
                       component={ComparisonPage}
                       variant="comparison"
+                      isProtected
+                      {...params}
+                    />
+                  )}
+                </Route>
+                <Route path="/sintomas">
+                  {(params) => (
+                    <LazyRoute
+                      component={SymptomsPage}
+                      variant="health"
+                      isProtected
+                      {...params}
+                    />
+                  )}
+                </Route>
+                <Route path="/calendario">
+                  {(params) => (
+                    <LazyRoute
+                      component={HealthCalendarPage}
+                      variant="health"
                       isProtected
                       {...params}
                     />

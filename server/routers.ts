@@ -46,26 +46,21 @@ import {
   getEventPosture,
   getEventsForAnimalPaginated,
   getEventsPaginated,
-  getFeedbackAnnotations,
   getLatestBeliefState,
   getLicensing,
   getOtherTreatments,
   getPendingInvitations,
   getRecentEvents,
-  getSettings,
   getSignedAudioUrl,
   getStatsForAnimal,
   getSupabase,
   getVaccinations,
   getWeeklyStats,
   insertEvent,
-  logAnalyticsEvent,
   recalculateAnimalBehaviorBaseline,
   removeAnimalShare,
   respondToInvitation,
-  reviewFeedbackAnnotation,
   saveBreedFeedback,
-  saveFeedbackAnnotation,
   savePostureForEvent,
   setActiveAnimal,
   updateAnimal,
@@ -77,15 +72,17 @@ import {
   updateEventNotes,
   updateUser,
   uploadAudioToSupabase,
-  upsertSettings,
   verifyAnimalOwner,
 } from "./db";
+import { analyticsRouter } from "./routers/analytics";
 import { familyRouter } from "./routers/family";
+import { feedbackRouter } from "./routers/feedback";
 import { foodsRouter } from "./routers/foods";
 import { healingRouter } from "./routers/healing";
 import { healthRouter } from "./routers/health";
 import { insightsRouter } from "./routers/insights";
 import { pushRouter } from "./routers/push";
+import { settingsRouter } from "./routers/settings";
 import { trendsRouter } from "./routers/trends";
 import { vetRouter } from "./routers/vet";
 
@@ -340,115 +337,8 @@ const SPECIES_LABELS: Record<string, string> = {
   cat: "gato",
 };
 
-const feedbackRouter = router({
-  submit: protectedProcedure
-    .input(
-      z.object({
-        classificationEventId: z.number(),
-        confirmedState: z.string().max(50),
-        comment: z.string().max(500).optional().nullable(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const accessToken = ctx.accessToken;
-      if (!accessToken) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Token de acesso em falta na sessão",
-        });
-      }
-      const userId = await effectiveUserId(ctx.user);
-      const data = await saveFeedbackAnnotation(accessToken, userId, input);
-      return { success: true, data };
-    }),
-
-  list: protectedProcedure
-    .input(
-      z
-        .object({
-          limit: z.number().min(1).max(50).default(20),
-          offset: z.number().min(0).default(0),
-          animal_type: z.string().optional(),
-          from: z.string().optional(),
-          to: z.string().optional(),
-          reviewed: z.enum(["all", "pending", "reviewed"]).default("all"),
-          predicted_state: z
-            .enum([
-              "distress",
-              "attention",
-              "excitement",
-              "hunger",
-              "alert",
-              "relaxed",
-            ])
-            .optional(),
-        })
-        .optional(),
-    )
-    .query(async ({ ctx, input }) => {
-      const accessToken = ctx.accessToken;
-      if (!accessToken) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Token de acesso em falta na sessão",
-        });
-      }
-      if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "Acesso restrito a utilizadores com role veterinária ou administrativa.",
-        });
-      }
-      const data = await getFeedbackAnnotations(accessToken, input);
-      return data;
-    }),
-
-  review: protectedProcedure
-    .input(
-      z.object({
-        feedbackId: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const accessToken = ctx.accessToken;
-      if (!accessToken) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Token de acesso em falta na sessão",
-        });
-      }
-      if (!ALLOWED_AUDIT_ROLES.includes(ctx.user?.role || "")) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "Acesso restrito a utilizadores com role veterinária ou administrativa.",
-        });
-      }
-      const userId = await effectiveUserId(ctx.user);
-      const data = await reviewFeedbackAnnotation(
-        accessToken,
-        userId,
-        input.feedbackId,
-      );
-      return { success: true, data };
-    }),
-});
-
-const analyticsRouter = router({
-  logEvent: protectedProcedure
-    .input(
-      z.object({
-        eventName: z.string(),
-        properties: z.any().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const userId = await effectiveUserId(ctx.user);
-      await logAnalyticsEvent(userId, input.eventName, input.properties);
-      return { success: true };
-    }),
-});
+// feedbackRouter, analyticsRouter and settingsRouter are defined in ./routers/feedback.ts,
+// ./routers/analytics.ts and ./routers/settings.ts respectively.
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
@@ -1893,38 +1783,7 @@ export const appRouter = router({
       }),
   }),
 
-  // ── Settings ────────────────────────────────────────────────────────────────
-  settings: router({
-    get: protectedProcedure.query(async ({ ctx }) => {
-      const userId = await effectiveUserId(ctx.user);
-      const s = await getSettings(userId);
-      if (!s) {
-        return {
-          notificationsEnabled: true,
-          alertSensitivity: "medium" as const,
-          shareDiagnosticData: false,
-        };
-      }
-      return {
-        notificationsEnabled: s.notifications_enabled,
-        alertSensitivity: s.alert_sensitivity as "low" | "medium" | "high",
-        shareDiagnosticData: !!s.share_diagnostic_data,
-      };
-    }),
-
-    update: protectedProcedure
-      .input(
-        z.object({
-          notificationsEnabled: z.boolean().optional(),
-          alertSensitivity: z.enum(["low", "medium", "high"]).optional(),
-          shareDiagnosticData: z.boolean().optional(),
-        }),
-      )
-      .mutation(async ({ ctx, input }) => {
-        const userId = await effectiveUserId(ctx.user);
-        return upsertSettings(userId, input);
-      }),
-  }),
+  // Settings router is defined in ./routers/settings.ts
 
   vet: vetRouter,
   health: healthRouter,
@@ -1935,6 +1794,7 @@ export const appRouter = router({
   push: pushRouter,
   feedback: feedbackRouter,
   analytics: analyticsRouter,
+  settings: settingsRouter,
 });
 
 export type AppRouter = typeof appRouter;

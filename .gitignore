@@ -70,6 +70,11 @@ server/family_shares.json
 .sb-pentest-context.json
 scratch/
 supabase/.temp/
+tmp-*.log
+tmp-*.err.log
+vercel_logs.txt
+fix_supabase_auth.js
+seed-supabase.mjs
 
 # Keystores and Android Builds
 *.jks

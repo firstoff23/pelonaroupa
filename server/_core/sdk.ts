@@ -228,7 +228,14 @@ class SDKServer {
         name,
       };
     } catch (error) {
-      console.warn("[Auth] Session verification failed", String(error));
+      // JOSEAlgNotAllowed: the cookie is a Supabase JWT (HS256 with Supabase secret),
+      // not a session cookie (HS256 with COOKIE_SECRET). This is expected when a
+      // Supabase user hits the legacy cookie auth path — context.ts will fall back
+      // to Bearer token auth automatically. Non-fatal.
+      const code = (error as any)?.code ?? (error as any)?.name ?? "unknown";
+      if (code !== "JOSEAlgNotAllowed" && code !== "ERR_JWS_INVALID") {
+        console.warn("[Auth] Session verification failed", code, String(error));
+      }
       return null;
     }
   }

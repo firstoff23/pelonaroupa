@@ -2,9 +2,11 @@ import {
   Activity,
   Apple,
   BarChart2,
+  CalendarDays,
   Camera,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   History,
   LogOut,
   PawPrint,
@@ -30,6 +32,8 @@ const PREFETCH_MAP: Record<string, () => Promise<unknown>> = {
   "/capturar": () => import("../pages/CapturePortalPage"),
   "/historico": () => import("../pages/HistoryPage"),
   "/alimentos": () => import("../pages/FoodSearchPage"),
+  "/sintomas": () => import("../pages/SymptomsPage"),
+  "/calendario": () => import("../pages/HealthCalendarPage"),
   "/definicoes": () => import("../pages/SettingsPage"),
   "/monitor": () => import("../pages/MonitorPage"),
 };
@@ -66,6 +70,16 @@ export function Sidebar() {
       path: "/alimentos",
       icon: Apple,
       label: language === "pt" ? "Alimentos" : "Foods",
+    },
+    {
+      path: "/sintomas",
+      icon: ClipboardList,
+      label: language === "pt" ? "Sintomas" : "Symptoms",
+    },
+    {
+      path: "/calendario",
+      icon: CalendarDays,
+      label: language === "pt" ? "Calendário" : "Calendar",
     },
     {
       path: "/monitor",

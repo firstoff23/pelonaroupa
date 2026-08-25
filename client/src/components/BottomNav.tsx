@@ -2,7 +2,9 @@ import {
   Activity,
   Apple,
   BarChart2,
+  CalendarDays,
   Camera,
+  ClipboardList,
   History,
   MoreHorizontal,
   PawPrint,
@@ -52,15 +54,24 @@ export function BottomNav() {
       icon: MoreHorizontal,
       label: language === "pt" ? "Mais" : "More",
       isAction: true,
-      activePaths: ["/alimentos", "/definicoes", "/monitor", "/vigilancia"],
+      activePaths: ["/alimentos", "/sintomas", "/calendario", "/definicoes", "/monitor", "/vigilancia"],
     },
   ];
-
   const MORE_ITEMS = [
     {
       path: "/alimentos",
       icon: Apple,
       label: language === "pt" ? "Alimentos" : "Foods",
+    },
+    {
+      path: "/sintomas",
+      icon: ClipboardList,
+      label: language === "pt" ? "Sintomas" : "Symptoms",
+    },
+    {
+      path: "/calendario",
+      icon: CalendarDays,
+      label: language === "pt" ? "Calendário" : "Calendar",
     },
     {
       path: "/definicoes",

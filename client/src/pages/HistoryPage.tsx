@@ -1023,7 +1023,7 @@ export default function HistoryPage() {
             reader.readAsDataURL(blob);
           });
         } catch (e) {
-          console.warn("Failed to fetch animal photo for PDF:", e);
+
         }
       }
 

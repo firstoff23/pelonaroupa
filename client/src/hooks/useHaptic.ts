@@ -8,13 +8,13 @@ export function useHaptic() {
       try {
         await Haptics.impact({ style: ImpactStyle.Light });
       } catch (e) {
-        console.warn("[Haptic] Capacitor vibration failed:", e);
+
       }
     } else if (typeof navigator !== "undefined" && navigator.vibrate) {
       try {
         navigator.vibrate(pattern);
       } catch (e) {
-        console.warn("[Haptic] Web vibration failed/blocked:", e);
+
       }
     }
   }, []);

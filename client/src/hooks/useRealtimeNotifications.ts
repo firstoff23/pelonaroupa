@@ -89,7 +89,7 @@ export function useRealtimeNotifications(enabled = true) {
       )
       .subscribe((status) => {
         if (status === "CHANNEL_ERROR") {
-          console.warn("[Realtime] classification_events channel error.");
+
         }
       });
 

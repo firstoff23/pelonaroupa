@@ -88,7 +88,7 @@ export function useMLBackendSSE({
       esRef.current = es;
 
       es.addEventListener("connected", () => {
-        console.log("[MLBackendSSE] Connected to", url);
+
       });
 
       es.onmessage = (event: MessageEvent<string>) => {
@@ -125,7 +125,7 @@ export function useMLBackendSSE({
       };
 
       es.onerror = () => {
-        console.warn("[MLBackendSSE] Connection error – reconnecting in 10s");
+
         es.close();
         esRef.current = null;
         if (isMounted) {

@@ -18,7 +18,7 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
     const cached = await get<T>(key, cacheStore);
     return cached !== undefined ? cached : null;
   } catch (err) {
-    console.warn(`[OfflineCache] Failed to get cache for key ${key}:`, err);
+
     return null;
   }
 }
@@ -27,7 +27,7 @@ export async function setCachedData<T>(key: string, data: T): Promise<void> {
   try {
     await set(key, data, cacheStore);
   } catch (err) {
-    console.warn(`[OfflineCache] Failed to set cache for key ${key}:`, err);
+
   }
 }
 

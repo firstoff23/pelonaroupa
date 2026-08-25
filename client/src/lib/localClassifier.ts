@@ -71,7 +71,7 @@ export async function runLocalYAMNet(
       };
     }
   } catch (e) {
-    console.warn("Error running browser TFJS YAMNet prediction:", e);
+
   }
 
   return getLocalMockClassification();

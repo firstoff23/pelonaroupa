@@ -30,6 +30,6 @@ export function triggerHaptic(
         break;
     }
   } catch (e) {
-    console.warn("Haptic feedback not supported/blocked:", e);
+
   }
 }

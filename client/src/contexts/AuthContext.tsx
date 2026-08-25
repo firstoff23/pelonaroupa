@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check session on mount
   useEffect(() => {
     if (!supabase) {
-      console.warn(missingSupabaseConfigMessage);
+
       setLoading(false);
       return;
     }

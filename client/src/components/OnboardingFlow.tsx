@@ -71,7 +71,7 @@ export function OnboardingFlow() {
       setMicStatus("granted");
       stream.getTracks().forEach((track) => track.stop());
     } catch (err) {
-      console.warn("Microphone permission denied:", err);
+
       setMicStatus("denied");
     }
   };
@@ -81,7 +81,7 @@ export function OnboardingFlow() {
       const result = await Notification.requestPermission();
       setNotiStatus(result === "default" ? "prompt" : result);
     } catch (err) {
-      console.warn("Notifications permission denied:", err);
+
       setNotiStatus("denied");
     }
   };

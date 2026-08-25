@@ -106,7 +106,9 @@ const apiRateLimit = rateLimit({
   message: { error: "Demasiadas tentativas. Tenta novamente em 15 minutos." },
   skip: (req) => {
     // Skip rate limiting in development and test environments
-    return process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+    return (
+      process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
+    );
   },
 });
 

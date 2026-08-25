@@ -89,7 +89,6 @@ export function useRealtimeNotifications(enabled = true) {
       )
       .subscribe((status) => {
         if (status === "CHANNEL_ERROR") {
-
         }
       });
 

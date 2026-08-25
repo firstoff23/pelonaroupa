@@ -70,9 +70,7 @@ export async function runLocalYAMNet(
         emoji: "🟢",
       };
     }
-  } catch (e) {
-
-  }
+  } catch (e) {}
 
   return getLocalMockClassification();
 }

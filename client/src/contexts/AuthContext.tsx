@@ -7,12 +7,16 @@ import { storeOfflineQueueAuth } from "@/lib/offlineQueue";
 // Initialize Supabase client
 const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ||
-  (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  (typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1")
     ? "https://test.supabase.co"
     : undefined);
 const supabaseAnonKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  (typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1")
     ? "test-anon-key-for-e2e"
     : undefined);
 
@@ -81,7 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check session on mount
   useEffect(() => {
     if (!supabase) {
-
       setLoading(false);
       return;
     }

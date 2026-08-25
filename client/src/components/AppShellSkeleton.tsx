@@ -338,7 +338,6 @@ function VetSkeleton() {
   );
 }
 
-
 function GenericContentSkeleton() {
   return (
     <PageFrame maxWidth="max-w-5xl">

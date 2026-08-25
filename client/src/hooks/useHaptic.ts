@@ -7,15 +7,11 @@ export function useHaptic() {
     if (Capacitor.isNativePlatform()) {
       try {
         await Haptics.impact({ style: ImpactStyle.Light });
-      } catch (e) {
-
-      }
+      } catch (e) {}
     } else if (typeof navigator !== "undefined" && navigator.vibrate) {
       try {
         navigator.vibrate(pattern);
-      } catch (e) {
-
-      }
+      } catch (e) {}
     }
   }, []);
 

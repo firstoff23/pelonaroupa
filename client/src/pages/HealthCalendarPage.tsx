@@ -5,12 +5,12 @@ import {
   ChevronRight,
   Heart,
   Loader2,
+  type LucideIcon,
   PawPrint,
   Plus,
   Shield,
   Syringe,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -37,7 +37,13 @@ type EventType = "vaccine" | "deworming" | "consultation" | "treatment";
 
 const EVENT_CONFIG: Record<
   EventType,
-  { labelPt: string; labelEn: string; icon: LucideIcon; color: string; dotColor: string }
+  {
+    labelPt: string;
+    labelEn: string;
+    icon: LucideIcon;
+    color: string;
+    dotColor: string;
+  }
 > = {
   vaccine: {
     labelPt: "Vacina",
@@ -81,15 +87,35 @@ function getCalendarDays(year: number, month: number) {
 }
 
 const MONTH_NAMES_PT = [
-  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 const MONTH_NAMES_EN = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
-const WEEKDAYS_PT = ["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
-const WEEKDAYS_EN = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const WEEKDAYS_PT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+const WEEKDAYS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 // ─── Event Dot ─────────────────────────────────────────────────────────────
 
@@ -114,11 +140,19 @@ interface AddEventModalProps {
   language: string;
 }
 
-function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: AddEventModalProps) {
+function AddEventModal({
+  animalId,
+  defaultDate,
+  onClose,
+  onSaved,
+  language,
+}: AddEventModalProps) {
   const pt = language === "pt";
   const [eventType, setEventType] = useState<EventType>("consultation");
   const [product, setProduct] = useState("");
-  const [date, setDate] = useState(defaultDate ?? new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(
+    defaultDate ?? new Date().toISOString().split("T")[0],
+  );
   const [nextDue, setNextDue] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -129,7 +163,9 @@ function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: Ad
 
   const handleSave = async () => {
     if (!product.trim()) {
-      toast.error(pt ? "Preenche o nome do evento." : "Please enter an event name.");
+      toast.error(
+        pt ? "Preenche o nome do evento." : "Please enter an event name.",
+      );
       return;
     }
     setSaving(true);
@@ -145,7 +181,8 @@ function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: Ad
       } else {
         await addMutation.mutateAsync({
           animalId,
-          recordType: eventType === "deworming" ? "deworming" : "other_treatment",
+          recordType:
+            eventType === "deworming" ? "deworming" : "other_treatment",
           category: eventType === "consultation" ? "consultation" : eventType,
           product: product.trim(),
           date,
@@ -184,7 +221,10 @@ function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: Ad
           <h3 className="text-base font-bold text-white">
             {pt ? "Adicionar Evento" : "Add Event"}
           </h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-white transition-colors"
+          >
             <X size={18} />
           </button>
         </div>
@@ -200,7 +240,9 @@ function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: Ad
                 onClick={() => setEventType(t)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all",
-                  eventType === t ? cfg.color : "bg-card border-border text-muted-foreground",
+                  eventType === t
+                    ? cfg.color
+                    : "bg-card border-border text-muted-foreground",
                 )}
               >
                 <Icon size={12} />
@@ -218,7 +260,11 @@ function AddEventModal({ animalId, defaultDate, onClose, onSaved, language }: Ad
           <Input
             value={product}
             onChange={(e) => setProduct(e.target.value)}
-            placeholder={pt ? "Ex: Rabigen Mono, Frontline..." : "E.g. Rabigen Mono, Frontline..."}
+            placeholder={
+              pt
+                ? "Ex: Rabigen Mono, Frontline..."
+                : "E.g. Rabigen Mono, Frontline..."
+            }
             className="bg-slate-800/50 border-slate-700 text-sm"
           />
         </div>
@@ -292,7 +338,8 @@ export default function HealthCalendarPage() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const { data: animals = [], isLoading: loadingAnimals } = trpc.animals.list.useQuery();
+  const { data: animals = [], isLoading: loadingAnimals } =
+    trpc.animals.list.useQuery();
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
   const selectedAnimal = selectedAnimalId
     ? animals.find((a) => a.id === selectedAnimalId)
@@ -343,18 +390,24 @@ export default function HealthCalendarPage() {
   const weekdays = pt ? WEEKDAYS_PT : WEEKDAYS_EN;
 
   const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
-    else setViewMonth((m) => m - 1);
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else setViewMonth((m) => m - 1);
   };
   const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
-    else setViewMonth((m) => m + 1);
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else setViewMonth((m) => m + 1);
   };
 
   const selectedDateStr = selectedDay
     ? `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
     : null;
-  const selectedDayEvents = selectedDateStr ? eventMap[selectedDateStr] ?? [] : [];
+  const selectedDayEvents = selectedDateStr
+    ? (eventMap[selectedDateStr] ?? [])
+    : [];
 
   // All upcoming events (nextDueDate in the future)
   const upcoming = [
@@ -380,7 +433,8 @@ export default function HealthCalendarPage() {
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, 5);
 
-  if (loadingAnimals) return <AppShellSkeleton mode="content" variant="health" />;
+  if (loadingAnimals)
+    return <AppShellSkeleton mode="content" variant="health" />;
 
   if (animals.length === 0) {
     return (
@@ -472,7 +526,10 @@ export default function HealthCalendarPage() {
           {/* Weekday headers */}
           <div className="grid grid-cols-7 mb-2">
             {weekdays.map((d) => (
-              <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">
+              <div
+                key={d}
+                className="text-center text-[10px] font-semibold text-muted-foreground py-1"
+              >
                 {d}
               </div>
             ))}
@@ -493,23 +550,27 @@ export default function HealthCalendarPage() {
               return (
                 <button
                   key={day}
-                  onClick={() => setSelectedDay(day === selectedDay ? null : day)}
+                  onClick={() =>
+                    setSelectedDay(day === selectedDay ? null : day)
+                  }
                   className={cn(
                     "relative flex flex-col items-center justify-center rounded-xl py-1.5 text-xs font-medium transition-all duration-150",
                     isSelected
                       ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30"
                       : isToday
-                      ? "bg-slate-700/60 text-white ring-1 ring-indigo-500/40"
-                      : "text-slate-300 hover:bg-slate-800/70",
+                        ? "bg-slate-700/60 text-white ring-1 ring-indigo-500/40"
+                        : "text-slate-300 hover:bg-slate-800/70",
                     dayEvents.length > 0 && !isSelected && "font-bold",
                   )}
                 >
                   {day}
                   {dayEvents.length > 0 && (
                     <div className="flex gap-0.5 mt-0.5 justify-center">
-                      {Array.from(new Set(dayEvents)).slice(0, 3).map((t, i) => (
-                        <EventDot key={i} type={t} />
-                      ))}
+                      {Array.from(new Set(dayEvents))
+                        .slice(0, 3)
+                        .map((t, i) => (
+                          <EventDot key={i} type={t} />
+                        ))}
                     </div>
                   )}
                 </button>
@@ -594,7 +655,9 @@ export default function HealthCalendarPage() {
                       <Icon size={14} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{ev.label}</p>
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {ev.label}
+                      </p>
                       <p className="text-[11px] text-muted-foreground">
                         {ev.date.toLocaleDateString(pt ? "pt-PT" : "en-US", {
                           day: "2-digit",
@@ -609,15 +672,19 @@ export default function HealthCalendarPage() {
                         daysLeft <= 7
                           ? "bg-red-500/15 text-red-300"
                           : daysLeft <= 30
-                          ? "bg-amber-500/15 text-amber-300"
-                          : "bg-slate-700/50 text-slate-400",
+                            ? "bg-amber-500/15 text-amber-300"
+                            : "bg-slate-700/50 text-slate-400",
                       )}
                     >
                       {daysLeft === 0
-                        ? pt ? "Hoje" : "Today"
+                        ? pt
+                          ? "Hoje"
+                          : "Today"
                         : daysLeft === 1
-                        ? pt ? "Amanhã" : "Tomorrow"
-                        : `${daysLeft}d`}
+                          ? pt
+                            ? "Amanhã"
+                            : "Tomorrow"
+                          : `${daysLeft}d`}
                     </span>
                   </CardContent>
                 </Card>
@@ -636,8 +703,12 @@ export default function HealthCalendarPage() {
             language={language}
             onClose={() => setShowModal(false)}
             onSaved={() => {
-              utils.health.getHealthRecords.invalidate({ animalId: selectedAnimal.id });
-              utils.health.getVaccines.invalidate({ animalId: selectedAnimal.id });
+              utils.health.getHealthRecords.invalidate({
+                animalId: selectedAnimal.id,
+              });
+              utils.health.getVaccines.invalidate({
+                animalId: selectedAnimal.id,
+              });
             }}
           />
         )}

@@ -195,7 +195,6 @@ export async function registerPendingRecordingsSync() {
     await syncRegistration.sync.register(OFFLINE_QUEUE_SYNC_TAG);
     return true;
   } catch (error) {
-
     return false;
   }
 }

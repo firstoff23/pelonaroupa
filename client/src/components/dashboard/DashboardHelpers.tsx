@@ -1,4 +1,4 @@
-import { useMotionValue, animate } from "motion/react";
+import { animate, useMotionValue } from "motion/react";
 import { useEffect, useRef } from "react";
 import type { EmotionalState } from "../../../../shared/types";
 

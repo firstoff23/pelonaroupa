@@ -18,7 +18,6 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
     const cached = await get<T>(key, cacheStore);
     return cached !== undefined ? cached : null;
   } catch (err) {
-
     return null;
   }
 }
@@ -26,9 +25,7 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
 export async function setCachedData<T>(key: string, data: T): Promise<void> {
   try {
     await set(key, data, cacheStore);
-  } catch (err) {
-
-  }
+  } catch (err) {}
 }
 
 export async function getCachedFoods(query: string, species: string) {

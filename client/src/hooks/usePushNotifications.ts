@@ -25,7 +25,6 @@ export function usePushNotifications() {
         }
 
         if (permStatus.receive !== "granted") {
-
           return;
         }
 
@@ -71,7 +70,6 @@ export function usePushNotifications() {
                 auth: "native-fcm-auth",
               },
             });
-
           } catch (err) {
             console.error("Erro ao enviar token FCM para o backend:", err);
           }

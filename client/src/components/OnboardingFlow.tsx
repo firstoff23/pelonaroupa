@@ -71,7 +71,6 @@ export function OnboardingFlow() {
       setMicStatus("granted");
       stream.getTracks().forEach((track) => track.stop());
     } catch (err) {
-
       setMicStatus("denied");
     }
   };
@@ -81,7 +80,6 @@ export function OnboardingFlow() {
       const result = await Notification.requestPermission();
       setNotiStatus(result === "default" ? "prompt" : result);
     } catch (err) {
-
       setNotiStatus("denied");
     }
   };

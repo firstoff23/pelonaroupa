@@ -1022,9 +1022,7 @@ export default function HistoryPage() {
             reader.onerror = reject;
             reader.readAsDataURL(blob);
           });
-        } catch (e) {
-
-        }
+        } catch (e) {}
       }
 
       const doc = new jsPDF({

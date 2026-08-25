@@ -41,28 +41,103 @@ interface SymptomOption {
 const SYMPTOM_OPTIONS: SymptomOption[] = [
   { id: "vomiting", labelPt: "Vómitos", labelEn: "Vomiting", emoji: "🤢" },
   { id: "diarrhea", labelPt: "Diarreia", labelEn: "Diarrhea", emoji: "💩" },
-  { id: "lethargy", labelPt: "Letargia / Cansaço", labelEn: "Lethargy", emoji: "😴" },
-  { id: "appetite_loss", labelPt: "Perda de apetite", labelEn: "Loss of appetite", emoji: "🍽️" },
-  { id: "excessive_drinking", labelPt: "Beber excessivo", labelEn: "Excessive drinking", emoji: "💧" },
-  { id: "scratching", labelPt: "Coceira / Prurido", labelEn: "Scratching / Itching", emoji: "🐾" },
+  {
+    id: "lethargy",
+    labelPt: "Letargia / Cansaço",
+    labelEn: "Lethargy",
+    emoji: "😴",
+  },
+  {
+    id: "appetite_loss",
+    labelPt: "Perda de apetite",
+    labelEn: "Loss of appetite",
+    emoji: "🍽️",
+  },
+  {
+    id: "excessive_drinking",
+    labelPt: "Beber excessivo",
+    labelEn: "Excessive drinking",
+    emoji: "💧",
+  },
+  {
+    id: "scratching",
+    labelPt: "Coceira / Prurido",
+    labelEn: "Scratching / Itching",
+    emoji: "🐾",
+  },
   { id: "coughing", labelPt: "Tosse", labelEn: "Coughing", emoji: "😮‍💨" },
   { id: "sneezing", labelPt: "Espirros", labelEn: "Sneezing", emoji: "🤧" },
-  { id: "limping", labelPt: "Claudicação / Mancar", labelEn: "Limping", emoji: "🦵" },
-  { id: "eye_discharge", labelPt: "Corrimento ocular", labelEn: "Eye discharge", emoji: "👁️" },
-  { id: "nasal_discharge", labelPt: "Corrimento nasal", labelEn: "Nasal discharge", emoji: "👃" },
-  { id: "bloating", labelPt: "Barriga dilatada", labelEn: "Bloating", emoji: "🫁" },
-  { id: "weight_loss", labelPt: "Perda de peso", labelEn: "Weight loss", emoji: "⚖️" },
+  {
+    id: "limping",
+    labelPt: "Claudicação / Mancar",
+    labelEn: "Limping",
+    emoji: "🦵",
+  },
+  {
+    id: "eye_discharge",
+    labelPt: "Corrimento ocular",
+    labelEn: "Eye discharge",
+    emoji: "👁️",
+  },
+  {
+    id: "nasal_discharge",
+    labelPt: "Corrimento nasal",
+    labelEn: "Nasal discharge",
+    emoji: "👃",
+  },
+  {
+    id: "bloating",
+    labelPt: "Barriga dilatada",
+    labelEn: "Bloating",
+    emoji: "🫁",
+  },
+  {
+    id: "weight_loss",
+    labelPt: "Perda de peso",
+    labelEn: "Weight loss",
+    emoji: "⚖️",
+  },
   { id: "trembling", labelPt: "Tremores", labelEn: "Trembling", emoji: "🥶" },
   { id: "seizures", labelPt: "Convulsões", labelEn: "Seizures", emoji: "⚡" },
-  { id: "blood_urine", labelPt: "Sangue na urina", labelEn: "Blood in urine", emoji: "🔴" },
-  { id: "bad_breath", labelPt: "Mau hálito", labelEn: "Bad breath", emoji: "💨" },
-  { id: "hair_loss", labelPt: "Queda de pelo", labelEn: "Hair loss", emoji: "🐱" },
+  {
+    id: "blood_urine",
+    labelPt: "Sangue na urina",
+    labelEn: "Blood in urine",
+    emoji: "🔴",
+  },
+  {
+    id: "bad_breath",
+    labelPt: "Mau hálito",
+    labelEn: "Bad breath",
+    emoji: "💨",
+  },
+  {
+    id: "hair_loss",
+    labelPt: "Queda de pelo",
+    labelEn: "Hair loss",
+    emoji: "🐱",
+  },
 ];
 
-const SEVERITY_CONFIG: Record<Severity, { labelPt: string; labelEn: string; color: string }> = {
-  low: { labelPt: "Leve", labelEn: "Mild", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-  medium: { labelPt: "Moderado", labelEn: "Moderate", color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
-  high: { labelPt: "Grave", labelEn: "Severe", color: "text-red-400 border-red-500/30 bg-red-500/10" },
+const SEVERITY_CONFIG: Record<
+  Severity,
+  { labelPt: string; labelEn: string; color: string }
+> = {
+  low: {
+    labelPt: "Leve",
+    labelEn: "Mild",
+    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  },
+  medium: {
+    labelPt: "Moderado",
+    labelEn: "Moderate",
+    color: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+  },
+  high: {
+    labelPt: "Grave",
+    labelEn: "Severe",
+    color: "text-red-400 border-red-500/30 bg-red-500/10",
+  },
 };
 
 // ─── Page ──────────────────────────────────────────────────────────────────
@@ -70,7 +145,8 @@ export default function SymptomsPage() {
   const { language } = useLanguage();
   const pt = language === "pt";
 
-  const { data: animals = [], isLoading: loadingAnimals } = trpc.animals.list.useQuery();
+  const { data: animals = [], isLoading: loadingAnimals } =
+    trpc.animals.list.useQuery();
   const utils = trpc.useUtils();
 
   const activeAnimal = animals.find((a) => a.isActive) ?? animals[0];
@@ -80,7 +156,9 @@ export default function SymptomsPage() {
     : activeAnimal;
 
   // Form state
-  const [checkedSymptoms, setCheckedSymptoms] = useState<Set<string>>(new Set());
+  const [checkedSymptoms, setCheckedSymptoms] = useState<Set<string>>(
+    new Set(),
+  );
   const [severity, setSeverity] = useState<Severity>("low");
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -98,12 +176,16 @@ export default function SymptomsPage() {
 
   const addRecordMutation = trpc.health.addHealthRecord.useMutation({
     onSuccess: () => {
-      utils.health.getHealthRecords.invalidate({ animalId: selectedAnimal?.id ?? 0 });
+      utils.health.getHealthRecords.invalidate({
+        animalId: selectedAnimal?.id ?? 0,
+      });
     },
   });
   const deleteRecordMutation = trpc.health.deleteHealthRecord?.useMutation?.({
     onSuccess: () => {
-      utils.health.getHealthRecords.invalidate({ animalId: selectedAnimal?.id ?? 0 });
+      utils.health.getHealthRecords.invalidate({
+        animalId: selectedAnimal?.id ?? 0,
+      });
     },
   });
 
@@ -118,17 +200,25 @@ export default function SymptomsPage() {
 
   const handleSave = async () => {
     if (!selectedAnimal) {
-      toast.error(pt ? "Seleciona um animal primeiro." : "Select an animal first.");
+      toast.error(
+        pt ? "Seleciona um animal primeiro." : "Select an animal first.",
+      );
       return;
     }
     if (checkedSymptoms.size === 0) {
-      toast.error(pt ? "Seleciona pelo menos um sintoma." : "Select at least one symptom.");
+      toast.error(
+        pt
+          ? "Seleciona pelo menos um sintoma."
+          : "Select at least one symptom.",
+      );
       return;
     }
 
     setIsSaving(true);
     try {
-      const selectedLabels = SYMPTOM_OPTIONS.filter((s) => checkedSymptoms.has(s.id))
+      const selectedLabels = SYMPTOM_OPTIONS.filter((s) =>
+        checkedSymptoms.has(s.id),
+      )
         .map((s) => (pt ? s.labelPt : s.labelEn))
         .join(", ");
 
@@ -142,19 +232,26 @@ export default function SymptomsPage() {
         notes: notes.trim() || null,
       });
 
-      toast.success(pt ? "Sintomas registados com sucesso!" : "Symptoms recorded successfully!");
+      toast.success(
+        pt
+          ? "Sintomas registados com sucesso!"
+          : "Symptoms recorded successfully!",
+      );
       setCheckedSymptoms(new Set());
       setNotes("");
       setSeverity("low");
     } catch (err) {
       console.error("Failed to save symptoms:", err);
-      toast.error(pt ? "Erro ao guardar sintomas." : "Failed to save symptoms.");
+      toast.error(
+        pt ? "Erro ao guardar sintomas." : "Failed to save symptoms.",
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (loadingAnimals) return <AppShellSkeleton mode="content" variant="health" />;
+  if (loadingAnimals)
+    return <AppShellSkeleton mode="content" variant="health" />;
 
   if (animals.length === 0) {
     return (
@@ -220,7 +317,9 @@ export default function SymptomsPage() {
             <Plus size={14} />
             {pt ? "Novo Registo" : "New Record"}
             {selectedAnimal && (
-              <span className="text-primary font-bold normal-case">— {selectedAnimal.name}</span>
+              <span className="text-primary font-bold normal-case">
+                — {selectedAnimal.name}
+              </span>
             )}
           </CardTitle>
         </CardHeader>
@@ -244,10 +343,17 @@ export default function SymptomsPage() {
                         : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-border/80",
                     )}
                   >
-                    <span className="text-base leading-none flex-shrink-0">{s.emoji}</span>
-                    <span className="truncate">{pt ? s.labelPt : s.labelEn}</span>
+                    <span className="text-base leading-none flex-shrink-0">
+                      {s.emoji}
+                    </span>
+                    <span className="truncate">
+                      {pt ? s.labelPt : s.labelEn}
+                    </span>
                     {checked && (
-                      <CheckCircle2 size={12} className="ml-auto text-rose-400 flex-shrink-0" />
+                      <CheckCircle2
+                        size={12}
+                        className="ml-auto text-rose-400 flex-shrink-0"
+                      />
                     )}
                   </button>
                 );
@@ -341,7 +447,9 @@ export default function SymptomsPage() {
           <div className="text-center py-10 text-muted-foreground space-y-2">
             <ClipboardList className="w-10 h-10 mx-auto opacity-30" />
             <p className="text-sm">
-              {pt ? "Nenhum sintoma registado ainda." : "No symptoms logged yet."}
+              {pt
+                ? "Nenhum sintoma registado ainda."
+                : "No symptoms logged yet."}
             </p>
           </div>
         ) : (
@@ -365,14 +473,23 @@ export default function SymptomsPage() {
                             <span className="text-xs font-semibold text-foreground truncate">
                               {record.product || (pt ? "Sintoma" : "Symptom")}
                             </span>
-                            <Badge className={cn("text-[10px] font-semibold border", cfg.color)}>
+                            <Badge
+                              className={cn(
+                                "text-[10px] font-semibold border",
+                                cfg.color,
+                              )}
+                            >
                               {pt ? cfg.labelPt : cfg.labelEn}
                             </Badge>
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-0.5">
                             {new Date(record.date).toLocaleDateString(
                               pt ? "pt-PT" : "en-US",
-                              { day: "2-digit", month: "short", year: "numeric" },
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              },
                             )}
                           </p>
                           {record.notes && (

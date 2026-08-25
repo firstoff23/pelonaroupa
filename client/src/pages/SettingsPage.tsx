@@ -27,6 +27,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
+import {
+  CrashingComponent,
+  SettingsSectionLabel,
+} from "@/components/settings/SettingsHelpers";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -60,7 +64,6 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { getVeterinaryRoleLabel, isVeterinaryRole } from "@/lib/roles";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { CrashingComponent, SettingsSectionLabel } from '@/components/settings/SettingsHelpers';
 
 type Sensitivity = "low" | "medium" | "high";
 

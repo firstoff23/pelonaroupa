@@ -87,9 +87,7 @@ export function useMLBackendSSE({
       const es = new EventSource(url);
       esRef.current = es;
 
-      es.addEventListener("connected", () => {
-
-      });
+      es.addEventListener("connected", () => {});
 
       es.onmessage = (event: MessageEvent<string>) => {
         try {
@@ -125,7 +123,6 @@ export function useMLBackendSSE({
       };
 
       es.onerror = () => {
-
         es.close();
         esRef.current = null;
         if (isMounted) {

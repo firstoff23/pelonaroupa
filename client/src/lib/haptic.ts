@@ -29,7 +29,5 @@ export function triggerHaptic(
         navigator.vibrate([30, 50, 30]);
         break;
     }
-  } catch (e) {
-
-  }
+  } catch (e) {}
 }

@@ -336,7 +336,7 @@ export default function ComparisonPage() {
               <Legend
                 wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
                 formatter={(value) => (
-                  <span style={{ color: "#94a3b8" }}>{value}</span>
+                  <span className="text-slate-400">{value}</span>
                 )}
               />
               {activeAnimals.map((a, i) => (
@@ -393,7 +393,7 @@ export default function ComparisonPage() {
                 <Legend
                   wrapperStyle={{ fontSize: "11px" }}
                   formatter={(value) => (
-                    <span style={{ color: "#94a3b8" }}>{value}</span>
+                    <span className="text-slate-400">{value}</span>
                   )}
                 />
                 <Tooltip content={<CustomTooltip />} />

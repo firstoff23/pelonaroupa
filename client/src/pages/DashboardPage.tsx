@@ -29,6 +29,12 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { AlertBanner } from "@/components/AlertBanner";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
+import {
+  AnimatedNumber,
+  ConfidenceTooltip,
+  CustomTooltip,
+  getHealthBadge,
+} from "@/components/dashboard/DashboardHelpers";
 import { TrendCard } from "@/components/TrendCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +57,6 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import type { EmotionalState } from "../../../shared/types";
 import { STATE_COLORS, STATE_EMOJIS } from "../../../shared/types";
-import { getHealthBadge, CustomTooltip, ConfidenceTooltip, AnimatedNumber } from '@/components/dashboard/DashboardHelpers';
 
 const STATES: EmotionalState[] = [
   "distress",

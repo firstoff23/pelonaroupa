@@ -1,5 +1,5 @@
-import QRCode from "qrcode";
 import fs from "node:fs";
+import QRCode from "qrcode";
 
 async function main() {
   const svg = await QRCode.toString("https://animalmind.vercel.app", {
@@ -13,7 +13,11 @@ async function main() {
   });
 
   fs.writeFileSync("client/public/qr-code.svg", svg, "utf-8");
-  console.log("Successfully generated client/public/qr-code.svg (" + svg.length + " bytes)");
+  console.log(
+    "Successfully generated client/public/qr-code.svg (" +
+      svg.length +
+      " bytes)",
+  );
 }
 
 main().catch(console.error);

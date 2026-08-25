@@ -1035,7 +1035,6 @@ export default function RecordingPage() {
     setCountdown(3);
     const interval = setInterval(() => {
       setCountdown((c) => {
-
         if (c <= 1) {
           console.log(
             "[E2E DEBUG] Timer finished, calling stopAndGetBlobLiveAudio",
@@ -1268,7 +1267,6 @@ export default function RecordingPage() {
   };
 
   const handlePointerDown = (_e: React.PointerEvent) => {
-
     // Tactile microinteraction for button press
     vibrate(15);
 

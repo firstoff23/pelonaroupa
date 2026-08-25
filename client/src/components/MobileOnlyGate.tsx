@@ -1,5 +1,5 @@
 import { Smartphone } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useIsMobile } from "@/hooks/useMobile";
 

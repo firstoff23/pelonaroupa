@@ -40,8 +40,12 @@ const STATES: EmotionalState[] = [
   "relaxed",
 ];
 
-import { compressImageToWebP, AnimalCard, WeeklyChart } from '@/components/profile/ProfileHelpers';
 import { FileText, Settings, Trash2 } from "lucide-react";
+import {
+  AnimalCard,
+  compressImageToWebP,
+  WeeklyChart,
+} from "@/components/profile/ProfileHelpers";
 // ─── Reusable Upload State Hook & Component ──────────────────────────────────
 import { Progress } from "@/components/ui/progress";
 

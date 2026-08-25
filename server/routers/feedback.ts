@@ -1,15 +1,17 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { protectedProcedure, router } from "../_core/trpc";
 import {
   getFeedbackAnnotations,
   reviewFeedbackAnnotation,
   saveFeedbackAnnotation,
 } from "../db";
-import { protectedProcedure, router } from "../_core/trpc";
 
 const ALLOWED_AUDIT_ROLES = ["admin", "vet", "veterinarian", "clinic_admin"];
 
-async function effectiveUserId(ctxUser: { id: number } | null): Promise<number> {
+async function effectiveUserId(
+  ctxUser: { id: number } | null,
+): Promise<number> {
   if (ctxUser) return ctxUser.id;
   const { getDemoUserId } = await import("../db");
   const demoId = await getDemoUserId();

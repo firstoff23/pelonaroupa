@@ -46,7 +46,6 @@ export async function subscribeUserToPush(
       await PushNotifications.removeAllListeners();
 
       await PushNotifications.addListener("registration", async (token) => {
-
         const endpoint = `https://fcm.googleapis.com/fcm/send/${token.value}`;
         await subscribeMutation({
           endpoint,
@@ -88,13 +87,11 @@ export async function subscribeUserToPush(
 
     // Check current permission state
     if (Notification.permission === "denied") {
-
       return;
     }
 
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
-
       return;
     }
 
@@ -158,7 +155,6 @@ export async function unsubscribeUserFromPush(
       const endpoint = subscription.endpoint;
       await subscription.unsubscribe();
       await unsubscribeMutation({ endpoint });
-
     }
   } catch (error) {
     console.error(

@@ -54,7 +54,14 @@ export function BottomNav() {
       icon: MoreHorizontal,
       label: language === "pt" ? "Mais" : "More",
       isAction: true,
-      activePaths: ["/alimentos", "/sintomas", "/calendario", "/definicoes", "/monitor", "/vigilancia"],
+      activePaths: [
+        "/alimentos",
+        "/sintomas",
+        "/calendario",
+        "/definicoes",
+        "/monitor",
+        "/vigilancia",
+      ],
     },
   ];
   const MORE_ITEMS = [

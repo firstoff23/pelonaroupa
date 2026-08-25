@@ -16,7 +16,6 @@ export async function getOfflineActions(): Promise<OfflineAction[]> {
     const actions = await get<OfflineAction[]>(ACTIONS_KEY, queueStore);
     return actions || [];
   } catch (err) {
-
     return [];
   }
 }
@@ -27,18 +26,13 @@ export async function enqueueOfflineAction(
   try {
     const current = await getOfflineActions();
     await set(ACTIONS_KEY, [...current, action], queueStore);
-
-  } catch (err) {
-
-  }
+  } catch (err) {}
 }
 
 export async function clearOfflineActions(): Promise<void> {
   try {
     await set(ACTIONS_KEY, [], queueStore);
-  } catch (err) {
-
-  }
+  } catch (err) {}
 }
 
 export async function processOfflineActions(mutations: {

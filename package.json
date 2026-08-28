@@ -122,7 +122,7 @@
     "react-email": "^6.5.0",
     "react-error-boundary": "^6.1.2",
     "react-hook-form": "^7.64.0",
-    "react-i18next": "^17.0.8",
+    "react-i18next": "^17.0.12",
     "react-p5": "^1.4.1",
     "react-resizable-panels": "^3.0.6",
     "recharts": "^2.15.4",

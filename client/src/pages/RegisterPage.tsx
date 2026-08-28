@@ -32,6 +32,7 @@ export default function RegisterPage() {
   const [passwordBlurred, setPasswordBlurred] = useState(false);
   const [apiEmailError, setApiEmailError] = useState("");
   const [apiPasswordError, setApiPasswordError] = useState("");
+  const [apiBannerError, setApiBannerError] = useState("");
   const [termsDialogOpen, setTermsDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function RegisterPage() {
     setPasswordBlurred(true);
     setApiEmailError("");
     setApiPasswordError("");
+    setApiBannerError("");
 
     if (!isFormValid) return;
 
@@ -104,12 +106,16 @@ export default function RegisterPage() {
       const msg =
         error instanceof Error && error.message
           ? error.message
-          : "Não foi possível criar a conta com este email.";
-      // Erros relacionados com password vão para o campo correto
+          : "Não foi possível criar a conta. Tente novamente.";
+      // Erros relacionados com password vão para o campo da password
       if (/password|senha|palavra.?passe/i.test(msg)) {
         setApiPasswordError(msg);
-      } else {
+      // Erros de email (já registado, email inválido, descartável)
+      } else if (/email|already.?registered|já.?registad|user.?exist/i.test(msg)) {
         setApiEmailError(msg);
+      // Erros genéricos (rate-limit, configuração, rede) vão para o banner
+      } else {
+        setApiBannerError(msg);
       }
     } finally {
       setLoading(false);
@@ -141,6 +147,7 @@ export default function RegisterPage() {
             setName(event.target.value);
             setApiEmailError("");
             setApiPasswordError("");
+            setApiBannerError("");
           }}
           onBlur={() => setNameBlurred(true)}
           autoComplete="name"
@@ -159,6 +166,7 @@ export default function RegisterPage() {
           onChange={(event) => {
             setEmail(event.target.value);
             setApiEmailError("");
+            setApiBannerError("");
           }}
           onBlur={() => setEmailBlurred(true)}
           autoComplete="username"
@@ -178,6 +186,7 @@ export default function RegisterPage() {
           onChange={(event) => {
             setPassword(event.target.value);
             setApiPasswordError("");
+            setApiBannerError("");
           }}
           onBlur={() => setPasswordBlurred(true)}
           autoComplete="new-password"
@@ -206,6 +215,16 @@ export default function RegisterPage() {
             Confirmo que tenho 16 ou mais anos
           </label>
         </div>
+
+        {apiBannerError && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-xs font-medium leading-relaxed text-destructive"
+          >
+            <span className="mt-0.5 shrink-0">⚠️</span>
+            <span>{apiBannerError}</span>
+          </div>
+        )}
 
         <AuthSubmitButton
           loading={loading}

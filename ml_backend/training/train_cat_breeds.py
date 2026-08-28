@@ -3,10 +3,17 @@ AnimalMind — ViT Cat Breed Classifier Training & Temperature Scaling Pipeline
 ================================================================================
 Target Accuracy: > 94%
 
+Improvements v2:
+  - RandAugment added to train transforms
+  - EarlyStoppingCallback via HF Trainer
+  - Class-weighted sampling (WeightedRandomSampler) for breed imbalance
+  - Weights & Biases experiment tracking (--use-wandb)
+
 Usage:
   python -m training.train_cat_breeds --batch-size 32 --epochs 30
   python -m training.train_cat_breeds --dry-run
   python -m training.train_cat_breeds --push-to-hub firstoff/animalmind-cat-classifier
+  python -m training.train_cat_breeds --use-wandb --wandb-project animalmind-cats
 """
 
 import argparse
@@ -22,7 +29,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from torchvision import transforms
 
 CAT_BREEDS_12 = [
@@ -158,17 +165,7 @@ def compute_ece(probs: np.ndarray, labels: np.ndarray, n_bins: int = 10) -> floa
     return float(ece)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="AnimalMind Cat Breed ViT Classifier Training")
-    parser.add_argument("--model-name", type=str, default="google/vit-base-patch16-224")
-    parser.add_argument("--epochs", type=int, default=40)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--output-dir", type=str, default="models/animalmind-cat-classifier")
-    parser.add_argument("--dry-run", action="store_true", help="Run 1-epoch dry-run test")
-    parser.add_argument("--push-to-hub", type=str, default=None, help="HF Hub repo ID")
-    args = parser.parse_args()
-
+def main(args):
     print(f"[CatTraining] Starting Cat Breed Fine-Tuning ({args.model_name})...")
     print(f"Cat Breeds: {len(CAT_BREEDS_12)} classes -> {CAT_BREEDS_12}")
 
@@ -193,6 +190,7 @@ def main():
         transforms.RandomRotation(15),
         transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
         transforms.RandomHorizontalFlip(),
+        transforms.RandAugment(num_ops=2, magnitude=9),  # v2: stronger augmentation
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
@@ -262,14 +260,46 @@ def main():
     val_size = len(dataset) - train_size
     train_ds, val_ds = torch.utils.data.random_split(dataset, [train_size, val_size])
 
+    # --- Weighted sampler to address class imbalance ---
+    print("[ClassWeight] Computing class weights from training distribution...")
+    train_labels = [dataset.labels[i] for i in train_ds.indices]
+    class_counts = torch.zeros(len(CAT_BREEDS_12))
+    for lbl in train_labels:
+        class_counts[lbl] += 1
+    class_counts = class_counts.clamp(min=1)
+    class_weights = 1.0 / class_counts
+    sample_weights = torch.tensor([class_weights[lbl] for lbl in train_labels], dtype=torch.float)
+    sampler = WeightedRandomSampler(sample_weights, num_samples=len(train_ds), replacement=True)
+    print(f"[ClassWeight] Breed distribution: {dict(enumerate(class_counts.int().tolist()))}")
+
     val_loader = DataLoader(val_ds, batch_size=args.batch_size)
 
     output_dir = pathlib.Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     image_processor.save_pretrained(output_dir)
 
+    # --- W&B setup ---
+    wandb_run = None
+    if getattr(args, "use_wandb", False):
+        try:
+            import wandb
+            wandb_run = wandb.init(
+                project=getattr(args, "wandb_project", "animalmind-cats"),
+                name=f"cat-vit-{int(time.time())}",
+                config=vars(args),
+            )
+            print(f"[W&B] Run initialized: {wandb_run.url}")
+        except ImportError:
+            print("[W&B] wandb not installed — skipping. Install with: pip install wandb")
+
     print("[CatTraining] Setting up HF Trainer...")
-    from transformers import TrainingArguments, Trainer
+    from transformers import EarlyStoppingCallback, TrainingArguments, Trainer
+
+    def compute_metrics(eval_pred):
+        logits, labels = eval_pred
+        preds = np.argmax(logits, axis=-1)
+        acc = float(np.mean(preds == labels))
+        return {"accuracy": acc}
 
     def collate_fn(examples):
         pixel_values = torch.stack([example[0] for example in examples])
@@ -286,8 +316,14 @@ def main():
         save_strategy="epoch" if not args.dry_run else "no",
         logging_steps=10,
         load_best_model_at_end=not args.dry_run,
+        metric_for_best_model="accuracy",
         remove_unused_columns=False,
+        report_to="wandb" if wandb_run is not None else "none",
     )
+
+    callbacks = []
+    if not args.dry_run:
+        callbacks.append(EarlyStoppingCallback(early_stopping_patience=5))
 
     trainer = Trainer(
         model=base_model,
@@ -295,6 +331,8 @@ def main():
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=collate_fn,
+        compute_metrics=compute_metrics,
+        callbacks=callbacks,
     )
 
     if not args.dry_run:
@@ -355,6 +393,22 @@ def main():
         except Exception as push_err:
             print(f"[CatTraining] Warning during push_to_hub: {push_err}")
 
+    if wandb_run is not None:
+        wandb_run.finish()
+        print("[W&B] Run finished and synced.")
+
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="AnimalMind Cat Breed ViT Classifier Training")
+    parser.add_argument("--model-name", type=str, default="google/vit-base-patch16-224")
+    parser.add_argument("--epochs", type=int, default=40)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--output-dir", type=str, default="models/animalmind-cat-classifier")
+    parser.add_argument("--dry-run", action="store_true", help="Run 1-epoch dry-run test")
+    parser.add_argument("--push-to-hub", type=str, default=None, help="HF Hub repo ID")
+    # v2 improvements
+    parser.add_argument("--use-wandb", action="store_true", help="Enable Weights & Biases tracking")
+    parser.add_argument("--wandb-project", type=str, default="animalmind-cats", help="W&B project name")
+    args = parser.parse_args()
+    main(args)

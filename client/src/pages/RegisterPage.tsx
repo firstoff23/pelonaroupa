@@ -103,15 +103,21 @@ export default function RegisterPage() {
       );
       setLocation(`/verify-otp?email=${encodeURIComponent(normalizedEmail)}`);
     } catch (error) {
-      const msg =
-        error instanceof Error && error.message
-          ? error.message
-          : "Não foi possível criar a conta. Tente novamente.";
+      console.error("[RegisterPage] signUp error:", error);
+      // Always extract a string — never pass an object to state (causes "{}" in UI)
+      let msg: string;
+      if (error instanceof Error && error.message) {
+        msg = error.message;
+      } else if (typeof error === "string" && error) {
+        msg = error;
+      } else {
+        msg = "Não foi possível criar a conta. Tente novamente.";
+      }
       // Erros relacionados com password vão para o campo da password
       if (/password|senha|palavra.?passe/i.test(msg)) {
         setApiPasswordError(msg);
       // Erros de email (já registado, email inválido, descartável)
-      } else if (/email|already.?registered|já.?registad|user.?exist/i.test(msg)) {
+      } else if (/email|already.?registered|já.?registad|user.?exist|registado/i.test(msg)) {
         setApiEmailError(msg);
       // Erros genéricos (rate-limit, configuração, rede) vão para o banner
       } else {

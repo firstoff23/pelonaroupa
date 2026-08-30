@@ -139,7 +139,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     ageConfirmed: boolean,
   ) => {
-    const { error } = await requireSupabase().auth.signUp({
+    console.log("[AuthContext] signUp called for:", email);
+    const { data, error } = await requireSupabase().auth.signUp({
       email,
       password,
       options: {
@@ -150,7 +151,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: getAuthCallbackUrl(),
       },
     });
-    if (error) throw error;
+    console.log("[AuthContext] signUp response:", { data, error });
+    if (error) {
+      // Supabase AuthApiError has a numeric 'status' and string 'message'.
+      // Re-throw as a plain Error so downstream catch blocks can use instanceof Error.
+      throw new Error(error.message || "Erro desconhecido ao criar conta.");
+    }
+    // Supabase silently returns data.user === null when the email is already
+    // registered but not yet confirmed (identity-linking disabled). Treat as error.
+    if (!data.user || data.user.identities?.length === 0) {
+      throw new Error(
+        "Este email já está registado. Verifica a tua caixa de entrada ou inicia sessão.",
+      );
+    }
   };
 
   const verifyOtp = async (

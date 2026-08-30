@@ -22,7 +22,6 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { ConfidenceRing } from "@/components/ConfidenceRing";
 import { ContextTagsSheet } from "@/components/ContextTagsSheet";
-import { P5AudioVisualizer } from "@/components/P5AudioVisualizer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -1623,8 +1622,8 @@ export default function RecordingPage() {
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-1">
                       {language === "pt"
-                        ? "Toque para gravar. O PeloNaRoupa precisa de acesso ao microfone."
-                        : "Tap to record. PeloNaRoupa needs microphone access."}
+                        ? "Toque para 3s · Mantenha premido para gravação contínua"
+                        : "Tap for 3s · Hold for continuous recording"}
                     </p>
                   </div>
                   <Badge
@@ -1663,14 +1662,9 @@ export default function RecordingPage() {
                       {t("recordingPage.autoModeOn")}
                     </p>
                   ) : recordState === "recording" ? (
-                    <div className="flex flex-col items-center">
-                      <p className="text-sm text-muted-foreground text-center">
-                        {t("recordingPage.recordingAcustic")}
-                      </p>
-                      <p className="text-xs font-semibold text-emerald-400 mt-1">
-                        Frequência dominante: {dominantFreq}Hz
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      {t("recordingPage.recordingAcustic")}
+                    </p>
                   ) : recordState === "requesting" ? (
                     <p className="text-sm text-muted-foreground text-center">
                       {t("recordingPage.requestingMic")}
@@ -1681,6 +1675,7 @@ export default function RecordingPage() {
                     </p>
                   )}
                 </div>
+
 
                 {/* ─── Veterinary Disclaimer (before button) ─── */}
                 <div className="w-full px-1">
@@ -1763,24 +1758,7 @@ export default function RecordingPage() {
                   </Tooltip>
                 </div>
 
-                <div className="w-full rounded-2xl border border-white/10 bg-black/20 p-3">
-                  <div className="flex items-center justify-between text-[10px] font-semibold uppercase text-muted-foreground">
-                    <span>
-                      {language === "pt" ? "Nível de áudio" : "Audio level"}
-                    </span>
-                    <span className="text-emerald-300">
-                      {Math.round(liveAudioLevel * 100)}%
-                    </span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
-                    <div
-                      className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-150"
-                      style={{
-                        width: `${Math.min(100, Math.round(liveAudioLevel * 100))}%`,
-                      }}
-                    />
-                  </div>
-                </div>
+
 
                 <p className="text-xs text-muted-foreground text-center h-4 font-sans">
                   {isAutoMode &&
@@ -1800,15 +1778,6 @@ export default function RecordingPage() {
                       ? "1 gravação pendente"
                       : `${pendingCount} gravações pendentes`}
                   </Badge>
-                )}
-
-                {(recordState === "recording" || isLiveAudioStreaming) && (
-                  <P5AudioVisualizer
-                    level={liveAudioLevel}
-                    waveform={liveWaveform}
-                    isActive={isLiveAudioStreaming}
-                    emotion={result ? result.state : "neutral"}
-                  />
                 )}
               </div>
             </div>

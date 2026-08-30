@@ -299,7 +299,7 @@ const EventRow = memo(function EventRow({
             )}
           </p>
           {event.notes && (
-            <p className="text-[11px] text-cyan-400 italic mt-0.5 truncate max-w-[260px] flex items-center gap-1">
+            <p className="text-[11px] text-muted-foreground/80 italic mt-0.5 truncate max-w-[260px] flex items-center gap-1">
               <FileText size={10} className="flex-shrink-0" />
               <span className="truncate">&ldquo;{event.notes}&rdquo;</span>
             </p>
@@ -654,7 +654,14 @@ function EmptyState({ filtered }: { filtered: boolean }) {
           </div>
 
           <Link href="/capturar">
-            <Button className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6">
+            <Button
+              className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6"
+              aria-label={
+                language === "pt"
+                  ? "Fazer primeira gravação de áudio do animal"
+                  : "Make first animal audio recording"
+              }
+            >
               <Mic size={16} className="animate-pulse" aria-hidden="true" />
               {language === "pt"
                 ? "Fazer primeira gravação"

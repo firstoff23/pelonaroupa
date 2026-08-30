@@ -41,6 +41,7 @@
     "@capacitor/push-notifications": "^8.1.2",
     "@capawesome-team/capacitor-android-foreground-service": "^8.1.0",
     "@hookform/resolvers": "^5.5.7",
+    "@ionic/pwa-elements": "^3.4.0",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/pose": "^0.5.1675469404",
     "@radix-ui/react-accordion": "^1.2.20",

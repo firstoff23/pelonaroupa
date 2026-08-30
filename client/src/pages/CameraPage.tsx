@@ -1,4 +1,5 @@
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 import {
   AlertCircle,
   Camera as CameraIcon,
@@ -6,7 +7,7 @@ import {
   RefreshCw as LoopIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import AnimatedCheckmark from "@/components/AnimatedCheckmark";
@@ -31,6 +32,8 @@ const isE2ETestBuild =
       window.location.hostname === "127.0.0.1" ||
       window.location.hostname === "localhost"));
 
+const isNativePlatform = Capacitor.isNativePlatform();
+
 export default function CameraPage() {
   const { t, language } = useLanguage();
   const [, _setLocation] = useLocation();
@@ -43,6 +46,9 @@ export default function CameraPage() {
   const { data: activeAnimal } = trpc.animals.getActive.useQuery();
   const saveVisionMutation = trpc.classify.saveVisionEvent.useMutation();
 
+  // Ref to the hidden <input type="file"> used as a PWA/web fallback
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const openCamera = async () => {
     // Browser E2E has no physical camera. The test-only build injects a
     // deterministic image, while normal web and native builds use Capacitor.
@@ -53,6 +59,14 @@ export default function CameraPage() {
       return;
     }
 
+    // On web/PWA, @capacitor/camera has no UI without PWA Elements.
+    // Use a hidden <input type="file"> which natively opens camera/gallery.
+    if (!isNativePlatform) {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    // Native Android/iOS path — use Capacitor Camera plugin
     try {
       const image = await Camera.getPhoto({
         quality: 60,
@@ -82,6 +96,33 @@ export default function CameraPage() {
         toast.error(err.message);
       }
     }
+  };
+
+  // Web fallback: reads the File selected via <input type="file">
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Reset so the same file can be re-selected after delete
+    event.target.value = "";
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        setCapturedImage(dataUrl);
+        setUploadState("idle");
+        setErrorMessage(null);
+      }
+    };
+    reader.onerror = () => {
+      setErrorMessage(
+        language === "pt"
+          ? "Não foi possível ler a imagem. Tenta novamente."
+          : "Could not read image. Try again.",
+      );
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRetry = () => {
@@ -356,6 +397,18 @@ export default function CameraPage() {
             : "PeloNaRoupa AI analyzes body postures and correlates them with feelings of relaxation, distress or play."}
         </p>
       </div>
+      {/* Hidden file input used as PWA/web fallback for camera access */}
+      {!isNativePlatform && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          className="hidden"
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }

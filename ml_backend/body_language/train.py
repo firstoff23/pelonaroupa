@@ -24,7 +24,10 @@ LABELS = {
 }
 REQUIRED_COLUMNS = {"keypoints", "animal_id", *LABELS}
 
-class PoseDataset(Dataset[tuple[torch.Tensor, dict[str, torch.Tensor]]]):
+
+class PoseDataset(Dataset[tuple[torch.Tensor, dict[str, torch.Tensor], dict[str, torch.Tensor]]]):
+    """Load a manifest; blank labels are treated as unsupervised for that head."""
+
     def __init__(self, manifest: str | Path) -> None:
         path = Path(manifest)
         self.rows = list(csv.DictReader(path.open("r", encoding="utf-8", newline="")))
@@ -37,14 +40,22 @@ class PoseDataset(Dataset[tuple[torch.Tensor, dict[str, torch.Tensor]]]):
     def __len__(self) -> int:
         return len(self.rows)
 
-    def __getitem__(self, index: int) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    def __getitem__(self, index: int):
         row = self.rows[index]
         features = extract_geometric_features(np.load(row["keypoints"]), cfg=FeatureConfig())
-        targets = {
-            name: torch.tensor(classes.index(row[name]), dtype=torch.long)
-            for name, classes in LABELS.items()
-        }
-        return torch.from_numpy(features), targets
+        targets: dict[str, torch.Tensor] = {}
+        masks: dict[str, torch.Tensor] = {}
+        for name, classes in LABELS.items():
+            value = row[name].strip()
+            if not value:
+                targets[name] = torch.tensor(0, dtype=torch.long)
+                masks[name] = torch.tensor(False)
+                continue
+            if value not in classes:
+                raise ValueError(f"invalid {name} label {value!r} at row {index}")
+            targets[name] = torch.tensor(classes.index(value), dtype=torch.long)
+            masks[name] = torch.tensor(True)
+        return torch.from_numpy(features), targets, masks
 
 
 def set_seed(seed: int) -> None:
@@ -60,22 +71,35 @@ def evaluate(model: BodyLanguageModel, loader: DataLoader, device: torch.device)
     truth = {name: [] for name in LABELS}
     pred = {name: [] for name in LABELS}
     with torch.inference_mode():
-        for features, targets in loader:
+        for features, targets, masks in loader:
             outputs = model(features.to(device))
             for name in LABELS:
-                truth[name].extend(targets[name].tolist())
-                pred[name].extend(outputs[name].argmax(dim=-1).cpu().tolist())
-    macro = {name: f1_score(truth[name], pred[name], average="macro", zero_division=0) for name in LABELS}
-    weighted = {name: f1_score(truth[name], pred[name], average="weighted", zero_division=0) for name in LABELS}
-    accuracy = {name: accuracy_score(truth[name], pred[name]) for name in LABELS}
-    return {
-        **{f"{name}_macro_f1": float(v) for name, v in macro.items()},
-        **{f"{name}_weighted_f1": float(v) for name, v in weighted.items()},
-        **{f"{name}_accuracy": float(v) for name, v in accuracy.items()},
-        "macro_f1": float(np.mean(list(macro.values()))),
-        "weighted_f1": float(np.mean(list(weighted.values()))),
-        "accuracy": float(np.mean(list(accuracy.values()))),
-    }
+                mask = masks[name].bool()
+                if not mask.any():
+                    continue
+                truth[name].extend(targets[name][mask].tolist())
+                pred[name].extend(outputs[name].argmax(dim=-1).cpu()[mask].tolist())
+
+    result: dict[str, float] = {}
+    macro_values: list[float] = []
+    weighted_values: list[float] = []
+    accuracy_values: list[float] = []
+    for name in LABELS:
+        if not truth[name]:
+            continue
+        macro = f1_score(truth[name], pred[name], average="macro", zero_division=0)
+        weighted = f1_score(truth[name], pred[name], average="weighted", zero_division=0)
+        accuracy = accuracy_score(truth[name], pred[name])
+        result[f"{name}_macro_f1"] = float(macro)
+        result[f"{name}_weighted_f1"] = float(weighted)
+        result[f"{name}_accuracy"] = float(accuracy)
+        macro_values.append(float(macro))
+        weighted_values.append(float(weighted))
+        accuracy_values.append(float(accuracy))
+    result["macro_f1"] = float(np.mean(macro_values)) if macro_values else 0.0
+    result["weighted_f1"] = float(np.mean(weighted_values)) if weighted_values else 0.0
+    result["accuracy"] = float(np.mean(accuracy_values)) if accuracy_values else 0.0
+    return result
 
 
 def train(train_manifest: str, val_manifest: str, output: str, epochs: int = 40, batch_size: int = 64, lr: float = 1e-3, patience: int = 7) -> None:
@@ -84,22 +108,32 @@ def train(train_manifest: str, val_manifest: str, output: str, epochs: int = 40,
     train_ds, val_ds = PoseDataset(train_manifest), PoseDataset(val_manifest)
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
-    sample_features, _ = train_ds[0]
+    sample_features, _, _ = train_ds[0]
     model = BodyLanguageModel(input_dim=sample_features.numel(), heads=[HeadSpec(n, len(c)) for n, c in LABELS.items()]).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.05, reduction="none")
     best_score, best_state, stale = -1.0, None, 0
+
     for epoch in range(1, epochs + 1):
         model.train()
         total_loss = 0.0
-        for features, targets in train_loader:
+        for features, targets, masks in train_loader:
             optimizer.zero_grad(set_to_none=True)
             outputs = model(features.to(device))
-            loss = sum(criterion(outputs[name], targets[name].to(device)) for name in LABELS)
+            losses = []
+            for name in LABELS:
+                per_sample = criterion(outputs[name], targets[name].to(device))
+                mask = masks[name].to(device).bool()
+                if mask.any():
+                    losses.append(per_sample[mask].mean())
+            if not losses:
+                raise RuntimeError("batch contains no supervised labels")
+            loss = torch.stack(losses).mean()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             total_loss += float(loss.item())
+
         metrics = evaluate(model, val_loader, device)
         print(json.dumps({"epoch": epoch, "loss": total_loss / max(1, len(train_loader)), **metrics}, sort_keys=True))
         if metrics["macro_f1"] > best_score:
@@ -111,10 +145,17 @@ def train(train_manifest: str, val_manifest: str, output: str, epochs: int = 40,
             if stale >= patience:
                 print(json.dumps({"early_stopping": True, "epoch": epoch}))
                 break
+
     if best_state is None:
         raise RuntimeError("training produced no checkpoint")
     Path(output).parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"state_dict": best_state, "labels": LABELS, "input_dim": sample_features.numel(), "feature_config": {"expected_keypoints": 24, "coordinate_dim": 3, "center": "withers", "scale_pair": ["withers", "throat"]}}, output)
+    torch.save({
+        "state_dict": best_state,
+        "labels": LABELS,
+        "input_dim": sample_features.numel(),
+        "feature_config": {"expected_keypoints": 24, "coordinate_dim": 3, "center": "withers", "scale_pair": ["withers", "throat"]},
+    }, output)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

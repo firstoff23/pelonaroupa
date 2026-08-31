@@ -13,12 +13,7 @@ class HeadSpec:
 
 
 class BodyLanguageModel(nn.Module):
-    """Small multi-head classifier for normalized pose features.
-
-    Each head predicts one observable attribute. This keeps labels independent
-    so a single image can represent, for example, a standing dog with ears
-    forward and a raised tail.
-    """
+    """Compact multi-head classifier for observable canine body-language signals."""
 
     def __init__(
         self,
@@ -32,6 +27,8 @@ class BodyLanguageModel(nn.Module):
             raise ValueError("input_dim must be positive")
         if not heads:
             raise ValueError("at least one prediction head is required")
+        if any(spec.num_classes < 2 for spec in heads):
+            raise ValueError("each prediction head needs at least two classes")
 
         self.backbone = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -42,9 +39,9 @@ class BodyLanguageModel(nn.Module):
             nn.GELU(),
             nn.Dropout(dropout),
         )
-        self.heads = nn.ModuleDict({
-            spec.name: nn.Linear(hidden_dim, spec.num_classes) for spec in heads
-        })
+        self.heads = nn.ModuleDict(
+            {spec.name: nn.Linear(hidden_dim, spec.num_classes) for spec in heads}
+        )
         self.head_specs = {spec.name: spec.num_classes for spec in heads}
 
     def forward(self, features: torch.Tensor) -> dict[str, torch.Tensor]:
@@ -58,9 +55,9 @@ def build_default_model(input_dim: int) -> BodyLanguageModel:
     return BodyLanguageModel(
         input_dim=input_dim,
         heads=[
-            HeadSpec("posture", 4),
-            HeadSpec("head", 3),
-            HeadSpec("ears", 4),
+            HeadSpec("posture", 5),
+            HeadSpec("head", 4),
+            HeadSpec("ears", 5),
             HeadSpec("tail", 5),
             HeadSpec("movement", 5),
         ],

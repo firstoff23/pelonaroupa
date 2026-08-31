@@ -1,4 +1,4 @@
-﻿import { Camera, CheckCircle2, Mic, XCircle } from "lucide-react";
+import { Camera, CheckCircle2, Mic, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
@@ -154,12 +154,12 @@ export default function CapturePortalPage() {
           >
             <Card className="bg-card hover:bg-card/90 border-border overflow-hidden shadow-md transition-colors duration-300 relative h-32 flex items-center justify-between p-4 rounded-2xl">
               <div
-                className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-all duration-300"
+                className="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-full blur-2xl group-hover:bg-secondary/15 transition-all duration-300"
                 aria-hidden="true"
               />
               <div className="flex items-center gap-4 min-w-0">
                 <div
-                  className="w-11 h-11 shrink-0 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300"
+                  className="w-11 h-11 shrink-0 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center group-hover:bg-secondary group-hover:text-secondary-foreground transition-all duration-300"
                   aria-hidden="true"
                 >
                   <Camera size={20} />
@@ -179,7 +179,7 @@ export default function CapturePortalPage() {
                 </div>
               </div>
               <div className="shrink-0 pl-2" aria-hidden="true">
-                <span className="text-xs font-bold text-indigo-400 group-hover:text-indigo-300 transition-colors whitespace-nowrap">
+                <span className="text-xs font-bold text-secondary group-hover:text-secondary/80 transition-colors whitespace-nowrap">
                   {language === "pt" ? "Analisar" : "Analyze"} &rarr;
                 </span>
               </div>

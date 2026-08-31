@@ -333,7 +333,7 @@ export default function CameraPage() {
                   <Button
                     type="button"
                     onClick={handleConfirm}
-                    className="flex-1 text-xs font-semibold h-11 bg-primary text-primary-foreground hover:bg-emerald-600 shadow-md shadow-primary/20"
+                    className="flex-1 text-xs font-semibold h-11 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20"
                   >
                     {language === "pt" ? "Confirmar" : "Confirm"}
                   </Button>

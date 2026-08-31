@@ -72,7 +72,7 @@ function statusClass(status: string) {
     return "border-rose-500/30 bg-rose-500/10 text-rose-300";
   if (status === "monitorizar")
     return "border-amber-500/30 bg-amber-500/10 text-amber-300";
-  return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+  return "border-primary/30 bg-primary/10 text-primary";
 }
 
 function alertClass(severity: string) {
@@ -80,7 +80,7 @@ function alertClass(severity: string) {
     return "border-rose-500/30 bg-rose-500/10 text-rose-200";
   if (severity === "warning")
     return "border-amber-500/30 bg-amber-500/10 text-amber-200";
-  return "border-cyan-500/30 bg-cyan-500/10 text-cyan-200";
+  return "border-secondary/30 bg-secondary/10 text-secondary";
 }
 
 function KpiCard({
@@ -95,12 +95,13 @@ function KpiCard({
   value: number;
   helper: string;
   icon: LucideIcon;
-  tone: "emerald" | "cyan" | "amber" | "rose";
+  tone: "primary" | "secondary" | "tertiary" | "amber" | "rose";
   noData?: boolean;
 }) {
   const toneClass = {
-    emerald: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-    cyan: "bg-cyan-500/10 text-cyan-300 border-cyan-500/20",
+    primary: "bg-primary/10 text-primary border-primary/20",
+    secondary: "bg-secondary/10 text-secondary border-secondary/20",
+    tertiary: "bg-tertiary/10 text-tertiary border-tertiary/20",
     amber: "bg-amber-500/10 text-amber-300 border-amber-500/20",
     rose: "bg-rose-500/10 text-rose-300 border-rose-500/20",
   }[tone];
@@ -271,7 +272,7 @@ export default function VetDashboardPage() {
           value={summary.animalsFollowed}
           helper="Casos ativos partilhados consigo"
           icon={PawPrint}
-          tone="emerald"
+          tone="primary"
           noData={noAnimals}
         />
         <KpiCard
@@ -279,7 +280,7 @@ export default function VetDashboardPage() {
           value={summary.reportsReceived}
           helper="Análises recentes nos últimos 30 dias"
           icon={ClipboardList}
-          tone="cyan"
+          tone="secondary"
           noData={noAnimals}
         />
         <KpiCard
@@ -302,9 +303,9 @@ export default function VetDashboardPage() {
 
       {/* ─── Tarefa 1 fix: banner explicativo quando sem animais partilhados ─── */}
       {noAnimals && (
-        <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/8 p-4">
+        <div className="rounded-2xl border border-secondary/20 bg-secondary/10 p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
               <UserRound size={17} />
             </div>
             <div>

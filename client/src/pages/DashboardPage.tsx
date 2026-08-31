@@ -617,7 +617,7 @@ export default function DashboardPage() {
               variant="outline"
               className="w-full h-12 rounded-2xl justify-start gap-2.5 border-border/60 hover:bg-muted/40 text-xs font-semibold px-4 active-scale tap-highlight-none"
             >
-              <Apple className="h-4.5 w-4.5 text-emerald-400" />
+              <Apple className="h-4.5 w-4.5 text-primary" />
               <span>{language === "pt" ? "Alimentos" : "Foods"}</span>
             </Button>
           </Link>
@@ -626,7 +626,7 @@ export default function DashboardPage() {
               variant="outline"
               className="w-full h-12 rounded-2xl justify-start gap-2.5 border-border/60 hover:bg-muted/40 text-xs font-semibold px-4 active-scale tap-highlight-none"
             >
-              <Clock3 className="h-4.5 w-4.5 text-indigo-400" />
+              <Clock3 className="h-4.5 w-4.5 text-secondary" />
               <span>{language === "pt" ? "Histórico" : "History"}</span>
             </Button>
           </Link>

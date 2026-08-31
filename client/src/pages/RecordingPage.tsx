@@ -1307,9 +1307,9 @@ export default function RecordingPage() {
   };
 
   const buttonColor = isAutoMode
-    ? "bg-gradient-to-tr from-cyan-500 to-blue-600 auto-pulse shadow-lg shadow-cyan-500/20 text-white"
+    ? "bg-secondary text-white auto-pulse shadow-lg shadow-secondary/20"
     : recordState === "idle"
-      ? "bg-primary hover:bg-emerald-600 text-white"
+      ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
       : recordState === "recording"
         ? "bg-red-500 record-pulse text-white"
         : recordState === "requesting"
@@ -1610,12 +1610,12 @@ export default function RecordingPage() {
             className="space-y-6"
           >
             {/* Primary Action Button */}
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-emerald-500/15 bg-[var(--color-surface)] p-5 shadow-[var(--shadow-lg)]">
-              <div className="absolute inset-x-8 top-10 h-32 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/20 bg-card p-5 shadow-[var(--shadow-lg)]">
+              <div className="absolute inset-x-8 top-10 h-32 rounded-full bg-primary/10 blur-3xl" />
               <div className="relative flex flex-col items-center gap-4">
                 <div className="flex w-full items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase text-emerald-300">
+                    <p className="text-xs font-semibold uppercase text-primary">
                       {language === "pt"
                         ? "Gravação acústica"
                         : "Acoustic recording"}
@@ -1632,7 +1632,7 @@ export default function RecordingPage() {
                       "rounded-full px-2.5 py-1 text-[10px] font-semibold",
                       recordState === "recording"
                         ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
-                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+                        : "border-primary/30 bg-primary/10 text-primary",
                     )}
                   >
                     <Volume2 className="h-3 w-3" />
@@ -1658,7 +1658,7 @@ export default function RecordingPage() {
 
                 <div className="min-h-[2.5rem] flex flex-col items-center justify-center">
                   {isAutoMode ? (
-                    <p className="text-md font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 animate-pulse text-center">
+                    <p className="text-md font-bold text-secondary animate-pulse text-center">
                       {t("recordingPage.autoModeOn")}
                     </p>
                   ) : recordState === "recording" ? (
@@ -1675,7 +1675,6 @@ export default function RecordingPage() {
                     </p>
                   )}
                 </div>
-
 
                 {/* ─── Veterinary Disclaimer (before button) ─── */}
                 <div className="w-full px-1">
@@ -1700,7 +1699,7 @@ export default function RecordingPage() {
                       "absolute h-48 w-48 rounded-full border transition-all duration-300",
                       recordState === "recording"
                         ? "border-rose-400/30 bg-rose-500/5"
-                        : "border-emerald-400/20 bg-emerald-500/5",
+                        : "border-primary/20 bg-primary/5",
                     )}
                     style={{
                       transform: `scale(${1 + Math.min(0.18, liveAudioLevel * 0.18)})`,
@@ -1734,8 +1733,8 @@ export default function RecordingPage() {
                           recordState === "recording"
                             ? "#ef4444"
                             : isAutoMode
-                              ? "#06b6d4"
-                              : "#10b981"
+                              ? "#194D91"
+                              : "#2D739B"
                         }
                         className={cn(
                           "w-40 h-40 rounded-full flex flex-col items-center justify-center gap-2",

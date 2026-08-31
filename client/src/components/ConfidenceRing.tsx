@@ -32,8 +32,8 @@ export function ConfidenceRing({
     bars = 3;
     levelEn = "High";
     levelPt = "Alta";
-    color = "bg-emerald-500";
-    textColor = "text-emerald-500";
+    color = "bg-primary";
+    textColor = "text-primary";
   } else if (confidence >= 0.5) {
     bars = 2;
     levelEn = "Medium";

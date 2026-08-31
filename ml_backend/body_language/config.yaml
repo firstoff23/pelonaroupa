@@ -1,0 +1,54 @@
+project: animalmind-body-language-v1
+seed: 42
+
+keypoints:
+  expected: 24
+  coordinate_dim: 3
+  normalize:
+    center: pelvis
+    scale: torso_length
+
+heads:
+  posture:
+    - standing
+    - sitting
+    - lying
+    - crouching
+  head:
+    - raised
+    - neutral
+    - lowered
+  ears:
+    - forward
+    - neutral
+    - backward
+    - unknown
+  tail:
+    - high
+    - neutral
+    - low
+    - tucked
+    - unknown
+  movement:
+    - still
+    - walking
+    - running
+    - shaking
+    - unknown
+
+training:
+  batch_size: 64
+  epochs: 40
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  dropout: 0.20
+  early_stopping_patience: 7
+  label_smoothing: 0.05
+
+validation:
+  split: animal_id
+  metrics:
+    - macro_f1
+    - weighted_f1
+    - accuracy
+    - calibration

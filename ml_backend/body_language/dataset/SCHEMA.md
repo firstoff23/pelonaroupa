@@ -2,22 +2,27 @@
 
 This schema separates observable body-language labels from higher-level interpretation.
 
-## Required fields
+## Fields
 
 - `sample_id`: stable sample identifier
-- `animal_id`: stable animal identifier when known; do not use frame-level IDs for the same animal
+- `animal_id`: stable animal identifier; all images/frames of one known animal share the same ID
+- `image`: source image path
 - `keypoints`: path to a 24x3 `(x, y, visibility)` pose array
 - `posture`: `standing | sitting | lying | crouching | unknown`
 - `head`: `raised | neutral | lowered | unknown`
 - `ears`: `forward | neutral | backward | asymmetric | unknown`
 - `tail`: `high | neutral | low | tucked | unknown`
 - `movement`: `still | walking | running | shaking | unknown`
-- `source`: dataset or provenance identifier
+- `source`: dataset/provenance identifier
 - `license`: provenance/license identifier
+
+## Partial-label policy
+
+A label cell may be blank when that source does not annotate the corresponding head. Blank means **not supervised**, not `unknown`. During training, masked loss ignores blank labels. Use `unknown` only when the source/annotator explicitly establishes that the signal was unobservable or ambiguous.
 
 ## Annotation policy
 
-Use `unknown` when the body part is occluded, ambiguous, outside the frame, or otherwise not reliably annotatable. Never infer emotional state from a single body-language label.
+Use `unknown` when a body part is occluded, ambiguous, outside the frame, or otherwise not reliably annotatable. Never infer emotional state from a single body-language label.
 
 ## Split policy
 

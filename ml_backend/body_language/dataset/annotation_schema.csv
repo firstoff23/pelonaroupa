@@ -1,0 +1,2 @@
+sample_id,animal_id,posture,head,ears,tail,movement,annotator,source,notes
+example-0001,animal-0001,standing,neutral,forward,high,still,human,custom,

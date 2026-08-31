@@ -8,9 +8,9 @@ from .model import BodyLanguageModel
 
 
 LABELS: dict[str, list[str]] = {
-    "posture": ["standing", "sitting", "lying", "crouching"],
-    "head": ["raised", "neutral", "lowered"],
-    "ears": ["forward", "neutral", "backward", "unknown"],
+    "posture": ["standing", "sitting", "lying", "crouching", "unknown"],
+    "head": ["raised", "neutral", "lowered", "unknown"],
+    "ears": ["forward", "neutral", "backward", "asymmetric", "unknown"],
     "tail": ["high", "neutral", "low", "tucked", "unknown"],
     "movement": ["still", "walking", "running", "shaking", "unknown"],
 }
@@ -26,7 +26,7 @@ def decode_predictions(
     logits: dict[str, torch.Tensor],
     labels: dict[str, list[str]] = LABELS,
 ) -> dict[str, Prediction]:
-    """Decode a single-sample model output into the API-safe representation."""
+    """Decode a single-sample model output into a stable API representation."""
     predictions: dict[str, Prediction] = {}
     for head, values in logits.items():
         if head not in labels:

@@ -178,7 +178,7 @@ curl -X POST "https://firstoff-animalmind-backend.hf.space/v1/feedback" \
 
 ## 🏋️ Model Training & Temperature Calibration
 
-The backend includes a state-of-the-art training pipeline (`ml_backend/training/train_dog_breeds.py`) to fine-tune ViT on Stanford Dogs (120 breeds) targeting **>90% accuracy**.
+The backend includes a training pipeline (`ml_backend/training/train_dog_breeds.py`) to fine-tune ViT on Stanford Dogs (120 breeds). Accuracy claims must be reproduced from a versioned dataset split and manifest before being treated as production benchmarks.
 
 ### Training Features:
 - **Augmentations**: `RandAugment(num_ops=2, magnitude=9)`, `MixUp`, `CutMix`, `ColorJitter`, `RandomRotation`.
@@ -210,9 +210,9 @@ The backend includes a state-of-the-art training pipeline (`ml_backend/training/
 ### 🏆 Model Performance & Calibration Benchmark:
 | Model / Task | Architecture | Validation Accuracy | Temperature ($T$) | ECE | HF Hub Status |
 |--------------|--------------|---------------------|-------------------|-----|---------------|
-| **Dog Breed Classifier** | `google/vit-base-patch16-224` | **91.40%** | **1.7221** | **2.69%** | Published ✅ [`firstoff/animalmind-breed-classifier`](https://huggingface.co/firstoff/animalmind-breed-classifier) |
-| **Cat Breed Classifier** | `google/vit-base-patch16-224` | **A aguardar** | **-** | **-** | Em treino ⌛ [`run_training_cat.ipynb`](training/run_training_cat.ipynb) |
-| **Audio Vocalization Classifier** | `facebook/wav2vec2-base` | **92.10%** | **1.5028** | **2.75%** | Published ✅ [`firstoff/animalmind-audio-classifier`](https://huggingface.co/firstoff/animalmind-audio-classifier) |
+| **Dog Breed Classifier** | `google/vit-base-patch16-224` | **Reprodução pendente** | **1.7221** | **2.69%** | Publicado no Hub; validar contra o manifesto de treino [`firstoff/animalmind-breed-classifier`](https://huggingface.co/firstoff/animalmind-breed-classifier) |
+| **Cat Breed Classifier** | `google/vit-base-patch16-224` | **Não validada neste snapshot** | **-** | **-** | Publicado no Hub, requer reprodução do benchmark [`run_training_cat.ipynb`](training/run_training_cat.ipynb) |
+| **Audio Vocalization Classifier** | `facebook/wav2vec2-base` | **Não validada neste snapshot** | **1.5028** | **2.75%** | Publicado no Hub; exige dataset real mapeado antes de promoção [`firstoff/animalmind-audio-classifier`](https://huggingface.co/firstoff/animalmind-audio-classifier) |
 
 ---
 

@@ -1,0 +1,36 @@
+{
+  "manifest_version": 1,
+  "status": "template_only_until_reproduced",
+  "model_id": "",
+  "model_revision": "",
+  "task": "image-classification|audio-classification",
+  "dataset_id": "",
+  "dataset_revision": "",
+  "split": {
+    "train": "",
+    "validation": "",
+    "test": "",
+    "grouping": "animal_or_recording"
+  },
+  "labels": [],
+  "seed": null,
+  "hyperparameters": {},
+  "preprocessing": {},
+  "environment": {
+    "python": "",
+    "pytorch": "",
+    "transformers": "",
+    "hardware": ""
+  },
+  "metrics": {
+    "accuracy": null,
+    "macro_f1": null,
+    "balanced_accuracy": null,
+    "top3_accuracy": null,
+    "ece": null,
+    "abstention_rate": null
+  },
+  "weights_sha256": "",
+  "created_at": "",
+  "notes": "Do not publish benchmark claims until every field needed for reproduction is filled."
+}

@@ -13,7 +13,7 @@ export const GlowingButton = React.forwardRef<
   GlowingButtonProps
 >(
   (
-    { children, className, glowColor = "#10b981", active = false, ...props },
+    { children, className, glowColor = "#2D739B", active = false, ...props },
     ref,
   ) => {
     return (

@@ -704,10 +704,10 @@ export default function DashboardPage() {
                           ) : (
                             <Avatar className="h-12 w-12 border border-white/10 bg-black/20">
                               <AvatarImage src={photoUrl} alt={a.name} />
-                              <AvatarFallback className="bg-emerald-500/10 text-lg">
+                              <AvatarFallback className="bg-primary/10 text-lg">
                                 <PawPrint
                                   size={18}
-                                  className="text-emerald-500/60"
+                                  className="text-primary/60"
                                 />
                               </AvatarFallback>
                             </Avatar>
@@ -771,41 +771,41 @@ export default function DashboardPage() {
         ) : displayAnimals.length === 0 ? (
           <motion.div
             variants={itemVariants}
-            className="flex flex-col items-center justify-center py-12 text-center space-y-8 bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm max-w-lg mx-auto"
+            className="flex flex-col items-center justify-center py-10 text-center space-y-7 bg-card border border-border rounded-2xl p-6 shadow-md max-w-lg mx-auto"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
-              <Sparkles className="w-12 h-12 text-indigo-400 relative" />
+              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+              <Sparkles className="w-12 h-12 text-primary relative" />
             </div>
 
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-slate-100">
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-bold text-foreground">
                 Bem-vindo ao PeloNaRoupa!
               </h2>
-              <p className="text-slate-400 text-xs sm:text-sm max-w-sm leading-relaxed">
+              <p className="text-muted-foreground text-xs sm:text-sm max-w-sm leading-relaxed">
                 Vamos configurar a sua conta. Siga os passos rápidos abaixo para
                 começar a monitorizar o seu companheiro.
               </p>
             </div>
 
-            <div className="w-full space-y-4 text-left">
+            <div className="w-full space-y-3 text-left">
               {/* Step 1 */}
-              <div className="flex gap-4 items-center bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-4 transition-all duration-300">
-                <div className="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+              <div className="flex gap-4 items-center bg-secondary/15 border border-secondary/30 rounded-2xl p-4 transition-all duration-300">
+                <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
                   1
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-bold text-slate-200">
+                  <h4 className="text-sm font-bold text-foreground">
                     Adicionar o Seu Primeiro Animal
                   </h4>
-                  <p className="text-[11px] text-indigo-300">
+                  <p className="text-[11px] text-muted-foreground">
                     Crie o perfil com espécie, raça e idade do seu companheiro.
                   </p>
                 </div>
                 <Link to="/definicoes">
                   <Button
                     size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs px-3.5 shadow-md"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-xs px-3.5 shadow-sm"
                   >
                     Criar Perfil
                   </Button>
@@ -813,37 +813,37 @@ export default function DashboardPage() {
               </div>
 
               {/* Step 2 */}
-              <div className="flex gap-4 items-center bg-slate-900/40 border border-slate-900 rounded-2xl p-4 opacity-50">
-                <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm shrink-0">
+              <div className="flex gap-4 items-center bg-muted/20 border border-border/40 rounded-2xl p-4 opacity-60">
+                <div className="w-9 h-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm shrink-0">
                   2
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-semibold text-slate-400">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
                     Gravar uma Vocalização
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-muted-foreground/80">
                     Capte o áudio do seu animal no gravador para obter o
                     relatório de bem-estar.
                   </p>
                 </div>
-                <span className="text-slate-500 text-xs">Aguardando</span>
+                <span className="text-muted-foreground text-xs">Aguardando</span>
               </div>
 
               {/* Step 3 */}
-              <div className="flex gap-4 items-center bg-slate-900/40 border border-slate-900 rounded-2xl p-4 opacity-50">
-                <div className="w-9 h-9 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm shrink-0">
+              <div className="flex gap-4 items-center bg-muted/20 border border-border/40 rounded-2xl p-4 opacity-60">
+                <div className="w-9 h-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm shrink-0">
                   3
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-semibold text-slate-400">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
                     Analisar Tendências
                   </h4>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-muted-foreground/80">
                     Aceda a estatísticas semanais e alertas automáticos de
                     alteração comportamental.
                   </p>
                 </div>
-                <span className="text-slate-500 text-xs">Aguardando</span>
+                <span className="text-muted-foreground text-xs">Aguardando</span>
               </div>
             </div>
           </motion.div>
@@ -1099,17 +1099,17 @@ export default function DashboardPage() {
         {familyActivity.length > 0 && (
           <motion.div
             variants={itemVariants}
-            className="bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-4 space-y-2"
+            className="bg-card border border-border rounded-2xl p-4 space-y-2"
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-primary">
                 {t("dashboardPage.familyActivity")}
               </h2>
               <Link to="/family">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs text-emerald-400"
+                  className="h-7 text-xs text-primary"
                 >
                   {t("dashboardPage.view")}
                 </Button>
@@ -1328,12 +1328,12 @@ export default function DashboardPage() {
                 <div className="pt-2 border-t border-border/50">
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/veterinario">
-                      <Button className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 font-semibold text-white shadow-md rounded-xl text-xs h-9">
+                      <Button className="w-full bg-primary hover:bg-primary/90 font-semibold text-primary-foreground shadow-sm rounded-lg text-xs h-9">
                         {t("dashboardPage.accessVetMode")}
                       </Button>
                     </Link>
                     <Link href="/family">
-                      <Button className="w-full bg-secondary text-foreground hover:bg-secondary/80 border border-border rounded-xl text-xs h-9">
+                      <Button className="w-full bg-secondary text-foreground hover:bg-secondary/80 border border-border rounded-lg text-xs h-9">
                         {t("dashboardPage.family")}
                       </Button>
                     </Link>
@@ -1436,10 +1436,10 @@ export default function DashboardPage() {
                       <Line
                         type="monotone"
                         dataKey="avg"
-                        stroke="#10b981"
+                        stroke="#2D739B"
                         strokeWidth={2.5}
-                        dot={{ fill: "#10b981", r: 4, strokeWidth: 0 }}
-                        activeDot={{ r: 6, fill: "#10b981" }}
+                        dot={{ fill: "#2D739B", r: 4, strokeWidth: 0 }}
+                        activeDot={{ r: 6, fill: "#2D739B" }}
                       />
                     </LineChart>
                   </ResponsiveContainer>

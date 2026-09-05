@@ -34,8 +34,8 @@ export function LiveAudioMeter({
           <span
             className="h-2.5 w-2.5 rounded-full"
             style={{
-              backgroundColor: isActive ? "#10b981" : "#475569",
-              boxShadow: isActive ? "0 0 14px rgba(16, 185, 129, 0.6)" : "none",
+              backgroundColor: isActive ? "#2D739B" : "rgba(255, 255, 255, 0.2)",
+              boxShadow: isActive ? "0 0 10px rgba(45, 115, 155, 0.4)" : "none",
             }}
             aria-hidden="true"
           />

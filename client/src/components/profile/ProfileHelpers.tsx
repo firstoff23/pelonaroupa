@@ -173,8 +173,8 @@ export function WeeklyChart({ animalId }: { animalId: number }) {
         <Radar
           name="Estados"
           dataKey="value"
-          stroke="#10b981"
-          fill="#10b981"
+          stroke="#2D739B"
+          fill="#2D739B"
           fillOpacity={0.25}
         />
         <Tooltip

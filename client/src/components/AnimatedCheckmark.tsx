@@ -16,7 +16,7 @@ export default function AnimatedCheckmark({
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1, duration: 0.4 }}
-        className="absolute rounded-full bg-emerald-500/10 blur-xl"
+        className="absolute rounded-full bg-primary/10 blur-xl"
         style={{ width: size * 1.5, height: size * 1.5 }}
       />
 
@@ -26,14 +26,14 @@ export default function AnimatedCheckmark({
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="relative z-10"
+        className="relative z-10 text-primary"
       >
         {/* Circle Path */}
         <motion.circle
           cx="50"
           cy="50"
           r="45"
-          stroke="#10b981"
+          stroke="#2D739B"
           strokeWidth="6"
           strokeLinecap="round"
           fill="transparent"
@@ -45,7 +45,7 @@ export default function AnimatedCheckmark({
         {/* Checkmark Path */}
         <motion.path
           d="M30 52L45 67L70 35"
-          stroke="#10b981"
+          stroke="#2D739B"
           strokeWidth="6"
           strokeLinecap="round"
           strokeLinejoin="round"

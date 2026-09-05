@@ -1,20 +1,20 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 
-// Colors requested by USER:
-// happy=verde (#22c55e), calm=azul (#6366f1), anxious=laranja (#f97316), aggressive=vermelho (#ef4444), neutral=cinzento (#94a3b8)
+// Serene Corporate Emotion Palette:
+// happy/excitement=azul oceano (#2D739B), calm/relaxed=sage (#6A8A8A), anxious/attention=âmbar (#F59E0B), aggressive/distress=vermelho (#EF4444), neutral=cinzento muted (#8C9EA6)
 const EMOTION_COLORS: Record<string, string> = {
-  happy: "#22c55e",
-  calm: "#6366f1",
-  anxious: "#f97316",
-  aggressive: "#ef4444",
-  neutral: "#94a3b8",
-  // Map our model states to these:
-  excitement: "#22c55e", // happy
-  relaxed: "#6366f1", // calm
-  hunger: "#f97316", // anxious
-  attention: "#f97316", // anxious
-  distress: "#ef4444", // aggressive
-  alert: "#ef4444", // aggressive
+  happy: "#2D739B",
+  calm: "#6A8A8A",
+  anxious: "#F59E0B",
+  aggressive: "#EF4444",
+  neutral: "#8C9EA6",
+  // Map our model states:
+  excitement: "#2D739B",
+  relaxed: "#6A8A8A",
+  hunger: "#F59E0B",
+  attention: "#194D91",
+  distress: "#EF4444",
+  alert: "#194D91",
 };
 
 function getEmotionColor(emotion: string): string {

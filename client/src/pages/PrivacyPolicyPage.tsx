@@ -34,13 +34,13 @@ export default function PrivacyPolicyPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-background text-foreground flex flex-col justify-between overflow-x-hidden font-sans">
       {/* Decorative top lights */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute top-10 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-10 right-1/4 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {/* Header */}
-      <header className="w-full max-w-4xl mx-auto px-6 py-6 flex items-center justify-between border-b border-slate-900 z-10">
+      <header className="w-full max-w-4xl mx-auto px-6 py-6 flex items-center justify-between border-b border-border z-10">
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => setLocation(isAuthenticated ? "/dashboard" : "/")}
@@ -48,7 +48,7 @@ export default function PrivacyPolicyPage() {
           <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <Logo className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-emerald-200 bg-clip-text text-transparent">
+          <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             PeloNaRoupa
           </span>
         </div>
@@ -421,7 +421,7 @@ export default function PrivacyPolicyPage() {
                   w.Termly.showConsentModal();
                 }
               }}
-              className="hover:text-slate-300 transition-colors font-medium text-emerald-400 focus-visible:outline-none focus-visible:underline"
+              className="hover:text-muted-foreground transition-colors font-medium text-primary focus-visible:outline-none focus-visible:underline"
             >
               Consentimento
             </button>

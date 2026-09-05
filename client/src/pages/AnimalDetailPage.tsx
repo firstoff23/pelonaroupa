@@ -223,10 +223,10 @@ export default function AnimalDetailPage({
         format: "a4",
       });
 
-      // Colors
-      const primaryColor = [16, 185, 129]; // Emerald (10B981)
-      const textColor = [30, 41, 59]; // Slate 800
-      const lightTextColor = [100, 116, 139]; // Slate 500
+      // Colors (Serene Corporate)
+      const primaryColor = [45, 115, 155]; // Primary (#2D739B)
+      const textColor = [29, 28, 23]; // Neutral text (#1D1C17)
+      const lightTextColor = [107, 114, 128]; // Muted (#6B7280)
 
       // Title & Header
       doc.setFillColor(248, 250, 252); // Light background
@@ -654,11 +654,11 @@ export default function AnimalDetailPage({
       </div>
 
       {/* Animal Identity Header */}
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-emerald-500/15 bg-[var(--color-surface)] p-5 shadow-[var(--shadow-lg)]">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-[var(--color-surface)] p-5 shadow-[var(--shadow-lg)]">
         <div className="absolute right-[-20px] top-[-20px] text-white/[0.03] pointer-events-none select-none rotate-12">
           <PawPrint size={140} />
         </div>
-        <div className="absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
+        <div className="absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
 
         <div className="relative grid gap-5 sm:grid-cols-[150px_1fr] sm:items-center">
           <div className="mx-auto h-36 w-36 overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/25 sm:mx-0">
@@ -675,7 +675,7 @@ export default function AnimalDetailPage({
                 <h1 className="text-3xl font-bold text-foreground">
                   {animal.name}
                 </h1>
-                <Badge className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] text-emerald-300">
+                <Badge className="rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-[10px] text-primary">
                   {animal.species === "dog"
                     ? t("profilePage.speciesDog")
                     : t("profilePage.speciesCat")}
@@ -710,7 +710,7 @@ export default function AnimalDetailPage({
                 <p className="text-[10px] uppercase text-muted-foreground">
                   {language === "pt" ? "Estado" : "State"}
                 </p>
-                <p className="mt-1 truncate text-sm font-bold text-emerald-300">
+                <p className="mt-1 truncate text-sm font-bold text-primary">
                   {dominantStateWeekly
                     ? t(`states.${dominantStateWeekly}`)
                     : "—"}
@@ -1055,7 +1055,7 @@ export default function AnimalDetailPage({
                               className={cn(
                                 "p-1 rounded transition-all",
                                 ev.feedback === "correct"
-                                  ? "bg-emerald-500/20 text-emerald-500"
+                                  ? "bg-primary/20 text-primary"
                                   : "text-muted-foreground hover:text-foreground",
                               )}
                             >

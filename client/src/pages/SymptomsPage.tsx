@@ -126,7 +126,7 @@ const SEVERITY_CONFIG: Record<
   low: {
     labelPt: "Leve",
     labelEn: "Mild",
-    color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    color: "text-tertiary border-tertiary/30 bg-tertiary/10",
   },
   medium: {
     labelPt: "Moderado",

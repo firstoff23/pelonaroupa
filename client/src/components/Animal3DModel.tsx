@@ -4,25 +4,26 @@ import React, { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { EmotionalState } from "../../../shared/types";
 
-// Map emotional states to the required colors
-// happy=verde (#22c55e), calm=azul (#6366f1), anxious=laranja (#f97316), aggressive=vermelho (#ef4444), neutral=cinzento (#94a3b8)
+// Serene Corporate Emotion Palette
 export function getEmotionColor(state: EmotionalState | string): string {
   switch (state) {
     case "excitement":
     case "happy":
-      return "#22c55e";
+      return "#2D739B"; // Primary
     case "relaxed":
     case "calm":
-      return "#6366f1";
-    case "hunger":
+      return "#6A8A8A"; // Tertiary
     case "attention":
+    case "alert":
+      return "#194D91"; // Secondary
+    case "hunger":
     case "anxious":
-      return "#f97316";
+      return "#F59E0B"; // Amber warning
     case "distress":
     case "aggressive":
-      return "#ef4444";
+      return "#EF4444"; // Red error
     default:
-      return "#94a3b8";
+      return "#8C9EA6"; // Muted
   }
 }
 
@@ -169,7 +170,7 @@ function PrimitiveAnimal({
           {/* Nose */}
           <mesh position={[0, -0.01, -0.32]}>
             <boxGeometry args={[0.08, 0.06, 0.04]} />
-            <meshStandardMaterial color="#1e293b" />
+            <meshStandardMaterial color="#1F262D" />
           </mesh>
 
           {/* Eyes */}

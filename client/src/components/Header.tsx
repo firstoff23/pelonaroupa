@@ -125,7 +125,7 @@ export function Header() {
       </div>
 
       {/* Centered Title */}
-      <div className="flex-1 flex items-center justify-center gap-1.5 font-bold text-base text-foreground tracking-tight font-satoshi">
+      <div className="flex-1 flex items-center justify-center gap-1.5 font-bold text-base text-foreground tracking-tight font-sans">
         {isRootPage && <Logo className="text-primary size-5" />}
         <span>{getPageTitle()}</span>
         {!isOnline && (

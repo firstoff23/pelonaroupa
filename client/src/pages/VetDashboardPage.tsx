@@ -225,17 +225,17 @@ export default function VetDashboardPage() {
   return (
     <div className="page-enter mx-auto flex min-h-full w-full max-w-lg flex-col gap-5 px-4 pb-24 pt-6">
       <header className="space-y-4">
-        <div className="rounded-2xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/12 via-card to-cyan-500/8 p-4">
+        <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
               <HeartPulse size={21} />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-foreground">
-                  Clínica comportamental AnimalMind
+                  Clínica comportamental PeloNaRoupa
                 </p>
-                <Badge className="border-emerald-500/25 bg-emerald-500/10 text-emerald-300 text-[9px] py-0 px-2 h-4 uppercase font-bold tracking-wider">
+                <Badge className="border-primary/20 bg-primary/10 text-primary text-[9px] py-0 px-2 h-4 uppercase font-bold tracking-wider">
                   {roleLabel}
                 </Badge>
               </div>
@@ -467,14 +467,14 @@ export default function VetDashboardPage() {
               Alertas prioritários
             </h2>
             {priorityAlerts.length === 0 ? (
-              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+              <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-300" size={20} />
+                  <ShieldCheck className="text-primary" size={20} />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-100">
+                    <p className="text-sm font-semibold text-foreground">
                       Sem alertas prioritários
                     </p>
-                    <p className="text-[11px] text-emerald-100/70">
+                    <p className="text-[11px] text-muted-foreground">
                       Os casos ativos estão estáveis ou apenas em monitorização
                       ligeira.
                     </p>

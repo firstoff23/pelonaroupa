@@ -58,7 +58,7 @@ export default function CapturePortalPage() {
   function CameraPermBadge() {
     if (cameraPerm === "granted") {
       return (
-        <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-full">
           <CheckCircle2 size={10} aria-hidden="true" />
           {language === "pt" ? "Camera pronta" : "Camera ready"}
         </span>

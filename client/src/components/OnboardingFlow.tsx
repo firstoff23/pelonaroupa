@@ -128,10 +128,10 @@ export function OnboardingFlow() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-between bg-neutral-950 text-neutral-100 overflow-hidden font-satoshi selection:bg-primary selection:text-primary-foreground p-6 md:p-12">
+    <div className="fixed inset-0 z-50 flex flex-col justify-between bg-neutral-950 text-neutral-100 overflow-hidden font-sans selection:bg-primary selection:text-primary-foreground p-6 md:p-12">
       {/* Background Decorative Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary/5 blur-[120px] pointer-events-none" />
 
       {/* Header */}
       <div className="w-full max-w-lg mx-auto flex items-center justify-between z-10">
@@ -169,17 +169,17 @@ export function OnboardingFlow() {
                 initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 transition={{ duration: 0.6, type: "spring" }}
-                className="relative flex items-center justify-center w-36 h-36 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-2xl mb-8"
+                className="relative flex items-center justify-center w-36 h-36 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-xl mb-8"
               >
                 <Logo size={72} className="text-primary" />
-                <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-neutral-950 p-2 rounded-full shadow-lg">
+                <div className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground p-2 rounded-full shadow-lg">
                   <Sparkles size={16} />
                 </div>
               </motion.div>
 
               <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
                 Bem-vindo ao{" "}
-                <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   PeloNaRoupa
                 </span>
               </h1>
@@ -216,7 +216,7 @@ export function OnboardingFlow() {
                 <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-neutral-900 border border-neutral-800 text-primary shadow-xl">
                   <PawPrint
                     size={44}
-                    className="animate-pulse text-emerald-400"
+                    className="animate-pulse text-primary"
                   />
                 </div>
                 <div className="absolute top-2 right-2 bg-neutral-900 border border-neutral-800 p-2 rounded-full text-neutral-400">
@@ -379,7 +379,7 @@ export function OnboardingFlow() {
                     onClick={handleRequestMic}
                     className={`h-9 px-4 rounded-lg font-bold text-xs ${
                       micStatus === "granted"
-                        ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+                        ? "border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
                         : "bg-primary text-primary-foreground hover:bg-primary/95"
                     }`}
                     disabled={micStatus === "granted"}
@@ -416,7 +416,7 @@ export function OnboardingFlow() {
                     onClick={handleRequestNotifications}
                     className={`h-9 px-4 rounded-lg font-bold text-xs ${
                       notiStatus === "granted"
-                        ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-400"
+                        ? "border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
                         : "bg-primary text-primary-foreground hover:bg-primary/95"
                     }`}
                     disabled={notiStatus === "granted"}
@@ -464,7 +464,7 @@ export function OnboardingFlow() {
               exit="exit"
               className="flex flex-col w-full"
             >
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto mb-6">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary mx-auto mb-6">
                 <Sparkles size={32} />
               </div>
 
@@ -480,7 +480,7 @@ export function OnboardingFlow() {
                   {
                     icon: Plus,
                     color:
-                      "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                      "bg-primary/10 text-primary border-primary/20",
                     title: "Adicionar o teu pet",
                     desc: "Cria o perfil do teu cão ou gato com foto e raça.",
                     path: "/perfil",

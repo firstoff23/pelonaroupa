@@ -214,7 +214,7 @@ export default function HealthPage() {
             disabled={isExporting}
             variant="outline"
             size="sm"
-            className="gap-2 text-xs font-semibold border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 shrink-0"
+            className="gap-2 text-xs font-semibold border-secondary/30 text-secondary hover:bg-secondary/10 hover:text-secondary-foreground shrink-0"
           >
             <Download size={14} />
             {isExporting
@@ -272,7 +272,7 @@ export default function HealthPage() {
                 <h2 className="text-lg font-bold text-white truncate">
                   {selectedAnimal.name}
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">
                   {species === "dog"
                     ? language === "pt"
                       ? "Cão"

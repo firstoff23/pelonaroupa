@@ -583,7 +583,7 @@ function LiveWaveformBars({
           <span
             key={`${index}-${sample.toFixed(2)}`}
             className={cn(
-              "w-1.5 rounded-full bg-emerald-400/80 transition-all duration-150",
+              "w-1.5 rounded-full bg-primary/80 transition-all duration-150",
               active && "animate-pulse",
             )}
             style={{
@@ -1480,7 +1480,7 @@ export default function RecordingPage() {
                   <Button
                     type="button"
                     onClick={handleConfirm}
-                    className="flex-1 text-xs font-semibold h-11 bg-primary text-primary-foreground hover:bg-emerald-600 shadow-md shadow-primary/20"
+                    className="flex-1 text-xs font-semibold h-11 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                   >
                     <Check size={14} className="mr-1.5" />
                     {language === "pt" ? "Confirmar" : "Confirm"}
@@ -1570,7 +1570,7 @@ export default function RecordingPage() {
                         : "Click the microphone icon in browser settings.",
                     );
                   }}
-                  className="text-xs h-9 bg-primary hover:bg-emerald-600 text-white"
+                  className="text-xs h-9 bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Settings size={12} className="mr-1.5" />
                   {language === "pt" ? "Abrir Definições" : "Open Settings"}

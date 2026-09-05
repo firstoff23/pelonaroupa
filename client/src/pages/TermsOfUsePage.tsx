@@ -27,7 +27,7 @@ export default function TermsOfUsePage() {
           <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <Logo className="w-5 h-5 text-primary" />
           </div>
-          <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-emerald-200 bg-clip-text text-transparent">
+          <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             PeloNaRoupa
           </span>
         </div>

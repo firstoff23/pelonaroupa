@@ -103,14 +103,14 @@ export function AuthShell({
             className="group flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-left text-white shadow-sm backdrop-blur transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Voltar à página inicial do PeloNaRoupa"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-emerald-950/30">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/30">
               <PawPrint size={18} />
             </span>
             <span>
               <span className="block text-sm font-bold leading-none">
                 PeloNaRoupa
               </span>
-              <span className="mt-1 block text-[10px] font-medium uppercase text-emerald-100/70">
+              <span className="mt-1 block text-[10px] font-medium uppercase text-primary-foreground/70">
                 acesso seguro
               </span>
             </span>
@@ -151,7 +151,7 @@ export function AuthShell({
                     protegido.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.075] p-4 backdrop-blur">
+                <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4 backdrop-blur">
                   <p className="font-semibold text-white">
                     Nativo no PeloNaRoupa
                   </p>
@@ -364,7 +364,7 @@ export function AuthSubmitButton({
     <Button
       type="submit"
       disabled={loading || disabled}
-      className="h-12 w-full rounded-2xl bg-gradient-to-r from-primary via-emerald-400 to-orange-300 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-950/25 transition-transform hover:brightness-105 active:scale-[0.985] disabled:brightness-75"
+      className="h-12 w-full rounded-lg bg-primary hover:bg-primary/90 text-sm font-bold text-primary-foreground shadow-sm transition-transform active:scale-95 disabled:opacity-50"
     >
       {loading ? (
         <>

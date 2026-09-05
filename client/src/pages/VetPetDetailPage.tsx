@@ -76,7 +76,7 @@ function statusClass(status: string) {
     return "border-rose-500/30 bg-rose-500/10 text-rose-200";
   if (status === "monitor")
     return "border-amber-500/30 bg-amber-500/10 text-amber-200";
-  return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+  return "border-primary/30 bg-primary/10 text-primary";
 }
 
 function alertClass(severity: string) {
@@ -240,7 +240,7 @@ export default function VetPetDetailPage({
               <h1 className="truncate text-2xl font-bold text-foreground">
                 {animal.name}
               </h1>
-              <Badge className="border-emerald-500/20 bg-emerald-500/10 text-emerald-300 text-[10px] h-5 py-0 px-2">
+              <Badge className="border-primary/20 bg-primary/10 text-primary text-[10px] h-5 py-0 px-2">
                 <Stethoscope size={10} className="mr-1 inline" />
                 Caso clínico
               </Badge>
@@ -331,14 +331,14 @@ export default function VetPetDetailPage({
           subtitle="Stress repetido, baixa confiança e tendências"
         />
         {detail.alerts.length === 0 ? (
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+          <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center gap-3">
-              <ShieldCheck size={18} className="text-emerald-300" />
+              <ShieldCheck size={18} className="text-primary" />
               <div>
-                <p className="text-sm font-semibold text-emerald-100">
+                <p className="text-sm font-semibold text-foreground">
                   Sem alertas ativos
                 </p>
-                <p className="text-[11px] text-emerald-100/70">
+                <p className="text-[11px] text-muted-foreground">
                   Não foram detetados sinais prioritários neste período.
                 </p>
               </div>

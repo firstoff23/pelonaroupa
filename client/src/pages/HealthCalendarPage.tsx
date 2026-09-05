@@ -49,8 +49,8 @@ const EVENT_CONFIG: Record<
     labelPt: "Vacina",
     labelEn: "Vaccine",
     icon: Syringe,
-    color: "bg-indigo-500/15 border-indigo-500/30 text-indigo-300",
-    dotColor: "bg-indigo-400",
+    color: "bg-secondary/15 border-secondary/30 text-foreground",
+    dotColor: "bg-secondary",
   },
   deworming: {
     labelPt: "Desparasitação",
@@ -63,8 +63,8 @@ const EVENT_CONFIG: Record<
     labelPt: "Consulta",
     labelEn: "Consultation",
     icon: Heart,
-    color: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-    dotColor: "bg-emerald-400",
+    color: "bg-primary/15 border-primary/30 text-primary",
+    dotColor: "bg-primary",
   },
   treatment: {
     labelPt: "Tratamento",
@@ -312,7 +312,7 @@ function AddEventModal({
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg"
         >
           {saving ? (
             <Loader2 size={16} className="animate-spin mr-2" />
@@ -458,7 +458,7 @@ export default function HealthCalendarPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <CalendarDays className="w-8 h-8 text-indigo-400" />
+            <CalendarDays className="w-8 h-8 text-primary" />
             {pt ? "Calendário de Saúde" : "Health Calendar"}
           </h1>
           <p className="text-slate-400 mt-1 text-sm">
@@ -470,7 +470,7 @@ export default function HealthCalendarPage() {
         <Button
           onClick={() => setShowModal(true)}
           size="sm"
-          className="gap-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl flex-shrink-0"
+          className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex-shrink-0"
         >
           <Plus size={14} />
           {pt ? "Adicionar" : "Add"}
@@ -556,9 +556,9 @@ export default function HealthCalendarPage() {
                   className={cn(
                     "relative flex flex-col items-center justify-center rounded-xl py-1.5 text-xs font-medium transition-all duration-150",
                     isSelected
-                      ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30"
+                      ? "bg-primary text-primary-foreground font-bold shadow-sm"
                       : isToday
-                        ? "bg-slate-700/60 text-white ring-1 ring-indigo-500/40"
+                        ? "bg-secondary/40 text-foreground ring-1 ring-primary/40"
                         : "text-slate-300 hover:bg-slate-800/70",
                     dayEvents.length > 0 && !isSelected && "font-bold",
                   )}
@@ -623,7 +623,7 @@ export default function HealthCalendarPage() {
                   size="sm"
                   onClick={() => setShowModal(true)}
                   variant="ghost"
-                  className="mt-3 w-full text-indigo-400 hover:text-indigo-300 text-xs gap-1.5"
+                  className="mt-3 w-full text-primary hover:text-primary/80 text-xs gap-1.5"
                 >
                   <Plus size={13} />
                   {pt ? "Adicionar evento neste dia" : "Add event on this day"}

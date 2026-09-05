@@ -42,24 +42,24 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
   onFeedbackClick,
 }) => {
   return (
-    <Card className="bg-slate-900/90 border-slate-800 shadow-2xl text-slate-100 backdrop-blur-md">
-      <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-slate-800">
+    <Card className="bg-card border-border shadow-lg text-card-foreground backdrop-blur-md">
+      <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border">
         <div>
           <Badge
             variant="outline"
-            className="text-[10px] uppercase font-semibold text-emerald-400 border-emerald-500/30 bg-emerald-500/10 mb-1"
+            className="text-[10px] uppercase font-semibold text-primary border-primary/30 bg-primary/10 mb-1"
           >
             {species === "cat" ? "🐱 Gato" : "🐶 Cão"} • Classificação v1
           </Badge>
-          <CardTitle className="text-xl font-bold text-white">
+          <CardTitle className="text-xl font-bold text-foreground">
             {breed}
           </CardTitle>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-extrabold text-emerald-400">
+          <span className="text-2xl font-extrabold text-primary">
             {(confidence * 100).toFixed(1)}%
           </span>
-          <p className="text-[10px] text-slate-400">Confiança Calibrada</p>
+          <p className="text-[10px] text-muted-foreground">Confiança Calibrada</p>
         </div>
       </CardHeader>
 
@@ -67,20 +67,20 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
         {/* Top 3 Predictions Bar */}
         {top3 && top3.length > 0 && (
           <div className="space-y-2.5">
-            <p className="text-xs font-medium text-slate-400">
+            <p className="text-xs font-medium text-muted-foreground">
               Top 3 Probabilidades Calibradas:
             </p>
             {top3.map((item, idx) => (
               <div key={idx} className="space-y-1">
                 <div className="flex justify-between text-xs font-medium">
-                  <span className="text-slate-200">{item.breed}</span>
-                  <span className="text-slate-400 font-mono">
+                  <span className="text-foreground">{item.breed}</span>
+                  <span className="text-muted-foreground font-mono">
                     {(item.confidence * 100).toFixed(1)}%
                   </span>
                 </div>
                 <Progress
                   value={Math.max(item.confidence * 100, 2)}
-                  className="h-1.5 bg-slate-800"
+                  className="h-1.5 bg-muted"
                 />
               </div>
             ))}
@@ -89,24 +89,24 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
 
         {/* Detailed Breed Info Panel */}
         {info && (
-          <div className="pt-2 space-y-3 border-t border-slate-800">
+          <div className="pt-2 space-y-3 border-t border-border">
             <div className="flex flex-wrap gap-1.5 text-xs">
               {info.origin && (
                 <Badge
                   variant="secondary"
-                  className="bg-slate-800 text-slate-300 border-slate-700 font-normal"
+                  className="bg-secondary/40 text-foreground border-border font-normal"
                 >
                   🌐 Origem:{" "}
-                  <strong className="ml-1 text-white">{info.origin}</strong>
+                  <strong className="ml-1 text-foreground">{info.origin}</strong>
                 </Badge>
               )}
               {info.life_expectancy && (
                 <Badge
                   variant="secondary"
-                  className="bg-slate-800 text-slate-300 border-slate-700 font-normal"
+                  className="bg-secondary/40 text-foreground border-border font-normal"
                 >
                   ⏳ Vida:{" "}
-                  <strong className="ml-1 text-white">
+                  <strong className="ml-1 text-foreground">
                     {info.life_expectancy}
                   </strong>
                 </Badge>
@@ -114,10 +114,10 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
               {info.average_weight && (
                 <Badge
                   variant="secondary"
-                  className="bg-slate-800 text-slate-300 border-slate-700 font-normal"
+                  className="bg-secondary/40 text-foreground border-border font-normal"
                 >
                   ⚖️ Peso:{" "}
-                  <strong className="ml-1 text-white">
+                  <strong className="ml-1 text-foreground">
                     {info.average_weight}
                   </strong>
                 </Badge>
@@ -125,10 +125,10 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
               {info.trainability && (
                 <Badge
                   variant="secondary"
-                  className="bg-slate-800 text-slate-300 border-slate-700 font-normal"
+                  className="bg-secondary/40 text-foreground border-border font-normal"
                 >
                   🎓 Treino:{" "}
-                  <strong className="ml-1 text-white">
+                  <strong className="ml-1 text-foreground">
                     {info.trainability}
                   </strong>
                 </Badge>
@@ -136,14 +136,14 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
             </div>
 
             {info.description && (
-              <p className="text-xs text-slate-300 leading-relaxed italic">
+              <p className="text-xs text-muted-foreground leading-relaxed italic">
                 "{info.description}"
               </p>
             )}
 
             {info.temperament && info.temperament.length > 0 && (
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 mb-1.5">
+                <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">
                   Temperamento:
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -151,7 +151,7 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
                     <Badge
                       key={tIdx}
                       variant="outline"
-                      className="bg-indigo-950/60 text-indigo-300 text-[11px] border-indigo-800/40"
+                      className="bg-secondary/30 text-secondary-foreground text-[11px] border-secondary/40"
                     >
                       {trait}
                     </Badge>
@@ -162,7 +162,7 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
 
             {info.health_risks && info.health_risks.length > 0 && (
               <div>
-                <p className="text-[11px] font-semibold text-slate-400 mb-1">
+                <p className="text-[11px] font-semibold text-muted-foreground mb-1">
                   Cuidados de Saúde:
                 </p>
                 <ul className="text-xs text-amber-300/90 list-disc list-inside space-y-0.5">
@@ -177,10 +177,10 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
 
         {/* Action Footer */}
         {onFeedbackClick && (
-          <div className="pt-2 flex justify-end border-t border-slate-800/60">
+          <div className="pt-2 flex justify-end border-t border-border/60">
             <button
               onClick={onFeedbackClick}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium underline flex items-center gap-1 transition-colors min-h-[44px]"
+              className="text-xs text-primary hover:text-primary/80 font-medium underline flex items-center gap-1 transition-colors min-h-[44px]"
             >
               💬 Reportar correção ou feedback
             </button>

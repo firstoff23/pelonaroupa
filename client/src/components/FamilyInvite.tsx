@@ -40,7 +40,7 @@ export default function FamilyInvite() {
           onClick={() => createInviteMutation.mutate({})}
           disabled={createInviteMutation.isPending}
           aria-label="Gerar novo link de convite familiar"
-          className="shrink-0 bg-primary hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold px-4 active-scale tap-highlight-none"
+          className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold px-4 active:scale-95 transition-all"
         >
           <Plus size={14} className="mr-1 shrink-0" aria-hidden="true" />
           {createInviteMutation.isPending ? "A gerar…" : "Gerar"}
@@ -55,7 +55,7 @@ export default function FamilyInvite() {
         >
           <Link2
             size={14}
-            className="text-emerald-400 shrink-0 ml-1"
+            className="text-primary shrink-0 ml-1"
             aria-hidden="true"
           />
           <input
@@ -63,7 +63,7 @@ export default function FamilyInvite() {
             value={inviteUrl}
             aria-label="Link de convite"
             onFocus={(e) => e.target.select()}
-            className="min-w-0 flex-1 bg-transparent text-xs text-slate-200 outline-none select-all focus-visible:ring-0"
+            className="min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none select-all focus-visible:ring-0"
           />
           <Button
             onClick={copyInvite}

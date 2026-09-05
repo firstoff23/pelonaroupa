@@ -6,17 +6,17 @@ export default function NotFound() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 px-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background px-4">
       <div className="flex flex-col items-center text-center space-y-6 max-w-sm">
         {/* Icon */}
         <div className="relative">
           <div
-            className="absolute inset-0 bg-emerald-500/10 rounded-full blur-2xl scale-150"
+            className="absolute inset-0 bg-primary/10 rounded-full blur-2xl scale-150"
             aria-hidden="true"
           />
-          <div className="relative grid h-20 w-20 place-items-center rounded-full bg-slate-900 border border-slate-800">
+          <div className="relative grid h-20 w-20 place-items-center rounded-full bg-card border border-border">
             <PawPrint
-              className="h-10 w-10 text-emerald-400"
+              className="h-10 w-10 text-primary"
               aria-hidden="true"
             />
           </div>
@@ -24,7 +24,7 @@ export default function NotFound() {
 
         {/* Copy */}
         <div className="space-y-2">
-          <h1 className="text-6xl font-black text-slate-800 select-none">
+          <h1 className="text-6xl font-black text-muted select-none">
             404
           </h1>
           <h2 className="text-lg font-bold text-foreground">
@@ -40,7 +40,7 @@ export default function NotFound() {
         {/* CTA */}
         <Button
           onClick={() => setLocation("/")}
-          className="bg-primary hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 active-scale tap-highlight-none"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 active:scale-95 transition-all"
         >
           <Home className="w-4 h-4" aria-hidden="true" />
           Ir para o início

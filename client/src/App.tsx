@@ -24,7 +24,6 @@ import { MobileOnlyGate } from "./components/MobileOnlyGate";
 import { OfflineActionsSyncer } from "./components/OfflineActionsSyncer";
 import { OnboardingFlow } from "./components/OnboardingFlow";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { Sidebar } from "./components/Sidebar";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MoodProvider } from "./contexts/MoodContext";
 import { SelfHealingProvider } from "./contexts/SelfHealingContext";
@@ -204,9 +203,6 @@ function Router() {
       <PushNotificationsBridge enabled={isAuthenticated} />
       <MLBackendSSEBridge enabled={isAuthenticated} />
 
-      {/* Sidebar Desktop — only shown when authenticated */}
-      {isAuthenticated && <Sidebar />}
-
       {/* Right container or single wrapper */}
       <div
         className={cn(
@@ -221,7 +217,7 @@ function Router() {
         <main
           className={cn(
             "flex-1 overflow-y-auto",
-            isAuthenticated ? "pb-20 md:pb-0" : "",
+            isAuthenticated ? "pb-24" : "",
           )}
         >
           <AnimatePresence mode="wait">
@@ -546,9 +542,9 @@ function App() {
                     position="bottom-center"
                     toastOptions={{
                       style: {
-                        background: "oklch(0.12 0.012 264)",
-                        border: "1px solid oklch(0.22 0.012 264)",
-                        color: "oklch(0.97 0.003 264)",
+                        background: "#161B20",
+                        border: "1px solid #1F262D",
+                        color: "#F5F0E8",
                       },
                     }}
                   />

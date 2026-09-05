@@ -488,7 +488,7 @@ export default function HealthBulletinTab({
           className="w-full px-5 py-4 flex items-center justify-between font-semibold text-foreground text-sm hover:bg-muted/10 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-500" />
+            <Activity className="w-4 h-4 text-primary" />
             <span>{t("bulletin.physicalTitle")}</span>
           </div>
           {expandedSection === "physical" ? (
@@ -525,7 +525,7 @@ export default function HealthBulletinTab({
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Verificar no SIAC"
-                          className="text-[9px] px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition-colors font-semibold"
+                          className="text-[9px] px-1.5 py-0.5 rounded-md bg-secondary/15 text-foreground border border-secondary/30 hover:bg-secondary/25 transition-colors font-semibold"
                         >
                           SIAC ↗
                         </a>
@@ -822,7 +822,7 @@ export default function HealthBulletinTab({
                       </div>
                       <div className="text-right flex items-center gap-2">
                         <div>
-                          <span className="text-[10px] text-emerald-400 font-medium block">
+                          <span className="text-[10px] text-primary font-medium block">
                             Ativa
                           </span>
                           {v.nextDueDate && (
@@ -1109,7 +1109,7 @@ export default function HealthBulletinTab({
           className="w-full px-5 py-4 flex items-center justify-between font-semibold text-foreground text-sm hover:bg-muted/10 transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-500" />
+            <Calendar className="w-4 h-4 text-primary" />
             <span>{t("bulletin.dewormingTitle")}</span>
           </div>
           {expandedSection === "deworming" ? (
@@ -1133,7 +1133,7 @@ export default function HealthBulletinTab({
                         {d.product}
                         <Badge
                           variant="outline"
-                          className="ml-2 text-[9px] border-indigo-500/20 text-indigo-400 bg-indigo-950/10"
+                          className="ml-2 text-[9px] border-secondary/30 text-foreground bg-secondary/15"
                         >
                           {d.type === "internal"
                             ? t("bulletin.dewormingInternal")
@@ -1926,7 +1926,7 @@ export default function HealthBulletinTab({
                                 ? "border-red-500/20 text-red-400 bg-red-950/10"
                                 : s.severity === "medium"
                                   ? "border-amber-500/20 text-amber-400 bg-amber-950/10"
-                                  : "border-emerald-500/20 text-emerald-400 bg-emerald-950/10"
+                                  : "border-primary/20 text-primary bg-primary/10"
                             }`}
                           >
                             {s.severity === "high"

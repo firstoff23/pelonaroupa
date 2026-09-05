@@ -1,5 +1,6 @@
 import { AlertCircle, BarChart3, PawPrint } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { Link } from "wouter";
 import {
   Bar,
   BarChart,
@@ -38,21 +39,21 @@ const ALL_STATES: EmotionalState[] = [
 ];
 
 const STATE_DOT_COLORS: Record<EmotionalState, string> = {
-  relaxed: "#94a3b8",
-  attention: "#eab308",
-  excitement: "#22c55e",
-  hunger: "#f97316",
-  alert: "#3b82f6",
-  distress: "#ef4444",
+  relaxed: "#6A8A8A",
+  attention: "#194D91",
+  excitement: "#2D739B",
+  hunger: "#F59E0B",
+  alert: "#194D91",
+  distress: "#EF4444",
 };
 
 const COLORS = [
-  "#6366f1",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#ec4899",
+  "#2D739B",
+  "#194D91",
+  "#6A8A8A",
+  "#8C9EA6",
+  "#F59E0B",
+  "#EF4444",
 ];
 
 export default function ComparisonPage() {
@@ -217,16 +218,27 @@ export default function ComparisonPage() {
 
   if (animals.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto p-4 text-center pt-16 space-y-4">
-        <PawPrint className="w-16 h-16 text-muted-foreground mx-auto opacity-50 animate-pulse" />
-        <h1 className="text-2xl font-bold text-white">
-          {language === "pt" ? "Sem Animais" : "No Animals"}
-        </h1>
-        <p className="text-slate-400">
-          {language === "pt"
-            ? "Adicione animais no Perfil para comparar dados emocionais."
-            : "Add animals in Profile to compare emotional data."}
-        </p>
+      <div className="max-w-md mx-auto p-4 text-center pt-16">
+        <Card className="p-8 space-y-5">
+          <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+            <PawPrint className="w-8 h-8 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-xl font-bold text-foreground">
+              {language === "pt" ? "Ainda não tens animais registados" : "No animals registered yet"}
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {language === "pt"
+                ? "Adiciona os teus animais de estimação para comparar estados emocionais e métricas de bem-estar."
+                : "Add your pets to compare emotional states and wellness metrics."}
+            </p>
+          </div>
+          <Link href="/perfil">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-sm">
+              {language === "pt" ? "Adicionar primeiro animal" : "Add first animal"}
+            </Button>
+          </Link>
+        </Card>
       </div>
     );
   }
@@ -235,11 +247,11 @@ export default function ComparisonPage() {
     <div className="max-w-2xl mx-auto p-4 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-          <BarChart3 className="w-8 h-8 text-indigo-400" />
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+          <BarChart3 className="w-8 h-8 text-primary" />
           {language === "pt" ? "Comparação de Animais" : "Animal Comparison"}
         </h1>
-        <p className="text-slate-400 mt-1">
+        <p className="text-muted-foreground mt-1">
           {language === "pt"
             ? "Compare os estados emocionais dos seus animais"
             : "Compare emotional states across your animals"}
@@ -247,7 +259,7 @@ export default function ComparisonPage() {
       </div>
 
       {/* Controls */}
-      <Card className="bg-slate-900/60 border-slate-800">
+      <Card>
         <CardContent className="p-4 space-y-4">
           {/* Period selector */}
           <div className="flex gap-2">
@@ -255,9 +267,9 @@ export default function ComparisonPage() {
               <button
                 key={opt.value}
                 onClick={() => setPeriod(opt.value as 7 | 30 | 90)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   period === opt.value
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                    ? "bg-primary text-primary-foreground font-semibold shadow-sm"
                     : "bg-card border border-border text-muted-foreground hover:text-foreground"
                 }`}
               >

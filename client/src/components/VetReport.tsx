@@ -109,7 +109,7 @@ export default function VetReport({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
             Relatório clínico
           </p>
           <h2 className="text-xl font-bold text-foreground print:text-slate-950">
@@ -124,7 +124,7 @@ export default function VetReport({
         <div className="no-print flex gap-2">
           <Button
             onClick={() => window.print()}
-            className="bg-emerald-500 text-white hover:bg-emerald-600"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <FileText size={16} />
             PDF
@@ -159,29 +159,29 @@ export default function VetReport({
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={report.trend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1F262D" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    tick={{ fill: "#8C9EA6", fontSize: 11 }}
                   />
                   <YAxis
-                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    tick={{ fill: "#8C9EA6", fontSize: 11 }}
                     domain={[0, 1]}
                   />
                   <Tooltip
                     contentStyle={{
-                      background: "#020617",
-                      border: "1px solid #1e293b",
+                      background: "#161B20",
+                      border: "1px solid #1F262D",
                       borderRadius: 8,
-                      color: "#e2e8f0",
+                      color: "#F8FAFC",
                     }}
                   />
                   <Line
                     type="monotone"
                     dataKey="confidence"
-                    stroke="#10b981"
+                    stroke="#2D739B"
                     strokeWidth={2}
-                    dot={{ r: 3, fill: "#10b981" }}
+                    dot={{ r: 3, fill: "#2D739B" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -210,13 +210,13 @@ export default function VetReport({
               <textarea
                 value={clinicalNotes}
                 onChange={(event) => onClinicalNotesChange(event.target.value)}
-                className="mt-1 min-h-32 w-full resize-none rounded-lg border border-slate-700 bg-slate-950 p-3 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                className="mt-1 min-h-32 w-full resize-none rounded-lg border border-slate-700 bg-slate-950 p-3 text-xs text-slate-100 outline-none focus:border-primary"
                 placeholder="Observações clínicas, recomendações, sinais a monitorizar..."
               />
               <Button
                 onClick={onSaveNotes}
                 disabled={savingNotes}
-                className="mt-2 w-full bg-emerald-500 text-white hover:bg-emerald-600"
+                className="mt-2 w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Save size={15} />
                 {savingNotes ? "A guardar..." : "Guardar notas"}
@@ -256,7 +256,7 @@ export default function VetReport({
                   {STATE_LABELS[event.state as keyof typeof STATE_LABELS] ??
                     event.state}
                 </td>
-                <td className="px-3 py-2 text-emerald-400 print:text-slate-800">
+                <td className="px-3 py-2 text-primary print:text-slate-800">
                   {Math.round(event.confidence * 100)}%
                 </td>
                 <td className="px-3 py-2 text-slate-300 print:text-slate-800">

@@ -119,7 +119,7 @@ export function Sidebar() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="font-satoshi font-extrabold text-base tracking-tight bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent truncate"
+                className="font-bold text-base tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate"
               >
                 PeloNaRoupa
               </motion.span>
@@ -163,7 +163,7 @@ export function Sidebar() {
               aria-current={active ? "page" : undefined}
               title={collapsed ? label : undefined}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-[150ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left active-scale font-satoshi text-xs font-semibold relative overflow-hidden group",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-[150ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-left active-scale font-sans text-xs font-semibold relative overflow-hidden group",
                 active
                   ? "bg-primary/10 text-primary border border-primary/25"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-transparent",

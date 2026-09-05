@@ -26,7 +26,7 @@ export function getHealthBadge(state?: EmotionalState | string | null) {
 
   return {
     label: "Estável",
-    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    className: "border-primary/30 bg-primary/10 text-primary",
   };
 }
 

@@ -139,16 +139,16 @@ export default function VetDashboard() {
   }
 
   return (
-    <div className="min-h-full bg-slate-950 px-4 py-6 text-slate-100">
+    <div className="min-h-full bg-background px-4 py-6 text-foreground">
       <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+        <header className="flex flex-col gap-4 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-400">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
               <Stethoscope size={16} />
               Modo Veterinário
             </p>
             <h1 className="mt-2 text-3xl font-bold">Dashboard clínico</h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-400">
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
               Animais partilhados consigo, histórico clínico, notas veterinárias
               e relatórios exportáveis.
             </p>
@@ -156,31 +156,31 @@ export default function VetDashboard() {
           <Button
             onClick={() => setLocation("/dashboard")}
             variant="outline"
-            className="border-slate-700"
+            className="border-border"
           >
             Voltar ao dashboard
           </Button>
         </header>
 
-        <section className="grid gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-4 md:grid-cols-4">
-          <label className="space-y-1 text-xs text-slate-400">
+        <section className="grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-4">
+          <label className="space-y-1 text-xs text-muted-foreground">
             Espécie
             <select
               value={species}
               onChange={(event) => setSpecies(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
             >
               <option value="all">Todas</option>
               <option value="dog">Cães</option>
               <option value="cat">Gatos</option>
             </select>
           </label>
-          <label className="space-y-1 text-xs text-slate-400">
+          <label className="space-y-1 text-xs text-muted-foreground">
             Estado emocional
             <select
               value={state}
               onChange={(event) => setState(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
             >
               {STATES.map((item) => (
                 <option key={item} value={item}>
@@ -189,36 +189,36 @@ export default function VetDashboard() {
               ))}
             </select>
           </label>
-          <label className="space-y-1 text-xs text-slate-400">
+          <label className="space-y-1 text-xs text-muted-foreground">
             Desde
             <input
               type="date"
               value={dateFrom}
               onChange={(event) => setDateFrom(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
             />
           </label>
-          <label className="space-y-1 text-xs text-slate-400">
+          <label className="space-y-1 text-xs text-muted-foreground">
             Até
             <input
               type="date"
               value={dateTo}
               onChange={(event) => setDateTo(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none focus:border-primary"
             />
           </label>
         </section>
 
         <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
           <aside className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
-              <Filter size={16} className="text-emerald-400" />
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Filter size={16} className="text-primary" />
               Animais partilhados
             </div>
             {animalsQuery.isLoading ? (
               <VetAnimalListSkeleton />
             ) : animalsQuery.data?.length === 0 ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-400">
+              <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
                 Ainda não existem animais partilhados com este veterinário.
               </div>
             ) : (
@@ -226,25 +226,25 @@ export default function VetDashboard() {
                 <button
                   key={animal.id}
                   onClick={() => setSelectedAnimalId(animal.id)}
-                  className={`w-full rounded-lg border p-4 text-left transition ${
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
                     selectedAnimal?.id === animal.id
-                      ? "border-emerald-500 bg-emerald-500/10"
-                      : "border-slate-800 bg-slate-900/60 hover:border-slate-700"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card hover:border-primary/40"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-slate-100">
+                      <p className="font-semibold text-foreground">
                         {animal.name}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         {animal.species === "dog" ? "Cão" : "Gato"} · Tutor:{" "}
                         {animal.ownerName}
                       </p>
                     </div>
-                    <Activity size={18} className="text-emerald-400" />
+                    <Activity size={18} className="text-primary" />
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     Último estado: {animal.lastState || "sem registos"}
                   </p>
                 </button>
@@ -254,16 +254,16 @@ export default function VetDashboard() {
 
           <main className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-slate-400">Período do relatório</p>
-              <div className="flex rounded-lg border border-slate-800 bg-slate-900 p-1">
+              <p className="text-sm text-muted-foreground">Período do relatório</p>
+              <div className="flex rounded-lg border border-border bg-card p-1">
                 {[30, 60, 90].map((days) => (
                   <button
                     key={days}
                     onClick={() => setPeriodDays(days)}
                     className={`rounded-md px-3 py-1 text-xs ${
                       periodDays === days
-                        ? "bg-emerald-500 text-white"
-                        : "text-slate-400"
+                        ? "bg-primary text-primary-foreground font-semibold"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {days}d

@@ -149,7 +149,7 @@ function PhotoUploadZone({
       )}
 
       {mediaState.status === "success" && (
-        <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-4 flex items-center justify-between">
+        <div className="border border-border bg-card rounded-2xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {mediaState.filePreview &&
             !mediaState.filePreview.startsWith("data:application/pdf") ? (
@@ -160,7 +160,7 @@ function PhotoUploadZone({
                 className="w-12 h-12 rounded-xl object-cover border border-border"
               />
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-primary border border-border">
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-primary border border-border">
                 <FileText size={20} />
               </div>
             )}
@@ -169,7 +169,7 @@ function PhotoUploadZone({
                 {mediaState.fileName ||
                   (language === "pt" ? "Ficheiro carregado" : "File uploaded")}
               </p>
-              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-0.5 mt-0.5">
+              <span className="text-[10px] text-primary font-semibold flex items-center gap-0.5 mt-0.5">
                 <Check size={10} strokeWidth={2.5} />{" "}
                 {language === "pt" ? "Sucesso" : "Success"}
               </span>
@@ -218,7 +218,7 @@ function PhotoUploadZone({
                 type="button"
                 size="sm"
                 onClick={openSettings}
-                className="text-xs h-8 bg-primary hover:bg-emerald-600 text-white"
+                className="text-xs h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <Settings size={12} className="mr-1" />
                 {language === "pt" ? "Definições" : "Settings"}
@@ -763,7 +763,7 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
                 </Label>
                 <div className="flex items-center gap-2">
                   {isNameValid && (
-                    <span className="text-emerald-400 text-[10px] flex items-center gap-0.5">
+                    <span className="text-primary text-[10px] flex items-center gap-0.5">
                       <Check size={10} />
                     </span>
                   )}
@@ -785,7 +785,7 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
                   nameError
                     ? "border-red-500 focus-visible:ring-red-500/50"
                     : ""
-                } ${isNameValid ? "border-emerald-500/50 focus-visible:ring-emerald-500/50" : ""}`}
+                } ${isNameValid ? "border-primary/50 focus-visible:ring-primary/50" : ""}`}
               />
               {nameError && (
                 <p className="text-[10px] text-red-400 font-medium leading-relaxed mt-1 flex gap-1 items-start">
@@ -1045,7 +1045,7 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
                 </Label>
                 <div className="flex items-center gap-2">
                   {isNameValid && (
-                    <span className="text-emerald-400 text-[10px] flex items-center gap-0.5">
+                    <span className="text-primary text-[10px] flex items-center gap-0.5">
                       <Check size={10} />
                     </span>
                   )}
@@ -1067,7 +1067,7 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
                   nameError
                     ? "border-red-500 focus-visible:ring-red-500/50"
                     : ""
-                } ${isNameValid ? "border-emerald-500/50 focus-visible:ring-emerald-500/50" : ""}`}
+                } ${isNameValid ? "border-primary/50 focus-visible:ring-primary/50" : ""}`}
               />
               {nameError && (
                 <p className="text-[10px] text-red-400 font-medium leading-relaxed mt-1 flex gap-1 items-start">
@@ -1253,7 +1253,7 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
                           fileName: null,
                         });
                       }}
-                      className="text-xs h-8 bg-primary hover:bg-emerald-600 text-white"
+                      className="text-xs h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       {language === "pt"
                         ? "Preencher manualmente"
@@ -1298,8 +1298,8 @@ export function AddAnimalForm({ onClose }: { onClose: () => void }) {
             className={`flex-1 font-semibold transition-all ${
               isFormValid &&
               (activeTab !== "ocr" || ocrMediaState.status === "success")
-                ? "bg-primary text-primary-foreground hover:bg-emerald-600 shadow-md shadow-primary/20"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border-border"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                : "bg-muted text-muted-foreground cursor-not-allowed opacity-50 border-border"
             }`}
           >
             {addMutation.isPending ? t("common.loading") : t("common.save")}
@@ -1790,8 +1790,8 @@ export function EditAnimalForm({
             disabled={updateMutation.isPending || !isFormValid}
             className={`flex-1 font-semibold transition-all ${
               isFormValid
-                ? "bg-primary text-primary-foreground hover:bg-emerald-600 shadow-md shadow-primary/20"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-50 border-border"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                : "bg-muted text-muted-foreground cursor-not-allowed opacity-50 border-border"
             }`}
           >
             {updateMutation.isPending ? t("common.loading") : t("common.save")}

@@ -9,8 +9,8 @@
     "settings": "Definições"
   },
   "header": {
-    "activeAnimal": "Animal Activo",
-    "noAnimal": "Nenhum animal seleccionado",
+    "activeAnimal": "Animal Ativo",
+    "noAnimal": "Nenhum animal selecionado",
     "logout": "Sair"
   },
   "common": {
@@ -160,11 +160,11 @@
   "recordingPage": {
     "simulatedPosture": "Simular Postura:",
     "postureEstimated": "Postura Estimada:",
-    "autoModeOn": "Auto Classify está ligado",
+    "autoModeOn": "Gravação contínua ativa",
     "recordingAcustic": "A gravar e analisar o sinal em tempo real…",
     "processingAcustic": "A analisar dados acústicos com IA…",
     "requestingMic": "A pedir acesso ao microfone…",
-    "pressForAuto": "Premir continuamente para Auto Classify",
+    "pressForAuto": "Manter premido para gravação contínua",
     "tapForSingle": "Toque para uma gravação única de 3 segundos",
     "nextAcusticSoon": "Próxima análise acústica a iniciar em breve…",
     "continuousMode": "Modo contínuo",

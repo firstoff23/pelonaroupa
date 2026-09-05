@@ -84,13 +84,13 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4 text-slate-100">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="bg-card border border-border rounded-2xl p-5 shadow-lg space-y-4 text-card-foreground">
+      <div className="flex items-center justify-between border-b border-border pb-3">
         <div>
-          <span className="text-xs uppercase tracking-wider font-semibold text-emerald-400">
+          <span className="text-xs uppercase tracking-wider font-semibold text-primary">
             🎙️ Áudio • Vocalização Pet
           </span>
-          <h3 className="text-xl font-bold text-white">
+          <h3 className="text-xl font-bold text-foreground">
             Gravador de Latidos & Miados
           </h3>
         </div>
@@ -99,7 +99,7 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
             className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${
               isRecording
                 ? "bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse"
-                : "bg-slate-800 text-slate-400 border-slate-700"
+                : "bg-muted text-muted-foreground border-border"
             }`}
           >
             {isRecording ? "🔴 A Gravar..." : "Pronto"}
@@ -122,14 +122,14 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
         {!isRecording ? (
           <button
             onClick={startRecording}
-            className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg min-h-[44px]"
+            className="flex-1 py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 min-h-[44px]"
           >
             🎤 Iniciar Gravação
           </button>
         ) : (
           <button
             onClick={stopRecording}
-            className="flex-1 py-3 px-4 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg min-h-[44px]"
+            className="flex-1 py-3 px-4 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 min-h-[44px]"
           >
             ⏹️ Parar Gravação
           </button>
@@ -139,7 +139,7 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
           <button
             onClick={handleSend}
             disabled={isProcessing}
-            className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-50 min-h-[44px]"
+            className="flex-1 py-3 px-4 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 disabled:opacity-50 min-h-[44px]"
           >
             {isProcessing ? "A Analisar..." : "⚡ Classificar Vocalização"}
           </button>
@@ -155,12 +155,12 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
 
       {/* Results Display */}
       {result && (
-        <div className="pt-3 border-t border-slate-800 space-y-3">
+        <div className="pt-3 border-t border-border space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-muted-foreground">
               Vocalização Identificada:
             </span>
-            <span className="text-sm font-bold text-emerald-400 uppercase tracking-wide">
+            <span className="text-sm font-bold text-primary uppercase tracking-wide">
               {result.vocalization_class} (
               {(result.confidence * 100).toFixed(1)}%)
             </span>
@@ -168,22 +168,22 @@ export const AudioRecorderCard: React.FC<AudioRecorderCardProps> = ({
 
           {result.top3 && result.top3.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[11px] font-medium text-slate-400">
+              <p className="text-[11px] font-medium text-muted-foreground">
                 Top 3 Diagnósticos Fónicos:
               </p>
               {result.top3.map((item, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-slate-300 capitalize">
+                    <span className="text-foreground capitalize">
                       {item.vocalization}
                     </span>
-                    <span className="text-slate-400">
+                    <span className="text-muted-foreground">
                       {(item.confidence * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                      className="bg-primary h-1.5 rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.max(item.confidence * 100, 2)}%`,
                       }}

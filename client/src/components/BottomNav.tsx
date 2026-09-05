@@ -81,19 +81,15 @@ export function BottomNav() {
       label: language === "pt" ? "Calendário" : "Calendar",
     },
     {
+      path: "/vigilancia",
+      icon: Activity,
+      label:
+        language === "pt" ? "Monitorização Contínua" : "Continuous Monitoring",
+    },
+    {
       path: "/definicoes",
       icon: Settings,
       label: language === "pt" ? "Definições" : "Settings",
-    },
-    {
-      path: "/monitor",
-      icon: Activity,
-      label: language === "pt" ? "Monitor" : "Monitor",
-    },
-    {
-      path: "/vigilancia",
-      icon: Activity,
-      label: language === "pt" ? "Vigilância" : "Surveillance",
     },
   ];
 
@@ -105,7 +101,7 @@ export function BottomNav() {
   return (
     <>
       <nav
-        className="fixed bottom-6 inset-x-4 z-50 md:hidden flex justify-center pointer-events-none"
+        className="fixed bottom-6 inset-x-4 z-50 flex justify-center pointer-events-none"
         aria-label={
           language === "pt" ? "Navegação principal" : "Primary navigation"
         }
@@ -201,7 +197,7 @@ export function BottomNav() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="bottom"
-          className="rounded-t-[1.75rem] border-t-0 p-6 md:hidden"
+          className="rounded-t-2xl border-t border-border p-6 max-w-md mx-auto"
         >
           <SheetHeader className="text-left mb-6">
             <SheetTitle>

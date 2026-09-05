@@ -49,19 +49,19 @@ export function CookieBanner() {
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
           className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-[100] overflow-hidden"
         >
-          <div className="relative bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col gap-4">
+          <div className="relative bg-popover/95 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-xl flex flex-col gap-4">
             {/* Ambient background light */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none -z-10" />
 
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center text-primary shrink-0">
                 <Cookie className="w-5 h-5 animate-pulse" />
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
                   {t.title}
                 </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {t.description}
                 </p>
               </div>
@@ -72,14 +72,14 @@ export function CookieBanner() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleConsent("essential")}
-                className="flex-1 text-[11px] font-semibold text-slate-400 hover:text-white hover:bg-slate-900 h-9 rounded-xl"
+                className="flex-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted h-9 rounded-lg"
               >
                 {t.essential}
               </Button>
               <Button
                 size="sm"
                 onClick={() => handleConsent("accepted")}
-                className="flex-1 text-[11px] font-bold bg-gradient-to-r from-primary via-emerald-400 to-emerald-300 text-slate-950 hover:brightness-105 transition-all shadow-md active:scale-[0.98] h-9 rounded-xl border-0"
+                className="flex-1 text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm active:scale-95 h-9 rounded-lg border-0"
               >
                 {t.accept}
               </Button>

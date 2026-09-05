@@ -47,7 +47,7 @@ export function BackgroundGrid({
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute bottom-[-10%] right-[10%] w-[450px] h-[450px] rounded-full bg-indigo-500/5 blur-[120px]"
+        className="absolute bottom-[-10%] right-[10%] w-[450px] h-[450px] rounded-full bg-secondary/5 blur-[120px]"
       />
     </div>
   );

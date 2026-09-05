@@ -132,9 +132,9 @@ export default function FoodSearchPage() {
           variant: "healthy" as const,
           icon: CheckCircle,
           colorClass:
-            "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
+            "text-primary border-primary/20 bg-primary/10",
           glowClass:
-            "hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:border-emerald-500/30",
+            "hover:shadow-md hover:border-primary/30",
         };
       case "caution":
         return {
@@ -315,11 +315,11 @@ export default function FoodSearchPage() {
             {/* Safe Foods */}
             {visibleFoods.some((f) => f.computedSeverity === "safe") && (
               <div className="space-y-3">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-500/80 flex items-center gap-1.5 px-1">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 px-1">
                   <CheckCircle className="h-3.5 w-3.5" />
                   {language === "pt" ? "Alimentos Seguros" : "Safe Foods"}
                 </h2>
-                <div className="flex flex-col gap-3 p-3.5 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.02]">
+                <div className="flex flex-col gap-3 p-3.5 rounded-2xl border border-primary/15 bg-primary/[0.03]">
                   <AnimatePresence mode="popLayout">
                     {visibleFoods
                       .filter((f) => f.computedSeverity === "safe")

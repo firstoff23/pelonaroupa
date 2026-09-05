@@ -82,13 +82,13 @@ export function TrendCard({ animalId }: TrendCardProps) {
     : [];
 
   return (
-    <Card className="bg-slate-900/60 border-slate-800 backdrop-blur-sm overflow-hidden">
+    <Card className="bg-card border-border backdrop-blur-sm overflow-hidden">
       <CardHeader className="pb-1 pt-4 px-4 flex flex-row items-center justify-between">
         <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {language === "pt" ? "Tendência de Bem-estar" : "Well-being Trend"}
         </CardTitle>
         <div className="flex items-center gap-1">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+          <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-1 space-y-4">
@@ -96,7 +96,7 @@ export function TrendCard({ animalId }: TrendCardProps) {
         <div className="flex items-baseline justify-between">
           <div className="flex items-center gap-2">
             {direction === "up" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                 <TrendingUp size={12} />
                 {percentageChange > 0
                   ? `+${percentageChange}%`
@@ -112,7 +112,7 @@ export function TrendCard({ animalId }: TrendCardProps) {
               </span>
             )}
             {direction === "stable" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary/15 text-tertiary border border-tertiary/30">
                 <Minus size={12} />
                 {language === "pt" ? "Estável" : "Stable"}
               </span>
@@ -133,13 +133,13 @@ export function TrendCard({ animalId }: TrendCardProps) {
               >
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 9, fill: "#94a3b8" }}
+                  tick={{ fontSize: 9, fill: "#8C9EA6" }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
                   domain={[0, 100]}
-                  tick={{ fontSize: 9, fill: "#94a3b8" }}
+                  tick={{ fontSize: 9, fill: "#8C9EA6" }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -147,8 +147,8 @@ export function TrendCard({ animalId }: TrendCardProps) {
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div className="bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-[10px] shadow-xl">
-                        <p className="font-semibold text-indigo-400">
+                      <div className="bg-card border border-border px-2.5 py-1 rounded-lg text-[10px] shadow-xl">
+                        <p className="font-semibold text-primary">
                           Score: {payload[0].value}%
                         </p>
                       </div>
@@ -158,10 +158,10 @@ export function TrendCard({ animalId }: TrendCardProps) {
                 <Line
                   type="monotone"
                   dataKey="score"
-                  stroke="#6366f1"
+                  stroke="#194D91"
                   strokeWidth={2.5}
-                  dot={{ r: 3, fill: "#6366f1", strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: "#818cf8" }}
+                  dot={{ r: 3, fill: "#194D91", strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: "#2D739B" }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -180,9 +180,9 @@ export function TrendCard({ animalId }: TrendCardProps) {
               {patternList.map((p, idx) => (
                 <div
                   key={idx}
-                  className="text-xs bg-indigo-950/20 text-indigo-300 border border-indigo-500/10 px-3 py-1.5 rounded-xl leading-normal flex items-start gap-1.5"
+                  className="text-xs bg-secondary/15 text-foreground border border-secondary/20 px-3 py-1.5 rounded-lg leading-normal flex items-start gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 mt-0.5 text-indigo-400 shrink-0" />
+                  <Sparkles className="w-3.5 h-3.5 mt-0.5 text-primary shrink-0" />
                   <span>{p}</span>
                 </div>
               ))}

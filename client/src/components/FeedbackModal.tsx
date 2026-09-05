@@ -88,127 +88,109 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           {" "}
           <div>
             {" "}
-            <p className="text-xs text-slate-400">Previsão Atual do Modelo:</p>{" "}
+            <p className="text-xs text-muted-foreground">Previsão Atual do Modelo:</p>
             <Badge
               variant="outline"
-              className="text-sm font-semibold text-emerald-400 border-emerald-500/30 bg-emerald-500/10 mt-1"
+              className="text-sm font-semibold text-primary border-primary/30 bg-primary/10 mt-1"
             >
-              {" "}
-              {predictedBreed}{" "}
-            </Badge>{" "}
-          </div>{" "}
+              {predictedBreed}
+            </Badge>
+          </div>
           <div className="space-y-2">
-            {" "}
-            <label className="text-xs font-medium text-slate-300 block">
-              {" "}
-              A previsão de raça estava correta?{" "}
-            </label>{" "}
+            <label className="text-xs font-medium text-foreground block">
+              A previsão de raça estava correta?
+            </label>
             <div className="flex gap-3">
-              {" "}
               <Button
                 type="button"
                 variant={isCorrect ? "default" : "outline"}
                 onClick={() => setIsCorrect(true)}
-                className={`flex-1 min-h-[44px] text-xs font-semibold ${isCorrect ? "bg-emerald-600 hover:bg-emerald-500 text-white border-none" : "bg-slate-800 border-slate-700 text-slate-300"}`}
+                className={`flex-1 min-h-[44px] text-xs font-semibold ${isCorrect ? "bg-primary hover:bg-primary/90 text-primary-foreground border-none" : "bg-muted border-border text-foreground"}`}
               >
-                {" "}
-                ✅ Sim, correta{" "}
-              </Button>{" "}
+                ✅ Sim, correta
+              </Button>
               <Button
                 type="button"
                 variant={!isCorrect ? "destructive" : "outline"}
                 onClick={() => setIsCorrect(false)}
-                className={`flex-1 min-h-[44px] text-xs font-semibold ${!isCorrect ? "bg-rose-600 hover:bg-rose-500 text-white border-none" : "bg-slate-800 border-slate-700 text-slate-300"}`}
+                className={`flex-1 min-h-[44px] text-xs font-semibold ${!isCorrect ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground border-none" : "bg-muted border-border text-foreground"}`}
               >
-                {" "}
-                ❌ Não, incorreta{" "}
-              </Button>{" "}
-            </div>{" "}
-          </div>{" "}
+                ❌ Não, incorreta
+              </Button>
+            </div>
+          </div>
           {!isCorrect && (
             <div>
-              {" "}
-              <label className="text-xs font-medium text-slate-300 block mb-1">
-                {" "}
-                Qual é a raça correta?{" "}
-              </label>{" "}
+              <label className="text-xs font-medium text-foreground block mb-1">
+                Qual é a raça correta?
+              </label>
               <input
                 type="text"
                 value={correctLabel}
                 onChange={(e) => setCorrectLabel(e.target.value)}
                 placeholder="Ex: Golden Retriever / Bengal"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 min-h-[44px]"
-              />{" "}
+                className="w-full bg-background border border-border rounded-lg px-3 py-2.5 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary min-h-[44px]"
+              />
             </div>
-          )}{" "}
+          )}
           <div>
-            {" "}
-            <label className="text-xs font-medium text-slate-300 block mb-1">
-              {" "}
-              Observações contextuais (opcional):{" "}
-            </label>{" "}
+            <label className="text-xs font-medium text-foreground block mb-1">
+              Observações contextuais (opcional):
+            </label>
             <textarea
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
               placeholder="Ex: Pelagem de cor diferente ou tamanho médio..."
               rows={2}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"
-            />{" "}
-          </div>{" "}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary resize-none"
+            />
+          </div>
           <div>
-            {" "}
-            <label className="text-xs font-medium text-slate-300 block mb-1">
-              {" "}
-              Anexar foto para retreino do modelo (opcional):{" "}
-            </label>{" "}
+            <label className="text-xs font-medium text-foreground block mb-1">
+              Anexar foto para retreino do modelo (opcional):
+            </label>
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${isDragActive ? "border-emerald-500 bg-emerald-500/10" : "border-slate-700 bg-slate-800/60 hover:bg-slate-800"}`}
+              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all ${isDragActive ? "border-primary bg-primary/10" : "border-border bg-muted/40 hover:bg-muted/60"}`}
             >
-              {" "}
-              <input {...getInputProps()} />{" "}
+              <input {...getInputProps()} />
               {previewUrl ? (
                 <div className="flex items-center justify-center gap-3">
-                  {" "}
                   <img
                     src={previewUrl}
                     alt="Preview"
-                    className="w-12 h-12 rounded-lg object-cover border border-slate-700"
-                  />{" "}
-                  <span className="text-xs text-emerald-400 font-medium">
+                    className="w-12 h-12 rounded-lg object-cover border border-border"
+                  />
+                  <span className="text-xs text-primary font-medium">
                     Imagem selecionada (clique ou arraste para substituir)
-                  </span>{" "}
+                  </span>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400">
-                  {" "}
+                <p className="text-xs text-muted-foreground">
                   {isDragActive
                     ? "Solte a imagem aqui..."
-                    : "📁 Arraste uma imagem ou clique para selecionar"}{" "}
+                    : "📁 Arraste uma imagem ou clique para selecionar"}
                 </p>
-              )}{" "}
-            </div>{" "}
-          </div>{" "}
+              )}
+            </div>
+          </div>
           <div className="pt-2 flex gap-3">
-            {" "}
             <Button
               type="button"
               variant="secondary"
               onClick={onClose}
-              className="flex-1 bg-slate-800 text-slate-300 hover:bg-slate-700 min-h-[44px]"
+              className="flex-1 rounded-lg min-h-[44px]"
             >
-              {" "}
-              Cancelar{" "}
-            </Button>{" "}
+              Cancelar
+            </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white min-h-[44px]"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg min-h-[44px]"
             >
-              {" "}
-              {isSubmitting ? "A guardar..." : "Submeter Feedback"}{" "}
-            </Button>{" "}
-          </div>{" "}
+              {isSubmitting ? "A guardar..." : "Submeter Feedback"}
+            </Button>
+          </div>
         </form>{" "}
       </DialogContent>{" "}
     </Dialog>

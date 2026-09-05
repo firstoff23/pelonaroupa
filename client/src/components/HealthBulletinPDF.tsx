@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   },
   header: {
     borderBottomWidth: 2,
-    borderBottomColor: "#6366f1",
+    borderBottomColor: "#2D739B",
     borderBottomStyle: "solid",
     paddingBottom: 10,
     marginBottom: 20,
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#6366f1",
+    color: "#2D739B",
   },
   subtitle: {
     fontSize: 12,
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#6366f1",
-    backgroundColor: "#f5f3ff",
+    color: "#2D739B",
+    backgroundColor: "#eef4f8",
     padding: 4,
     marginBottom: 10,
     marginTop: 15,

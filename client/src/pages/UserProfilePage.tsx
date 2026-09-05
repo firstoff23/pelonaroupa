@@ -104,7 +104,7 @@ export default function UserProfilePage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {saving ? (
                   <>
@@ -121,18 +121,18 @@ export default function UserProfilePage() {
       </Card>
 
       {/* Account Status */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white">Estado da Conta</CardTitle>
+          <CardTitle className="text-foreground">Estado da Conta</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-slate-300">Email Verificado</span>
+            <span className="text-muted-foreground">Email Verificado</span>
             <span
               className={`px-3 py-1 rounded-full text-sm font-medium ${
                 user.email_confirmed_at
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-yellow-500/20 text-yellow-400"
+                  ? "bg-primary/20 text-primary"
+                  : "bg-warning/20 text-warning"
               }`}
             >
               {user.email_confirmed_at ? "Verificado" : "Pendente"}

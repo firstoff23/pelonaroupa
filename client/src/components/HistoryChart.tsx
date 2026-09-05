@@ -67,7 +67,7 @@ export default function HistoryChart({
         <Line
           type="monotone"
           dataKey="stateValue"
-          stroke="#10b981"
+          stroke="#2D739B"
           strokeWidth={3}
           activeDot={{ r: 6 }}
         />

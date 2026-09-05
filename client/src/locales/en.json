@@ -160,11 +160,11 @@
   "recordingPage": {
     "simulatedPosture": "Simulate Posture:",
     "postureEstimated": "Posture Estimated:",
-    "autoModeOn": "Auto Classify is active",
+    "autoModeOn": "Continuous recording is active",
     "recordingAcustic": "Recording and analyzing signal in real time…",
     "processingAcustic": "Analyzing acoustic data with AI…",
     "requestingMic": "Requesting microphone access…",
-    "pressForAuto": "Press and hold for Auto Classify",
+    "pressForAuto": "Press and hold for continuous recording",
     "tapForSingle": "Tap for a single 3-second recording",
     "nextAcusticSoon": "Next acoustic analysis starting soon…",
     "continuousMode": "Continuous Mode",

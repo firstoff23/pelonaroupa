@@ -1,4 +1,4 @@
-﻿import {
+import {
   Activity,
   AlertCircle,
   Bell,
@@ -387,11 +387,11 @@ export default function SettingsPage() {
       {/* Modo VeterinÃ¡rio */}
       {canAccessVetMode && (
         <motion.div variants={cardVariants}>
-          <Card className="overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-card to-cyan-500/10">
-            <CardHeader className="pb-3 border-b border-emerald-500/10 bg-emerald-500/5">
+          <Card className="overflow-hidden border-border bg-card">
+            <CardHeader className="pb-3 border-b border-border/40 bg-muted/20">
               <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                <Stethoscope className="w-4 h-4 text-emerald-400" />
-                {language === "pt" ? "Modo VeterinÃ¡rio" : "Veterinary Mode"}
+                <Stethoscope className="w-4 h-4 text-primary" />
+                {language === "pt" ? "Modo Veterinário" : "Veterinary Mode"}
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 {language === "pt"
@@ -402,12 +402,12 @@ export default function SettingsPage() {
             <CardContent className="pt-4">
               <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
                 {language === "pt"
-                  ? "Acompanhe animais partilhados por tutores, consulte relatÃ³rios e registe notas clÃ­nicas internas."
+                  ? "Acompanhe animais partilhados por tutores, consulte relatórios e registe notas clínicas internas."
                   : "Track animals shared by guardians, review reports, and save internal clinical notes."}
               </p>
               <Button
                 onClick={() => setLocation("/vet")}
-                className="w-full gap-2 bg-emerald-500 text-white hover:bg-emerald-600 text-xs h-9 active-scale tap-highlight-none"
+                className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-9 active-scale tap-highlight-none"
               >
                 <Stethoscope className="w-3.5 h-3.5" />
                 {language === "pt"
@@ -849,7 +849,7 @@ export default function SettingsPage() {
                   className={cn(
                     "text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex items-center gap-1.5",
                     healthState?.status === "healthy" || !healthState
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      ? "bg-primary/10 text-primary border border-primary/20"
                       : healthState?.status === "degraded"
                         ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                         : "bg-rose-500/10 text-rose-400 border border-rose-500/20",
@@ -859,7 +859,7 @@ export default function SettingsPage() {
                     className={cn(
                       "w-1.5 h-1.5 rounded-full animate-ping",
                       healthState?.status === "healthy" || !healthState
-                        ? "bg-emerald-400"
+                        ? "bg-primary"
                         : healthState?.status === "degraded"
                           ? "bg-amber-400"
                           : "bg-rose-400",
@@ -880,7 +880,7 @@ export default function SettingsPage() {
                           aria-hidden="true"
                         />
                       </span>
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                      <span className="font-semibold text-primary flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Operational
                       </span>
                     </div>
@@ -888,7 +888,7 @@ export default function SettingsPage() {
                   <TooltipContent>
                     <p className="text-xs max-w-[180px]">
                       {language === "pt"
-                        ? "API FastAPI em produÃ§Ã£o (HF Spaces). Recebe pedidos de classificaÃ§Ã£o de Ã¡udio e raÃ§as."
+                        ? "API FastAPI em produção (HF Spaces). Recebe pedidos de classificação de áudio e raças."
                         : "FastAPI backend on HF Spaces. Receives breed and audio classification requests."}
                     </p>
                   </TooltipContent>
@@ -904,7 +904,7 @@ export default function SettingsPage() {
                           aria-hidden="true"
                         />
                       </span>
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                      <span className="font-semibold text-primary flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Ready
                       </span>
                     </div>
@@ -912,7 +912,7 @@ export default function SettingsPage() {
                   <TooltipContent>
                     <p className="text-xs max-w-[180px]">
                       {language === "pt"
-                        ? "Sistema de cÃ¢mara do WebView pronto para captura de imagens para identificaÃ§Ã£o de raÃ§as."
+                        ? "Sistema de câmara do WebView pronto para captura de imagens para identificação de raças."
                         : "WebView camera system ready to capture images for breed identification."}
                     </p>
                   </TooltipContent>
@@ -928,7 +928,7 @@ export default function SettingsPage() {
                           aria-hidden="true"
                         />
                       </span>
-                      <span className="font-semibold text-emerald-400 flex items-center gap-1 mt-0.5">
+                      <span className="font-semibold text-primary flex items-center gap-1 mt-0.5">
                         <CheckCircle2 className="w-3 h-3" /> Online
                       </span>
                     </div>
@@ -1079,7 +1079,7 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div className="border border-dashed border-border/40 rounded-xl p-3 flex flex-col items-center justify-center text-center text-muted-foreground py-5">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400 mb-1" />
+                  <CheckCircle2 className="w-6 h-6 text-primary mb-1" />
                   <span className="text-[10px] font-medium">
                     {language === "pt"
                       ? "Nenhum erro detetado recente"
@@ -1093,7 +1093,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-foreground">
                 {language === "pt"
-                  ? "HistÃ³rico de AÃ§Ãµes de Autocura"
+                  ? "Histórico de Ações de Autocura"
                   : "Self-Healing Actions History"}
               </Label>
               {healingHistory && healingHistory.length > 0 ? (
@@ -1113,7 +1113,7 @@ export default function SettingsPage() {
                             className={cn(
                               "px-1.5 py-0.2 rounded-md font-bold capitalize text-[8px]",
                               act.status === "success"
-                                ? "bg-emerald-500/10 text-emerald-400"
+                                ? "bg-primary/10 text-primary"
                                 : "bg-red-500/10 text-red-400",
                             )}
                           >
@@ -1360,7 +1360,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 {mfaStatus?.enabled ? (
-                  <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 rounded-full px-2.5 py-1">
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 rounded-full px-2.5 py-1">
                     <ShieldCheck className="w-3 h-3" />
                     {language === "pt" ? "Ativo" : "Active"}
                   </span>
@@ -1529,8 +1529,8 @@ export default function SettingsPage() {
 
           {mfaStep === "done" && (
             <div className="flex flex-col items-center gap-4 py-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                <ShieldCheck className="w-8 h-8 text-emerald-400" />
+              <div className="w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-primary" />
               </div>
               <div className="text-center space-y-1">
                 <p className="font-semibold text-foreground">

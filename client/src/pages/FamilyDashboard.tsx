@@ -31,7 +31,7 @@ function getRoleLabel(role: string): { label: string; className: string } {
     case "member":
       return {
         label: "Membro",
-        className: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+        className: "text-primary bg-primary/10 border-primary/20",
       };
     default:
       return {
@@ -247,12 +247,12 @@ export default function FamilyDashboard({
 
       <div className="page-enter max-w-lg mx-auto space-y-4 px-4 pt-5 pb-6 min-h-full text-slate-100">
         {/* Header banner */}
-        <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/15 flex items-start gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/15">
-            <Users size={16} className="text-emerald-400" aria-hidden="true" />
+        <div className="p-4 rounded-2xl bg-primary/5 border border-primary/15 flex items-start gap-3">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/15">
+            <Users size={16} className="text-primary" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
               Modo Família
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
@@ -271,7 +271,7 @@ export default function FamilyDashboard({
               <div className="flex items-center gap-2">
                 <Plus
                   size={14}
-                  className="text-emerald-400"
+                  className="text-primary"
                   aria-hidden="true"
                 />
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -303,7 +303,7 @@ export default function FamilyDashboard({
                     createFamilyMutation.isPending ||
                     familyName.trim().length === 0
                   }
-                  className="bg-primary hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold px-4 active-scale tap-highlight-none"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold px-4 active:scale-95 transition-all"
                 >
                   {createFamilyMutation.isPending ? "A criar…" : "Criar"}
                 </Button>
@@ -355,7 +355,7 @@ export default function FamilyDashboard({
                   <Button
                     type="submit"
                     disabled={joinMutation.isPending || joinCode.length !== 6}
-                    className="bg-primary hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold px-4 active-scale tap-highlight-none"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold px-4 active:scale-95 transition-all"
                   >
                     {joinMutation.isPending ? "A entrar…" : "Entrar"}
                   </Button>
@@ -397,7 +397,7 @@ export default function FamilyDashboard({
                           className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold ${
                             isOwner
                               ? "bg-amber-500/15 text-amber-400"
-                              : "bg-emerald-500/15 text-emerald-400"
+                              : "bg-primary/15 text-primary"
                           }`}
                           aria-hidden="true"
                         >
@@ -453,7 +453,7 @@ export default function FamilyDashboard({
                       <div className="flex items-center gap-2 min-w-0">
                         <PawPrint
                           size={15}
-                          className="text-emerald-400 shrink-0"
+                          className="text-primary shrink-0"
                           aria-hidden="true"
                         />
                         <p className="text-xs font-semibold text-foreground truncate">

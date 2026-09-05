@@ -344,7 +344,7 @@ export default function FeedbackAuditPage() {
                       #{item.id}
                     </span>
                     {item.reviewed_by ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-semibold">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full font-semibold">
                         <CheckCircle size={10} />
                         Revisto
                       </span>
@@ -551,7 +551,7 @@ export default function FeedbackAuditPage() {
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {item.reviewed_by ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-semibold">
+                          <span className="inline-flex items-center gap-1 text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full font-semibold">
                             <CheckCircle size={10} />
                             Revisto
                           </span>

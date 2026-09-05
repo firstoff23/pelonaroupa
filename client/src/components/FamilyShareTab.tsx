@@ -130,7 +130,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
 
       <div className="bg-secondary/20 border border-border/80 rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2 text-foreground">
-          <Home size={16} className="text-emerald-400" />
+          <Home size={16} className="text-primary" />
           <h3 className="text-xs font-semibold uppercase tracking-wider">
             Família
           </h3>
@@ -142,7 +142,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
           <Button
             onClick={() => shareWithFamilyMutation.mutate({ animalId })}
             disabled={shareWithFamilyMutation.isPending}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs active-scale tap-highlight-none font-semibold h-9"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs active:scale-95 transition-all font-semibold h-9"
           >
             {shareWithFamilyMutation.isPending
               ? "A adicionar..."
@@ -152,7 +152,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
           <Button
             onClick={() => setLocation("/family")}
             variant="outline"
-            className="w-full border-border text-xs rounded-xl active-scale tap-highlight-none font-semibold h-9"
+            className="w-full border-border text-xs rounded-lg active:scale-95 transition-all font-semibold h-9"
           >
             Criar ou juntar família
           </Button>
@@ -162,7 +162,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
       {/* Invite form */}
       <div className="bg-secondary/20 border border-border/80 rounded-2xl p-4 space-y-4">
         <div className="flex items-center gap-2 text-foreground">
-          <UserPlus size={16} className="text-emerald-400" />
+          <UserPlus size={16} className="text-primary" />
           <h3 className="text-xs font-semibold uppercase tracking-wider">
             Convidar Co-tutor
           </h3>
@@ -178,7 +178,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ex: familiar@email.com"
-              className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors tap-highlight-none"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors tap-highlight-none"
             />
           </div>
 
@@ -192,7 +192,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
                 onChange={(e) =>
                   setPermission(e.target.value as "read" | "write")
                 }
-                className="w-full bg-background text-xs border border-border rounded-xl px-3 py-2 text-foreground focus:outline-none focus:border-primary/50 active-scale tap-highlight-none"
+                className="w-full bg-background text-xs border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:border-primary/50 active-scale tap-highlight-none"
               >
                 <option value="read">
                   Apenas Leitura (Estatísticas e Histórico)
@@ -206,7 +206,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
             <Button
               type="submit"
               disabled={inviteMutation.isPending}
-              className="w-full bg-primary hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold h-9 active-scale tap-highlight-none mt-1"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-xs font-semibold h-9 active:scale-95 transition-all mt-1"
             >
               {inviteMutation.isPending ? "A enviar..." : "Convidar Co-tutor"}
             </Button>
@@ -244,7 +244,7 @@ export default function FamilyShareTab({ animalId }: FamilyShareTabProps) {
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     {share.status === "accepted" ? (
-                      <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
+                      <span className="text-[10px] text-primary flex items-center gap-1 font-semibold">
                         <CheckCircle2 size={10} /> Aceite
                       </span>
                     ) : share.status === "rejected" ? (

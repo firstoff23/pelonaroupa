@@ -7,14 +7,14 @@ const MOBILE_URL = "https://animalmind.vercel.app";
 
 function DesktopMobileNotice() {
   return (
-    <main className="min-h-screen bg-[#07080a] text-white flex items-center justify-center px-6 py-10 overflow-hidden">
-      <section className="w-full max-w-[420px] rounded-lg border border-white/10 bg-[#0d0f12] p-6 shadow-2xl shadow-black/40">
+    <main className="min-h-screen bg-[#0E1215] text-white flex items-center justify-center px-6 py-10 overflow-hidden">
+      <section className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#161B20] p-6 shadow-2xl shadow-black/40">
         <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-lg border border-emerald-400/25 bg-emerald-400/10 text-emerald-300">
+          <span className="grid size-11 place-items-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
             <Logo className="size-6" />
           </span>
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
               PeloNaRoupa
             </p>
             <p className="text-sm text-white/52">Experiência mobile-first</p>
@@ -23,7 +23,7 @@ function DesktopMobileNotice() {
 
         <div className="mt-10 space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/62">
-            <Smartphone className="size-3.5 text-emerald-300" />
+            <Smartphone className="size-3.5 text-primary" />
             Abrir no telemóvel
           </div>
           <h1 className="text-3xl font-black leading-[1.05] tracking-tight text-white">
@@ -46,8 +46,8 @@ function DesktopMobileNotice() {
           />
         </div>
 
-        <div className="mt-5 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-4 py-3 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-300">
+        <div className="mt-5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Link directo
           </p>
           <a

@@ -235,7 +235,7 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                       ) : (
                         <TrendingDown
                           size={12}
-                          className="text-emerald-400 flex-shrink-0"
+                          className="text-primary flex-shrink-0"
                         />
                       )}
                       <span
@@ -249,7 +249,7 @@ export function InsightsPanel({ animalId }: { animalId: number }) {
                       <span
                         className={cn(
                           "font-bold",
-                          isUp ? "text-amber-400" : "text-emerald-400",
+                          isUp ? "text-amber-400" : "text-primary",
                         )}
                       >
                         {isUp ? "+" : ""}

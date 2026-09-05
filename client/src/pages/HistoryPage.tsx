@@ -225,9 +225,9 @@ const EventRow = memo(function EventRow({
       style={{ touchAction: "pan-y" }}
       aria-label="Classificação no histórico"
     >
-      {/* Correct background (Green) - Swiping Right */}
+      {/* Correct background (Primary) - Swiping Right */}
       <motion.div
-        className="absolute inset-y-0 left-0 flex items-center gap-2 px-4 text-xs font-semibold text-emerald-400 bg-emerald-950/70"
+        className="absolute inset-y-0 left-0 flex items-center gap-2 px-4 text-xs font-semibold text-primary bg-primary/20"
         style={{ opacity: opacityCorrect, width: "100%" }}
       >
         <ThumbsUp size={16} aria-hidden="true" />
@@ -267,7 +267,7 @@ const EventRow = memo(function EventRow({
                 {event.feedback === "correct" ? (
                   <ThumbsUp
                     size={12}
-                    className="text-emerald-400 inline"
+                    className="text-primary inline"
                     aria-label="Correct"
                   />
                 ) : (
@@ -336,7 +336,7 @@ const EventRow = memo(function EventRow({
           <div
             className="text-sm font-bold"
             style={{
-              color: pct >= 80 ? "#10b981" : pct >= 60 ? "#eab308" : "#ef4444",
+              color: pct >= 80 ? "#2D739B" : pct >= 60 ? "#6A8A8A" : "#EF4444",
             }}
           >
             {pct}%
@@ -347,7 +347,7 @@ const EventRow = memo(function EventRow({
               style={{
                 width: `${pct}%`,
                 backgroundColor:
-                  pct >= 80 ? "#10b981" : pct >= 60 ? "#eab308" : "#ef4444",
+                  pct >= 80 ? "#2D739B" : pct >= 60 ? "#6A8A8A" : "#EF4444",
               }}
             />
           </div>
@@ -644,28 +644,28 @@ function EmptyState({ filtered }: { filtered: boolean }) {
 
           <div className="space-y-2 max-w-xs">
             <p className="text-lg font-bold text-foreground">
-              {language === "pt" ? "Nenhuma análise ainda" : "No analyses yet"}
+              {language === "pt" ? "Ainda não tens gravações" : "No recordings yet"}
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {language === "pt"
-                ? "Grave o som do seu animal e descubra o que ele está a tentar dizer."
+                ? "Grave o som do seu animal e descubra o que ele está a tentar dizer em tempo real."
                 : "Record your pet's sounds and discover what they're trying to say."}
             </p>
           </div>
 
           <Link href="/capturar">
             <Button
-              className="mt-2 gap-2 shadow-lg shadow-primary/20 font-semibold px-6"
+              className="mt-2 gap-2 shadow-sm font-semibold px-6 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
               aria-label={
                 language === "pt"
-                  ? "Fazer primeira gravação de áudio do animal"
+                  ? "Faz a primeira gravação agora"
                   : "Make first animal audio recording"
               }
             >
-              <Mic size={16} className="animate-pulse" aria-hidden="true" />
+              <Mic size={16} aria-hidden="true" />
               {language === "pt"
-                ? "Fazer primeira gravação"
-                : "Make first recording"}
+                ? "Faz a primeira gravação agora"
+                : "Make first recording now"}
             </Button>
           </Link>
         </>
@@ -1332,7 +1332,7 @@ export default function HistoryPage() {
               variant="outline"
               size="sm"
               onClick={() => setLocation("/comparison")}
-              className="gap-1.5 h-8 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10 active-scale tap-highlight-none"
+              className="gap-1.5 h-8 border-secondary/30 text-secondary hover:bg-secondary/10 active-scale tap-highlight-none"
             >
               <ArrowUpDown size={14} className="rotate-90" />
               {t("nav.comparison") || "Comparar"}

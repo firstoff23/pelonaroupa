@@ -159,19 +159,22 @@ def main():
         print("[AudioTraining] Attempting to load real audio dataset from HF Hub...")
         try:
             from datasets import load_dataset as hf_load_dataset
-            # Try to load ESC-50 (environmental sounds, includes animal classes)
-            # We filter for animal-like classes as a starting point.
-            # Replace with a custom pet-sounds dataset when available.
-            hf_audio_ds = hf_load_dataset("ashraq/esc50", split="train")
-            print(f"[AudioTraining] Loaded ESC-50 with {len(hf_audio_ds)} examples.")
-            print("[AudioTraining] NOTE: For production, replace ESC-50 with a pet-specific dataset.")
-            # Use synthetic dataset as training base (ESC-50 class mapping differs)
-            # TODO: add proper ESC-50 → VOCALIZATION_CLASSES mapping
-            dataset = SyntheticAudioDataset(num_samples=500)
+            hf_audio_ds = hf_load_dataset(
+                os.environ.get("AUDIO_DATASET_ID", "firstoff/animalmind-sounds"),
+                split="train",
+            )
+            print(f"[AudioTraining] Loaded real audio dataset with {len(hf_audio_ds)} examples.")
+            raise NotImplementedError(
+                "Real audio dataset loaded, but its schema is not mapped to VOCALIZATION_CLASSES yet. "
+                "Implement the mapping before production training."
+            )
+        except NotImplementedError:
+            raise
         except Exception as exc:
-            print(f"[AudioTraining] Could not load real dataset ({exc}). Using synthetic fallback (500 samples).")
-            print("[AudioTraining] ⚠️  Add a real pet sounds dataset for production training.")
-            dataset = SyntheticAudioDataset(num_samples=500)
+            raise RuntimeError(
+                f"Could not load a real mapped audio dataset: {exc}. "
+                "Use --dry-run only for synthetic pipeline checks."
+            ) from exc
 
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size

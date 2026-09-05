@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "description": "AnimalMind observable canine body-language annotation schema",
+  "principle": "Annotate observable signals; do not infer emotions or medical diagnoses from pose alone.",
+  "heads": {
+    "posture": ["standing", "sitting", "lying", "crouching", "unknown"],
+    "head": ["raised", "neutral", "lowered", "unknown"],
+    "ears": ["forward", "neutral", "backward", "asymmetric", "unknown"],
+    "tail": ["high", "neutral", "low", "tucked", "unknown"],
+    "movement": ["still", "walking", "running", "shaking", "unknown"]
+  },
+  "metadata": [
+    "sample_id",
+    "animal_id",
+    "species",
+    "source",
+    "source_license",
+    "annotator",
+    "annotation_confidence",
+    "notes"
+  ],
+  "quality_rules": [
+    "Use unknown when the relevant body part is occluded or ambiguous.",
+    "Do not copy a label from breed identity.",
+    "Do not use the same animal in both train and validation splits when animal_id is known.",
+    "Keep source attribution for every sample."
+  ]
+}

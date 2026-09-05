@@ -218,6 +218,33 @@ class SyntheticDogBreedDataset(Dataset):
         return img, label
 
 
+class HFDogBreedDataset(Dataset):
+    """Adapter for a real HF image dataset with image and label columns."""
+
+    def __init__(self, dataset, transform):
+        self.dataset = dataset
+        self.transform = transform
+        columns = set(dataset.column_names)
+        self.image_column = "image" if "image" in columns else "img"
+        self.label_column = "label" if "label" in columns else "labels"
+        if self.image_column not in columns or self.label_column not in columns:
+            raise ValueError(
+                f"Expected image/label columns, got {sorted(columns)}"
+            )
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        from PIL import Image
+
+        item = self.dataset[idx]
+        image = item[self.image_column]
+        if not isinstance(image, Image.Image):
+            image = Image.fromarray(np.asarray(image))
+        return self.transform(image.convert("RGB")), int(item[self.label_column])
+
+
 def get_transforms():
     """Returns state-of-the-art augmentation transforms for ViT training."""
     train_transform = transforms.Compose([
@@ -304,11 +331,14 @@ def train_pipeline(args):
             val_ds_raw = val_test["train"]
             test_ds_raw = val_test["test"]
             print(f"[Dataset] Train: {len(train_ds_raw)}, Val: {len(val_ds_raw)}, Test: {len(test_ds_raw)}")
+            train_dataset = HFDogBreedDataset(train_ds_raw, train_transform)
+            val_dataset = HFDogBreedDataset(val_ds_raw, val_transform)
+            test_dataset = HFDogBreedDataset(test_ds_raw, val_transform)
         except Exception as exc:
-            print(f"[Dataset] Warning: Could not load Stanford Dogs remotely ({exc}). Using synthetic fallback.")
-            train_dataset = SyntheticDogBreedDataset(num_samples=128, num_classes=120, transform=train_transform)
-            val_dataset = SyntheticDogBreedDataset(num_samples=32, num_classes=120, transform=val_transform)
-            test_dataset = SyntheticDogBreedDataset(num_samples=32, num_classes=120, transform=val_transform)
+            raise RuntimeError(
+                f"Could not load/map a real Stanford Dogs dataset: {exc}. "
+                "Use --dry-run only for synthetic pipeline checks."
+            ) from exc
 
     # --- Class weights ---
     print("[ClassWeight] Computing class weights from training distribution...")

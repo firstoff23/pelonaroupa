@@ -1,0 +1,57 @@
+name: ML backend checks
+
+on:
+  pull_request:
+    paths:
+      - "ml_backend/**"
+      - ".github/workflows/ml-backend-checks.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ml_backend/**"
+      - ".github/workflows/ml-backend-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ml-backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    name: Validar backend ML
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Obter o repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compilar módulos Python
+        run: |
+          python -m compileall -q ml_backend
+
+      - name: Verificar diffs e fallback proibido
+        shell: bash
+        run: |
+          git diff --check
+          if grep -RInE 'breed\[0\]|wav_path|fallback Wav2Vec2|Using synthetic fallback' \
+            ml_backend/app.py ml_backend/routers ml_backend/services \
+            ml_backend/training/*.py; then
+            echo "Encontrado fallback/heurística proibida no caminho de produção."
+            exit 1
+          fi
+
+      - name: Verificar configuração dos modelos
+        run: |
+          grep -q 'firstoff/animalmind-breed-classifier' ml_backend/app.py
+          grep -q 'firstoff/animalmind-cat-classifier' ml_backend/app.py
+          grep -q 'firstoff/animalmind-audio-classifier' ml_backend/services/audio_service.py
+          grep -q 'include_router(classify_breed_router' ml_backend/app.py
+          grep -q 'training_manifest.template.json' <(git ls-files ml_backend/training/training_manifest.template.json)

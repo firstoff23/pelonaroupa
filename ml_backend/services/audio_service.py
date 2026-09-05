@@ -1,4 +1,5 @@
 import io
+import os
 import time
 import pathlib
 import torch
@@ -39,12 +40,22 @@ def load_audio_model():
             _FEATURE_EXTRACTOR = AutoFeatureExtractor.from_pretrained(str(model_dir))
             _AUDIO_MODEL = AutoModelForAudioClassification.from_pretrained(str(model_dir))
         else:
-            print("[AudioService] Loading fallback Wav2Vec2 audio classifier...")
-            _FEATURE_EXTRACTOR = AutoFeatureExtractor.from_pretrained("facebook/wav2vec2-base")
-            _AUDIO_MODEL = AutoModelForAudioClassification.from_pretrained("facebook/wav2vec2-base")
+            model_id = os.environ.get(
+                "AUDIO_MODEL_ID", "firstoff/animalmind-audio-classifier"
+            )
+            print(f"[AudioService] Loading audio classifier from Hugging Face: {model_id}")
+            _FEATURE_EXTRACTOR = AutoFeatureExtractor.from_pretrained(model_id)
+            _AUDIO_MODEL = AutoModelForAudioClassification.from_pretrained(model_id)
+
+        config_labels = getattr(_AUDIO_MODEL.config, "id2label", {}) or {}
+        labels = [config_labels.get(i, "") for i in range(len(config_labels))]
+        if labels and set(labels) != set(VOCALIZATION_CLASSES):
+            raise ValueError(
+                f"Audio model labels do not match expected classes: {labels}"
+            )
         _AUDIO_MODEL.eval()
     except Exception as err:
-        print(f"[AudioService] Could not load Wav2Vec2 model: {err}. Using heuristic fallback.")
+        print(f"[AudioService] Could not load AnimalMind audio model: {err}.")
         _AUDIO_MODEL = None
         _FEATURE_EXTRACTOR = None
 
@@ -110,16 +121,13 @@ def classify_vocalization(audio_bytes: bytes) -> Dict[str, Any]:
         except Exception as err:
             print(f"[AudioService] Model inference error: {err}")
 
-    # Fallback response for unmapped audio input
+    # Do not return a fabricated high-confidence prediction when the model is unavailable.
     proc_ms = round((time.time() - start_t) * 1000.0, 1)
     return {
-        "vocalization_class": "bark",
-        "confidence": 0.85,
-        "top3": [
-            {"vocalization": "bark", "confidence": 0.85},
-            {"vocalization": "growl", "confidence": 0.10},
-            {"vocalization": "whine", "confidence": 0.05}
-        ],
+        "vocalization_class": "unknown",
+        "confidence": 0.0,
+        "top3": [],
         "calibrated": False,
-        "processing_time_ms": proc_ms
+        "model_available": False,
+        "processing_time_ms": proc_ms,
     }

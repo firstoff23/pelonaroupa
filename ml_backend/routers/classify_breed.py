@@ -82,74 +82,34 @@ async def classify_breed_v1(
     if cached_result:
         return BreedClassificationResponse(**cached_result)
 
-    # 6. Carregar Modelo de Visão
+    # 6. Detect species first, then select the matching breed classifier
     t_start = time.perf_counter()
     try:
-        main_app._load_vision_model()
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"Erro ao carregar modelo de visão: {exc}")
+        from app import _get_species_classifier, _map_imagenet_to_species
+        from app import _get_cat_classifier, _get_dog_classifier, _run_breed_pipeline
 
-    # 7. Descodificar Imagem
-    try:
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Não foi possível descodificar a imagem: {exc}")
+        species_map = _map_imagenet_to_species(_get_species_classifier()(img))
+        species = species_map["species"]
+        if species == "unknown":
+            raise HTTPException(status_code=422, detail="Não foi possível identificar cão ou gato.")
 
-    # 8. Inferência
-    try:
-        with torch.no_grad():
-            inputs = main_app._vit_processor(images=img, return_tensors="pt")
-            outputs = main_app._vit_model(**inputs)
+        classifier = _get_cat_classifier() if species == "cat" else _get_dog_classifier()
+        results = _run_breed_pipeline(classifier, image_bytes)
+        if not results:
+            raise RuntimeError("O classificador não devolveu resultados")
 
-        if hasattr(outputs, "logits") or "logits" in outputs:
-            logits = outputs.logits if hasattr(outputs, "logits") else outputs["logits"]
-
-            # Apply Temperature Scaling if calibrated parameter exists (dog or cat)
-            import pathlib
-            dog_temp = pathlib.Path(__file__).parent.parent / "models" / "temperature.pt"
-            cat_temp = pathlib.Path(__file__).parent.parent / "models" / "cat_temperature.pt"
-            temp_path = cat_temp if cat_temp.exists() else dog_temp
-            if temp_path.exists():
-                try:
-                    temp_data = torch.load(str(temp_path), map_location="cpu")
-                    temp_val = float(temp_data.get("temperature", 1.0))
-                    if temp_val > 0:
-                        logits = logits / temp_val
-                except Exception as temp_err:
-                    print(f"[Inference] Warning: Erro ao carregar parâmetro de temperatura: {temp_err}")
-
-            prob_breed = F.softmax(logits, dim=-1)[0]
-            top_k = torch.topk(prob_breed, k=min(3, len(prob_breed)))
-
-            top3_items: List[Top3Item] = []
-            id2label = getattr(main_app._vit_model.config, "id2label", {}) or {}
-
-            for idx, score in zip(top_k.indices, top_k.values):
-                raw_label = id2label.get(int(idx), main_app._BREED_LABELS[int(idx)] if int(idx) < len(main_app._BREED_LABELS) else f"Breed_{idx}")
-                clean_name = main_app._clean_breed_label(raw_label)
-                top3_items.append(Top3Item(breed=clean_name, confidence=round(float(score), 3)))
-
-            top_breed = top3_items[0].breed
-            top_confidence = top3_items[0].confidence
-            species = "cat" if top_breed[0].isupper() else "dog"
-
-        else:
-            # Dual-head fallback
-            prob_species = F.softmax(outputs["logits_species"], dim=-1)[0]
-            prob_breed = F.softmax(outputs["logits_breed"], dim=-1)[0]
-
-            species_idx = int(prob_species.argmax())
-            species = main_app._SPECIES_LABELS[species_idx]
-
-            top_k = torch.topk(prob_breed, k=3)
-            top3_items = []
-            for idx, score in zip(top_k.indices, top_k.values):
-                clean_name = main_app._clean_breed_label(main_app._BREED_LABELS[int(idx)])
-                top3_items.append(Top3Item(breed=clean_name, confidence=round(float(score), 3)))
-
-            top_breed = top3_items[0].breed
-            top_confidence = round(float((prob_species[species_idx] * prob_breed[top_k.indices[0]]) ** 0.5), 3)
-
+        top3_items = [
+            Top3Item(
+                breed=main_app._clean_breed_label(str(item.get("label", "unknown"))),
+                confidence=round(float(item.get("score", 0.0)), 3),
+            )
+            for item in results[:3]
+        ]
+        top_breed = top3_items[0].breed
+        top_confidence = top3_items[0].confidence
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Erro durante a inferência: {exc}")
 

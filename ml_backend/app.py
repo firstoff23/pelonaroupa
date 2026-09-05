@@ -1,7 +1,8 @@
-import csv
 import os
 import subprocess
 import io
+import csv
+import asyncio
 from typing import Dict, List, Optional, Tuple, Union, BinaryIO
 # Load environment variables from .env if present
 try:
@@ -35,6 +36,15 @@ except ImportError:
 from datetime import datetime, timezone
 from fastapi.responses import StreamingResponse
 
+cors_origins = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CORS_ORIGINS",
+        "https://animalmind.vercel.app,http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]
+
 # ─── SSE (Server-Sent Events) broadcast queue ────────────────────────────────
 # Each connected SSE client gets a reference to its own asyncio.Queue.
 # When /classify completes, it broadcasts the result to all connected queues.
@@ -62,6 +72,15 @@ app = FastAPI(
     version="1.4.0",
 )
 
+# Public API versioned routes. The routers import the app lazily inside handlers
+# so they can share the model singletons without creating an import cycle.
+from routers.classify_breed import router as classify_breed_router
+from routers.feedback import router as feedback_router
+from routers.health import router as health_router
+app.include_router(classify_breed_router, prefix="/v1")
+app.include_router(feedback_router, prefix="/v1")
+app.include_router(health_router, prefix="/v1")
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -77,8 +96,6 @@ app.add_middleware(
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-import asyncio
-
 class AuditLogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -429,7 +446,7 @@ def classify_with_yamnet(wav_source: Union[str, BinaryIO, bytes]) -> Dict[str, o
     ]
     top_debug = ", ".join(f"{label}:{score:.2f}" for label, score in top_predictions[:5])
     logger.debug("YAMNet top predictions", extra={"top_classes": top_debug})
-    signal_result = classify_with_signal_features(wav_path)
+    signal_result = classify_with_signal_features(wav_source)
     state, confidence = _score_state_from_yamnet(top_predictions, signal_result)
     return {"state": state, "confidence": round(confidence, 2), "model": "yamnet-tfhub"}
 
@@ -656,8 +673,12 @@ async def get_task_status(
 # Modelos confirmados pelo HuggingFace Assistant:
 # Cões: wesleyacheng/dog-breeds-multiclass-image-classification-with-vit (120 raças)
 # Gatos: dima806/67_cat_breeds_image_detection (67 raças)
-DOG_MODEL_ID = "wesleyacheng/dog-breeds-multiclass-image-classification-with-vit"
-CAT_MODEL_ID = "dima806/67_cat_breeds_image_detection"
+DOG_MODEL_ID = os.environ.get(
+    "DOG_BREED_MODEL_ID", "firstoff/animalmind-breed-classifier"
+)
+CAT_MODEL_ID = os.environ.get(
+    "CAT_BREED_MODEL_ID", "firstoff/animalmind-cat-classifier"
+)
 
 _dog_classifier = None
 _cat_classifier = None
@@ -1221,60 +1242,38 @@ async def classify_image(
             detail="File content does not match a valid image format.",
         )
 
-    # ── Load model lazily ─────────────────────────────────────────────────
-    try:
-        _load_vision_model()
-    except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"Model load failed: {exc}")
-
-    # ── Read & decode image ───────────────────────────────────────────────
+    # ── Detect species first, then use the matching breed model ─────────────
     t_start = _time.perf_counter()
     try:
         from PIL import Image as _PIL_Image
-        # `contents` is already populated by the size-check block above
+
         img = _PIL_Image.open(io.BytesIO(contents)).convert("RGB")
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Cannot decode image: {exc}")
+        species_classifier = _get_species_classifier()
+        species_results = species_classifier(img)
+        mapping = _map_imagenet_to_species(species_results)
+        species = mapping["species"]
+        if species == "unknown":
+            return ImageClassificationResponse(
+                species="unknown",
+                breed="unknown",
+                confidence=round(float(mapping["confidence"]), 4),
+                processing_time_ms=round((_time.perf_counter() - t_start) * 1000.0, 1),
+                model_source=SPECIES_MODEL_ID,
+            )
 
-    # ── Inference ─────────────────────────────────────────────────────────
-    try:
-        with _torch.no_grad():
-            inputs  = _vit_processor(images=img, return_tensors="pt")
-            outputs = _vit_model(**inputs)
+        classifier = _get_cat_classifier() if species == "cat" else _get_dog_classifier()
+        results = _run_breed_pipeline(classifier, contents)
+        if not results:
+            raise RuntimeError("Breed model returned no predictions")
 
-        import torch.nn.functional as F
-        
-        # Check if the output has 'logits' attribute/key (standard ViTForImageClassification)
-        if hasattr(outputs, "logits") or "logits" in outputs:
-            logits = outputs.logits if hasattr(outputs, "logits") else outputs["logits"]
-            prob_breed = F.softmax(logits, dim=-1)[0]
-            breed_idx = int(prob_breed.argmax())
-            
-            # Resolve breed label via id2label if available, mapping to backend format
-            if hasattr(_vit_model, "config") and hasattr(_vit_model.config, "id2label") and _vit_model.config.id2label:
-                raw_breed = _vit_model.config.id2label[breed_idx]
-                norm_map = {b.lower().replace(" ", "_"): b for b in _BREED_LABELS}
-                breed = norm_map.get(raw_breed.lower().replace(" ", "_"), raw_breed)
-            else:
-                breed = _BREED_LABELS[breed_idx]
-            
-            # Map breed to species
-            species = "cat" if breed[0].isupper() else "dog"
-            confidence = float(prob_breed[breed_idx])
-        else:
-            # Fallback to the legacy dual-head/mock model format
-            prob_species = F.softmax(outputs["logits_species"], dim=-1)[0]
-            prob_breed   = F.softmax(outputs["logits_breed"],   dim=-1)[0]
-
-            species_idx = int(prob_species.argmax())
-            breed_idx   = int(prob_breed.argmax())
-
-            species    = _SPECIES_LABELS[species_idx]
-            breed      = _BREED_LABELS[breed_idx]
-            confidence = float((prob_species[species_idx] * prob_breed[breed_idx]) ** 0.5)
+        top = results[0]
+        breed = _clean_breed_label(str(top.get("label", "unknown")))
+        confidence = float(top.get("score", 0.0))
+        model_source = CAT_MODEL_ID if species == "cat" else DOG_MODEL_ID
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Inference error: {exc}")
+
 
     elapsed_ms = (_time.perf_counter() - t_start) * 1000.0
 
@@ -1283,20 +1282,26 @@ async def classify_image(
         breed              = breed,
         confidence         = round(confidence, 4),
         processing_time_ms = round(elapsed_ms, 1),
-        model_source       = _vit_source or "unknown",
+        model_source       = model_source,
     )
 
 
 @app.get("/model-health", response_model=ModelHealthResponse)
 def model_health():
     """Returns whether the vision model is loaded and its metadata."""
+    loaded = _dog_classifier is not None or _cat_classifier is not None
+    loaded_sources = []
+    if _dog_classifier is not None:
+        loaded_sources.append(DOG_MODEL_ID)
+    if _cat_classifier is not None:
+        loaded_sources.append(CAT_MODEL_ID)
     return ModelHealthResponse(
-        loaded       = _vit_model is not None,
-        model_source = _vit_source,
-        loaded_at    = _vit_loaded_at,
-        num_species  = len(_SPECIES_LABELS),
-        num_breeds   = len(_BREED_LABELS),
-        device       = "cpu",
+        loaded=loaded,
+        model_source=", ".join(loaded_sources) or _vit_source,
+        loaded_at=_vit_loaded_at,
+        num_species=len(_SPECIES_LABELS),
+        num_breeds=len(_BREED_LABELS),
+        device="cpu",
     )
 
 

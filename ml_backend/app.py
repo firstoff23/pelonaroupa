@@ -153,7 +153,12 @@ app.add_middleware(SecurityHeadersMiddleware)
 # --- Globals: DB pool e Redis client ---
 db_pool = None
 redis_conn = None
-
+vision_warmup = {
+    "status": "not_started",
+    "error": None,
+    "started_at": None,
+    "completed_at": None,
+}
 
 
 @app.on_event("startup")
@@ -197,6 +202,25 @@ async def startup():
             logger.info("Redis connected successfully")
         except Exception as e:
             logger.error("Redis connection failed", extra={"error": str(e)})
+
+    # Warm the visual model before reporting readiness. The model loader is
+    # defined later in this module but is available when startup executes.
+    vision_warmup["status"] = "loading"
+    vision_warmup["started_at"] = datetime.now(timezone.utc).isoformat()
+    try:
+        await asyncio.to_thread(_load_vision_model)
+        vision_warmup["status"] = "ready"
+        vision_warmup["error"] = None
+        vision_warmup["completed_at"] = datetime.now(timezone.utc).isoformat()
+        logger.info(
+            "Vision model warm-up completed",
+            extra={"model_source": _vit_source, "loaded_at": _vit_loaded_at},
+        )
+    except Exception as exc:
+        vision_warmup["status"] = "failed"
+        vision_warmup["error"] = f"{type(exc).__name__}: {exc}"
+        vision_warmup["completed_at"] = datetime.now(timezone.utc).isoformat()
+        logger.exception("Vision model warm-up failed")
 
     # Launch periodic cleanup of expired async tasks
     asyncio.create_task(_cleanup_expired_tasks())

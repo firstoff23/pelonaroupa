@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           health_url="${HF_BACKEND_URL}/health"
-          ready_url="${HF_BACKEND_URL}/ready"
+          ready_url="${HF_BACKEND_URL}/v1/ready"
           for attempt in $(seq 1 60); do
             health_code="$(curl --silent --show-error --output /tmp/hf-health.json --write-out '%{http_code}' "$health_url" || true)"
             ready_code="$(curl --silent --show-error --output /tmp/hf-ready.json --write-out '%{http_code}' "$ready_url" || true)"

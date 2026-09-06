@@ -64,6 +64,7 @@ def _sse_broadcast(event_type: str, data: dict):
 
 from utils.logging import setup_structured_logging, logger
 from utils.auth import get_current_user
+from services.audio_service import classify_vocalization
 setup_structured_logging()
 
 app = FastAPI(
@@ -559,6 +560,35 @@ async def classify_audio(
         raise HTTPException(status_code=500, detail="Audio processing failed. Please try again.")
     finally:
         pass
+
+
+@app.post("/v1/classify-audio")
+async def classify_audio_v1(file: UploadFile = File(...)):
+    """Classify a WAV/audio upload with explicit client-error responses."""
+    audio_bytes = await file.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Ficheiro de áudio vazio.")
+
+    allowed_types = {
+        "audio/wav",
+        "audio/x-wav",
+        "audio/wave",
+        "audio/mpeg",
+        "audio/ogg",
+        "audio/webm",
+        "audio/flac",
+    }
+    content_type = (file.content_type or "").lower()
+    if content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Tipo de áudio inválido.")
+
+    try:
+        return classify_vocalization(audio_bytes)
+    except (ValueError, EOFError) as exc:
+        raise HTTPException(status_code=400, detail=f"Áudio inválido: {exc}") from exc
+    except Exception as exc:
+        logger.exception("Audio classification failed", extra={"error": str(exc)})
+        raise HTTPException(status_code=503, detail="Modelo de áudio indisponível.") from exc
 
 
 # ─── Async Audio Classification ───────────────────────────────────────────────

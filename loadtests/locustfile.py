@@ -17,7 +17,11 @@ from pathlib import Path
 from locust import HttpUser, between, task, tag
 
 
+SCENARIO = os.getenv("LOAD_SCENARIO", "all")
+
+
 class AnimalMindUser(HttpUser):
+    abstract = SCENARIO == "sse"
     wait_time = between(1, 3)
 
     def on_start(self) -> None:
@@ -43,6 +47,7 @@ class AnimalMindUser(HttpUser):
 
 
 class AnimalMindSSEUser(HttpUser):
+    abstract = SCENARIO == "classify"
     wait_time = between(1, 2)
     weight = 1
 

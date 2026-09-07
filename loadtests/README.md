@@ -1,6 +1,8 @@
 # Testes de carga AnimalMind
 
-Os cenários são deliberadamente opt-in e não correm contra produção sem um `IMAGE_PATH` e um `AUTH_TOKEN` fornecidos no ambiente do processo.
+Os cenários são deliberadamente opt-in e não correm contra produção sem um `IMAGE_PATH` e um `AUTH_TOKEN` fornecidos no ambiente do processo. O fixture versionado `loadtests/fixtures/test-dog-synthetic.jpg` é uma ilustração sintética criada exclusivamente para testar o transporte multipart; não deve ser usado para medir a accuracy do modelo.
+
+Para reproduzir o benchmark local simulado, inicia `loadtests.mock_backend:app` em `127.0.0.1:8765` e executa os comandos com `--host=http://127.0.0.1:8765`. Os resultados guardados em `loadtests/results/` são preliminares e não representam o Hugging Face Space.
 
 ## Instalação
 

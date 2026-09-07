@@ -1,0 +1,40 @@
+{
+  "environment": "local mock backend, 127.0.0.1:8765",
+  "fixture": "loadtests/fixtures/test-dog-synthetic.jpg",
+  "warning": "These are preliminary harness/transport measurements, not model or production SLO results.",
+  "runs": [
+    {
+      "run": "classify-u1",
+      "requests": 10,
+      "failures": 0,
+      "avg_ms": 15.811093899901607,
+      "min_ms": 13.662392000696855,
+      "max_ms": 33.47062199827633,
+      "median_ms": 14.0,
+      "rps": 0.5345265963717858,
+      "failures_per_s": 0.0
+    },
+    {
+      "run": "classify-u8",
+      "requests": 116,
+      "failures": 0,
+      "avg_ms": 14.028391930941293,
+      "min_ms": 12.985271998331882,
+      "max_ms": 34.28003600129159,
+      "median_ms": 14.0,
+      "rps": 4.014072590537815,
+      "failures_per_s": 0.0
+    },
+    {
+      "run": "sse-u10",
+      "requests": 182,
+      "failures": 0,
+      "avg_ms": 3.7934148132170686,
+      "min_ms": 2.3096660006558523,
+      "max_ms": 44.736976000422146,
+      "median_ms": 3.0,
+      "rps": 6.290205527877999,
+      "failures_per_s": 0.0
+    }
+  ]
+}

@@ -142,7 +142,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        # Allow embedding inside Hugging Face Spaces iframe while protecting against external clickjacking
+        response.headers["Content-Security-Policy"] = (
+            "frame-ancestors 'self' https://huggingface.co https://*.huggingface.co https://*.hf.space;"
+        )
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["X-Correlation-ID"] = getattr(request.state, "correlation_id", "")
         return response

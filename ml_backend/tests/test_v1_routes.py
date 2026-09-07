@@ -76,3 +76,25 @@ def test_auth_verification():
     assert verify_api_key("secret_key_123") is True
     assert verify_api_key("wrong_key") is False
     del os.environ["API_KEY"]
+
+
+def test_jwt_verification_hs256():
+    from utils.auth import verify_jwt
+    import jwt as pyjwt
+
+    secret = "super_secret_test_key_1234567890"
+    os.environ["SUPABASE_JWT_SECRET"] = secret
+
+    token = pyjwt.encode(
+        {"email": "test@pelonaroupa.app", "aud": "authenticated"},
+        secret,
+        algorithm="HS256",
+    )
+    payload = verify_jwt(token)
+    assert payload is not None
+    assert payload.get("email") == "test@pelonaroupa.app"
+
+    # Invalid token test
+    assert verify_jwt("invalid.token.here") is None
+
+    del os.environ["SUPABASE_JWT_SECRET"]

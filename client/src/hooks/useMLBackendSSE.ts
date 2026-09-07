@@ -8,10 +8,18 @@
  * This complements the Supabase Realtime hook (useRealtimeNotifications)
  * which handles DB-persisted events. This hook provides immediate feedback
  * directly from the ML inference pipeline (useful for long classifications).
+ *
+ * Authentication:
+ * The /sse endpoint is protected by Bearer JWT (Depends(get_current_user)).
+ * The native EventSource API does NOT support custom headers, so we use
+ * @microsoft/fetch-event-source which uses the Fetch API under the hood and
+ * fully supports Authorization headers. This avoids exposing tokens in URLs.
  */
 
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 // The ML backend URL – falls back to the Fly.io primary backend.
 const ML_BACKEND_BASE =
@@ -64,83 +72,148 @@ export interface UseMLBackendSSEOptions {
   onClassification?: (event: ClassificationEvent["data"]) => void;
 }
 
+// Custom error to signal intentional abort (no reconnect)
+class AbortError extends Error {}
+
 export function useMLBackendSSE({
   enabled = true,
   language = "pt",
   onClassification,
 }: UseMLBackendSSEOptions = {}) {
-  const esRef = useRef<EventSource | null>(null);
+  // We use a ref to the AbortController so we can cancel the connection on unmount/disable.
+  const abortControllerRef = useRef<AbortController | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Get the current Supabase session token from the auth context.
+  const { session } = useAuth();
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;
 
-    // EventSource is not available in all environments (e.g., SSR, Node.js tests)
-    if (typeof EventSource === "undefined") return;
+    // Only connect when we have a valid session token.
+    // This prevents unauthenticated connections on public routes.
+    const token = session?.access_token;
+    if (!token) return;
 
-    let isMounted = true;
+    let isCancelled = false;
 
     function connect() {
-      if (!isMounted) return;
+      if (!isMountedRef.current || isCancelled) return;
 
       const url = `${ML_BACKEND_BASE}/sse`;
-      const es = new EventSource(url);
-      esRef.current = es;
 
-      es.addEventListener("connected", () => {});
+      // Create a new AbortController for each connection attempt.
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
-      es.onmessage = (event: MessageEvent<string>) => {
-        try {
-          const parsed = JSON.parse(event.data) as SSEEvent;
+      fetchEventSource(url, {
+        signal: controller.signal,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "text/event-stream",
+        },
+        // openWhenHidden: keep the SSE alive when the tab is hidden (background monitoring)
+        openWhenHidden: true,
 
-          if (parsed.type === "classification") {
-            const { data } = parsed as ClassificationEvent;
-
-            if (onClassification) {
-              onClassification(data);
-              return;
-            }
-
-            const stateLabel =
-              language === "pt"
-                ? (STATE_LABELS_PT[data.state] ?? data.state)
-                : (STATE_LABELS_EN[data.state] ?? data.state);
-
-            const confidence = Math.round(data.confidence * 100);
-            const message =
-              language === "pt"
-                ? `${data.emoji} ${stateLabel} — ${confidence}% confiança`
-                : `${data.emoji} ${stateLabel} — ${confidence}% confidence`;
-
-            toast.info(message, {
-              id: `ml-sse-classification`,
-              duration: 5000,
-            });
+        onopen: async (response) => {
+          if (response.ok && response.status === 200) {
+            // Connection established successfully
+            return;
           }
-        } catch {
-          // Non-JSON keep-alive messages are silently ignored
-        }
-      };
+          if (response.status === 401) {
+            // Auth error — do not reconnect (token invalid or expired)
+            throw new AbortError(
+              `SSE: 401 Unauthorized — session may have expired.`,
+            );
+          }
+          if (response.status >= 500) {
+            // Server error — reconnect with backoff
+            throw new Error(`SSE: server error ${response.status}`);
+          }
+        },
 
-      es.onerror = () => {
-        es.close();
-        esRef.current = null;
-        if (isMounted) {
+        onmessage: (event) => {
+          if (event.event === "connected") {
+            // Initial heartbeat from server — ignore
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(event.data) as SSEEvent;
+
+            if (parsed.type === "classification") {
+              const { data } = parsed as ClassificationEvent;
+
+              if (onClassification) {
+                onClassification(data);
+                return;
+              }
+
+              const stateLabel =
+                language === "pt"
+                  ? (STATE_LABELS_PT[data.state] ?? data.state)
+                  : (STATE_LABELS_EN[data.state] ?? data.state);
+
+              const confidence = Math.round(data.confidence * 100);
+              const message =
+                language === "pt"
+                  ? `${data.emoji} ${stateLabel} — ${confidence}% confiança`
+                  : `${data.emoji} ${stateLabel} — ${confidence}% confidence`;
+
+              toast.info(message, {
+                id: "ml-sse-classification",
+                duration: 5000,
+              });
+            }
+          } catch {
+            // Non-JSON keep-alive comments are silently ignored (": keepalive" pings)
+          }
+        },
+
+        onerror: (error) => {
+          if (error instanceof AbortError) {
+            // Intentional abort (auth failure or unmount) — stop reconnecting
+            throw error;
+          }
+          // For transient errors, fetchEventSource will automatically retry.
+          // We log in dev but don't throw — let the library handle reconnection.
+          if (import.meta.env.DEV) {
+            console.debug("[SSE] connection error, will retry:", error);
+          }
+        },
+
+        onclose: () => {
+          // Server closed the connection — schedule reconnect if still mounted
+          if (!isMountedRef.current || isCancelled) return;
           reconnectTimerRef.current = setTimeout(connect, 10_000);
+        },
+      }).catch((err) => {
+        // fetchEventSource throws only when we rethrow from onerror or onopen
+        // (e.g. AbortError for auth failures). Log in dev.
+        if (import.meta.env.DEV && !(err instanceof AbortError)) {
+          console.debug("[SSE] fatal error:", err);
         }
-      };
+      });
     }
 
     connect();
 
     return () => {
-      isMounted = false;
-      esRef.current?.close();
-      esRef.current = null;
+      isCancelled = true;
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = null;
       }
     };
-  }, [enabled, language, onClassification]);
+  }, [enabled, language, onClassification, session?.access_token]);
 }

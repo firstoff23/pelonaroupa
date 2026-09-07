@@ -1,0 +1,54 @@
+{
+  "manifest_version": 1,
+  "status": "beta_needs_more_training",
+  "model_id": "google/vit-base-patch16-224",
+  "model_revision": "finetuned-cat-breeds-v1",
+  "task": "image-classification",
+  "dataset_id": "cat-breeds-mixed",
+  "dataset_revision": "train-val-test-2026",
+  "split": {
+    "train": "~80%",
+    "validation": "~10%",
+    "test": "~10%",
+    "grouping": "animal_or_recording"
+  },
+  "labels": [
+    "abyssinian", "bengal", "birman", "bombay",
+    "british_shorthair", "egyptian_mau", "maine_coon", "persian",
+    "ragdoll", "russian_blue", "siamese", "sphynx"
+  ],
+  "seed": 42,
+  "hyperparameters": {
+    "learning_rate": 2e-5,
+    "batch_size": 32,
+    "epochs": 1,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "warmup_steps": 100
+  },
+  "preprocessing": {
+    "resize": [224, 224],
+    "normalize_mean": [0.485, 0.456, 0.406],
+    "normalize_std": [0.229, 0.224, 0.225],
+    "augmentations": ["random_horizontal_flip", "random_crop"]
+  },
+  "environment": {
+    "python": "3.10",
+    "pytorch": "2.x",
+    "transformers": "4.x",
+    "hardware": "CPU (1 epoch prototype — GPU training pending)"
+  },
+  "metrics": {
+    "accuracy": 0.1708,
+    "macro_f1": null,
+    "balanced_accuracy": null,
+    "top3_accuracy": null,
+    "ece": 0.0398,
+    "abstention_rate": null,
+    "calibrated_temperature": 1.4852,
+    "num_classes": 12
+  },
+  "weights_sha256": "",
+  "created_at": "2026-09-07",
+  "notes": "1-epoch prototype. Accuracy of 17.1% is better than random (1/12 = 8.3%) for 12 classes but requires full training. ECE=0.04 indicates well-calibrated probabilities relative to the model confidence. Temperature calibration applied (T=1.4852). Do not publish benchmark claims until full training is complete."
+}

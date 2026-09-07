@@ -1,0 +1,83 @@
+{
+  "manifest_version": 1,
+  "status": "beta_needs_more_training",
+  "model_id": "google/vit-base-patch16-224",
+  "model_revision": "finetuned-dog-breeds-v1",
+  "task": "image-classification",
+  "dataset_id": "stanford-dogs",
+  "dataset_revision": "train-val-test-2026",
+  "split": {
+    "train": "~80%",
+    "validation": "~10%",
+    "test": "~10%",
+    "grouping": "animal_or_recording"
+  },
+  "labels": [
+    "affenpinscher", "afghan_hound", "african_hunting_dog", "airedale",
+    "american_staffordshire_terrier", "appenzeller", "australian_terrier",
+    "basenji", "basset", "beagle", "bedlington_terrier", "bernese_mountain_dog",
+    "black-and-tan_coonhound", "blenheim_spaniel", "bloodhound", "bluetick",
+    "border_collie", "border_terrier", "borzoi", "boston_bull",
+    "bouvier_des_flandres", "boxer", "brabancon_griffon", "briard",
+    "brittany_spaniel", "bull_mastiff", "cairn", "cardigan",
+    "chesapeake_bay_retriever", "chihuahua", "chow", "clumber",
+    "cocker_spaniel", "collie", "curly-coated_retriever", "dandie_dinmont",
+    "dhole", "dingo", "doberman", "english_foxhound",
+    "english_setter", "english_springer", "entlebucher", "eskimo_dog",
+    "flat-coated_retriever", "french_bulldog", "german_shepherd", "german_short-haired_pointer",
+    "giant_schnauzer", "golden_retriever", "gordon_setter", "great_dane",
+    "great_pyrenees", "greater_swiss_mountain_dog", "groenendael", "ibizan_hound",
+    "irish_setter", "irish_terrier", "irish_water_spaniel", "irish_wolfhound",
+    "italian_greyhound", "japanese_spaniel", "keeshond", "kelpie",
+    "kerry_blue_terrier", "komondor", "kuvasz", "labrador_retriever",
+    "lakeland_terrier", "leonberg", "lhasa", "malamute",
+    "malinois", "maltese_dog", "mexican_hairless", "miniature_pinscher",
+    "miniature_poodle", "miniature_schnauzer", "newfoundland", "norfolk_terrier",
+    "norwegian_elkhound", "norwich_terrier", "old_english_sheepdog", "otterhound",
+    "papillon", "pekinese", "pembroke", "pomeranian",
+    "pug", "redbone", "rhodesian_ridgeback", "rottweiler",
+    "saint_bernard", "saluki", "samoyed", "schipperke",
+    "scotch_terrier", "scottish_deerhound", "sealyham_terrier", "shetland_sheepdog",
+    "shih-tzu", "siberian_husky", "silky_terrier", "soft-coated_wheaten_terrier",
+    "staffordshire_bullterrier", "standard_poodle", "standard_schnauzer", "sussex_spaniel",
+    "tibetan_mastiff", "tibetan_terrier", "toy_poodle", "toy_terrier",
+    "vizsla", "walker_hound", "weimaraner", "welsh_springer_spaniel",
+    "west_highland_white_terrier", "whippet", "wire-haired_fox_terrier", "yorkshire_terrier"
+  ],
+  "seed": 42,
+  "hyperparameters": {
+    "learning_rate": 2e-5,
+    "batch_size": 32,
+    "epochs": 1,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "warmup_steps": 100
+  },
+  "preprocessing": {
+    "resize": [224, 224],
+    "normalize_mean": [0.485, 0.456, 0.406],
+    "normalize_std": [0.229, 0.224, 0.225],
+    "augmentations": ["random_horizontal_flip", "random_crop"]
+  },
+  "environment": {
+    "python": "3.10",
+    "pytorch": "2.x",
+    "transformers": "4.x",
+    "hardware": "CPU (1 epoch prototype — GPU training pending)"
+  },
+  "metrics": {
+    "accuracy": 0.0078,
+    "macro_f1": null,
+    "balanced_accuracy": null,
+    "top3_accuracy": null,
+    "ece": 0.0269,
+    "abstention_rate": null,
+    "calibrated_temperature": 1.7221,
+    "train_loss_epoch1": 5.1347,
+    "val_loss_epoch1": 4.8563,
+    "val_accuracy_epoch1": 0.0
+  },
+  "weights_sha256": "",
+  "created_at": "2026-09-07",
+  "notes": "1-epoch prototype trained on CPU. Accuracy is near-chance (0.78%) — model requires full training with GPU (10-30 epochs) before production use. Temperature calibration applied (T=1.7221) to improve probability calibration. Do not publish benchmark claims until full training is complete."
+}

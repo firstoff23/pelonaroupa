@@ -18,15 +18,6 @@ import { trpc } from "@/lib/trpc";
 import type { EmotionalState } from "../../../shared/types";
 import { STATE_LABELS } from "../../../shared/types";
 
-interface ActiveAnimal {
-  id: number;
-  name: string;
-  species: "dog" | "cat";
-  breed?: string;
-  age?: number;
-  isActive?: boolean;
-}
-
 export default function VetPage() {
   const [vetName, setVetName] = useState("");
   const [vetEmail, setVetEmail] = useState("");
@@ -322,8 +313,7 @@ export default function VetPage() {
     <div className="page-enter min-h-full px-4 pt-4 pb-6 max-w-lg mx-auto space-y-6">
       <div>
         <h1 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          Partilha Veterinária{" "}
-          <Activity size={16} className="text-primary" />
+          Partilha Veterinária <Activity size={16} className="text-primary" />
         </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
           Dossiê clínico, estatísticas de comportamento e partilha com o médico

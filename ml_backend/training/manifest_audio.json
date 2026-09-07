@@ -1,0 +1,56 @@
+{
+  "manifest_version": 1,
+  "status": "production_via_yamnet",
+  "model_id": "google/yamnet",
+  "model_revision": "production-yamnet-with-wav2vec2-prototype",
+  "task": "audio-classification",
+  "dataset_id": "mixed-pet-audio-esc50-custom",
+  "dataset_revision": "2026",
+  "split": {
+    "train": "~80%",
+    "validation": "~10%",
+    "test": "~10%",
+    "grouping": "animal_or_recording"
+  },
+  "labels": [
+    "bark",
+    "meow",
+    "whine",
+    "growl",
+    "hiss",
+    "silence"
+  ],
+  "seed": 42,
+  "hyperparameters": {
+    "yamnet_score_aggregation": "mean",
+    "wav2vec2_learning_rate": 2e-5,
+    "wav2vec2_batch_size": 16,
+    "wav2vec2_epochs": 1,
+    "optimizer": "AdamW"
+  },
+  "preprocessing": {
+    "sample_rate": 16000,
+    "frame_length_ms": 25,
+    "frame_step_ms": 10,
+    "normalize": true
+  },
+  "environment": {
+    "python": "3.10",
+    "pytorch": "2.x",
+    "transformers": "4.x",
+    "hardware": "CPU (wav2vec2 prototype); YAMNet runs in production on Fly.io CPU"
+  },
+  "metrics": {
+    "accuracy": null,
+    "macro_f1": null,
+    "balanced_accuracy": null,
+    "top3_accuracy": null,
+    "ece": 0.1721,
+    "abstention_rate": null,
+    "calibrated_temperature": 1.5028,
+    "notes_on_accuracy": "YAMNet production model accuracy not measured separately; wav2vec2 prototype accuracy not recorded for 1-epoch run. ECE of 0.172 indicates moderate calibration requiring improvement."
+  },
+  "weights_sha256": "",
+  "created_at": "2026-09-07",
+  "notes": "Production inference uses YAMNet (Google, pre-trained, not fine-tuned) via TF Hub. Results are mapped to pet emotional states (distress, attention, excitement, hunger, alert, relaxed) via heuristic class mapping. The wav2vec2 fine-tuning pipeline (facebook/wav2vec2-base) was prototyped for 1 epoch — not yet deployed. Temperature calibration (T=1.5028) applied to the wav2vec2 prototype outputs. ECE=0.172 is higher than ideal; further training recommended."
+}

@@ -1,0 +1,48 @@
+name: Model provenance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ml_backend/**"
+      - "scripts/generate_model_manifest.py"
+      - ".github/workflows/model-provenance.yml"
+  pull_request:
+    paths:
+      - "ml_backend/**"
+      - "scripts/generate_model_manifest.py"
+      - ".github/workflows/model-provenance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest:
+    name: Generate model provenance manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate manifest
+        env:
+          ANIMALMIND_RUNTIME: github-actions
+          ANIMALMIND_HARDWARE: github-hosted-runner
+        run: python scripts/generate_model_manifest.py --output model_manifest.json
+
+      - name: Validate manifest
+        run: python -m json.tool model_manifest.json >/dev/null
+
+      - name: Upload manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: animalmind-model-provenance-${{ github.sha }}
+          path: model_manifest.json
+          if-no-files-found: error
+          retention-days: 90

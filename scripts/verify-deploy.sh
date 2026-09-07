@@ -10,6 +10,7 @@ if [ -z "${VERCEL_TOKEN:-}" ]; then
 fi
 
 echo "🔍 Verificando variáveis de ambiente de produção..."
+VERCEL_PROJECT="${VERCEL_PROJECT:-animalmind}"
 REQUIRED_VARS=(
     "VITE_SUPABASE_URL"
     "VITE_SUPABASE_ANON_KEY"
@@ -22,7 +23,7 @@ REQUIRED_VARS=(
 # The deployment runner does not expose project secrets as shell variables.
 # Query Vercel's production environment by name instead of checking stale
 # Next.js variable names locally.
-if ! VERCEL_ENV_VARS="$(vercel env ls production --token="$VERCEL_TOKEN")"; then
+if ! VERCEL_ENV_VARS="$(vercel env ls production --project "$VERCEL_PROJECT" --token="$VERCEL_TOKEN")"; then
     echo "❌ Não foi possível consultar as variáveis de ambiente no Vercel."
     exit 1
 fi

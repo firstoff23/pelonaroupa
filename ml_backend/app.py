@@ -3,6 +3,8 @@ import subprocess
 import io
 import csv
 import asyncio
+import time
+from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union, BinaryIO
 # Load environment variables from .env if present
 try:
@@ -13,7 +15,7 @@ except ImportError:
 
 import numpy as np
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -64,6 +66,7 @@ def _sse_broadcast(event_type: str, data: dict):
 
 from utils.logging import setup_structured_logging, logger
 from utils.auth import get_current_user
+from services.audio_service import classify_vocalization
 setup_structured_logging()
 
 app = FastAPI(
@@ -152,10 +155,68 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+_request_metrics = defaultdict(int)
+_request_latency_ms = defaultdict(float)
+
+
+class RequestMetricsMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        started = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            _request_metrics[(request.method, request.url.path, "500")] += 1
+            raise
+        elapsed_ms = (time.perf_counter() - started) * 1000.0
+        key = (request.method, request.url.path, str(response.status_code))
+        _request_metrics[key] += 1
+        _request_latency_ms[(request.method, request.url.path)] += elapsed_ms
+        response.headers["X-Response-Time-Ms"] = f"{elapsed_ms:.1f}"
+        return response
+
+
+app.add_middleware(RequestMetricsMiddleware)
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics():
+    lines = [
+        "# HELP animalmind_requests_total Total HTTP requests by method, path and status.",
+        "# TYPE animalmind_requests_total counter",
+    ]
+    for (method, path, status), count in sorted(_request_metrics.items()):
+        lines.append(
+            f'animalmind_requests_total{{method="{method}",path="{path}",status="{status}"}} {count}'
+        )
+    lines.extend([
+        "# HELP animalmind_request_latency_ms_sum Cumulative request latency in milliseconds.",
+        "# TYPE animalmind_request_latency_ms_sum counter",
+    ])
+    for (method, path), total_ms in sorted(_request_latency_ms.items()):
+        lines.append(
+            f'animalmind_request_latency_ms_sum{{method="{method}",path="{path}"}} {total_ms:.3f}'
+        )
+    lines.extend([
+        "# HELP animalmind_sse_clients Current SSE subscribers.",
+        "# TYPE animalmind_sse_clients gauge",
+        f"animalmind_sse_clients {len(_sse_subscribers)}",
+        "# HELP animalmind_warmup_ready Whether the visual model warm-up completed.",
+        "# TYPE animalmind_warmup_ready gauge",
+        f"animalmind_warmup_ready {1 if _vit_model is not None else 0}",
+    ])
+    return PlainTextResponse("\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
+
+
 # --- Globals: DB pool e Redis client ---
+
 db_pool = None
 redis_conn = None
-
+vision_warmup = {
+    "status": "not_started",
+    "error": None,
+    "started_at": None,
+    "completed_at": None,
+}
 
 
 @app.on_event("startup")
@@ -199,6 +260,25 @@ async def startup():
             logger.info("Redis connected successfully")
         except Exception as e:
             logger.error("Redis connection failed", extra={"error": str(e)})
+
+    # Warm the visual model before reporting readiness. The model loader is
+    # defined later in this module but is available when startup executes.
+    vision_warmup["status"] = "loading"
+    vision_warmup["started_at"] = datetime.now(timezone.utc).isoformat()
+    try:
+        await asyncio.to_thread(_load_vision_model)
+        vision_warmup["status"] = "ready"
+        vision_warmup["error"] = None
+        vision_warmup["completed_at"] = datetime.now(timezone.utc).isoformat()
+        logger.info(
+            "Vision model warm-up completed",
+            extra={"model_source": _vit_source, "loaded_at": _vit_loaded_at},
+        )
+    except Exception as exc:
+        vision_warmup["status"] = "failed"
+        vision_warmup["error"] = f"{type(exc).__name__}: {exc}"
+        vision_warmup["completed_at"] = datetime.now(timezone.utc).isoformat()
+        logger.exception("Vision model warm-up failed")
 
     # Launch periodic cleanup of expired async tasks
     asyncio.create_task(_cleanup_expired_tasks())
@@ -562,6 +642,35 @@ async def classify_audio(
         raise HTTPException(status_code=500, detail="Audio processing failed. Please try again.")
     finally:
         pass
+
+
+@app.post("/v1/classify-audio")
+async def classify_audio_v1(file: UploadFile = File(...)):
+    """Classify a WAV/audio upload with explicit client-error responses."""
+    audio_bytes = await file.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Ficheiro de áudio vazio.")
+
+    allowed_types = {
+        "audio/wav",
+        "audio/x-wav",
+        "audio/wave",
+        "audio/mpeg",
+        "audio/ogg",
+        "audio/webm",
+        "audio/flac",
+    }
+    content_type = (file.content_type or "").lower()
+    if content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Tipo de áudio inválido.")
+
+    try:
+        return classify_vocalization(audio_bytes)
+    except (ValueError, EOFError) as exc:
+        raise HTTPException(status_code=400, detail=f"Áudio inválido: {exc}") from exc
+    except Exception as exc:
+        logger.exception("Audio classification failed", extra={"error": str(exc)})
+        raise HTTPException(status_code=503, detail="Modelo de áudio indisponível.") from exc
 
 
 # ─── Async Audio Classification ───────────────────────────────────────────────

@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -10,6 +12,8 @@ class ReadinessResponse(BaseModel):
     vision_model_loaded: bool
     db_connected: bool
     redis_connected: bool
+    warmup_status: str
+    warmup_error: Optional[str] = None
 
 
 @router.get(
@@ -25,13 +29,20 @@ def ready_check():
     db_ok = main_app.db_pool is not None
     redis_ok = main_app.redis_conn is not None
 
-    status_str = "ready" if vision_loaded else "warming_up"
+    warmup = getattr(
+        main_app,
+        "vision_warmup",
+        {"status": "unknown", "error": None},
+    )
+    status_str = "ready" if vision_loaded else warmup.get("status", "warming_up")
 
     res = ReadinessResponse(
         status=status_str,
         vision_model_loaded=vision_loaded,
         db_connected=db_ok,
         redis_connected=redis_ok,
+        warmup_status=warmup.get("status", "unknown"),
+        warmup_error=warmup.get("error"),
     )
 
     if not vision_loaded:

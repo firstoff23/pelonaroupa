@@ -1,0 +1,94 @@
+name: Deploy ML backend to Hugging Face
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ml_backend/**"
+      - ".github/workflows/deploy-hf-backend.yml"
+  workflow_dispatch:
+    inputs:
+      require_ready:
+        description: "Fail unless the backend readiness endpoint returns HTTP 200"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-backend-production
+  cancel-in-progress: false
+
+env:
+  HF_SPACE_ID: firstoff/animalmind-backend
+  HF_BACKEND_URL: https://firstoff-animalmind-backend.hf.space
+
+jobs:
+  deploy:
+    name: Deploy and verify Hugging Face backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile backend
+        run: python -m compileall -q ml_backend
+
+      - name: Validate deployment files
+        shell: bash
+        run: |
+          git diff --check
+          test -f ml_backend/app.py
+          test -f scripts/deploy_hf_space.py
+          grep -q 'firstoff/animalmind-breed-classifier' ml_backend/app.py
+          grep -q 'firstoff/animalmind-cat-classifier' ml_backend/app.py
+          grep -q 'firstoff/animalmind-audio-classifier' ml_backend/services/audio_service.py
+
+      - name: Check Hugging Face token
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [[ -z "$HF_TOKEN" ]]; then
+            echo "HF_TOKEN is not configured in the production environment secrets."
+            exit 1
+          fi
+
+      - name: Install Hugging Face client
+        run: python -m pip install --disable-pip-version-check --quiet huggingface_hub
+
+      - name: Upload backend to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python scripts/deploy_hf_space.py
+
+      - name: Wait for backend health and readiness
+        env:
+          REQUIRE_READY: ${{ github.event_name == 'workflow_dispatch' && inputs.require_ready || 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_url="${HF_BACKEND_URL}/health"
+          ready_url="${HF_BACKEND_URL}/v1/ready"
+          for attempt in $(seq 1 60); do
+            health_code="$(curl --silent --show-error --output /tmp/hf-health.json --write-out '%{http_code}' "$health_url" || true)"
+            ready_code="$(curl --silent --show-error --output /tmp/hf-ready.json --write-out '%{http_code}' "$ready_url" || true)"
+            echo "Attempt ${attempt}/60: health=${health_code}, ready=${ready_code}"
+            if [[ "$health_code" == "200" && ( "$REQUIRE_READY" != "true" || "$ready_code" == "200" ) ]]; then
+              echo "Hugging Face backend passed post-deploy verification."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Backend did not pass post-deploy verification within 10 minutes."
+          echo "Health response:"; cat /tmp/hf-health.json || true
+          echo "Readiness response:"; cat /tmp/hf-ready.json || true
+          exit 1

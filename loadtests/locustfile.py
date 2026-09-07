@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 loadtests/locustfile.py
 
@@ -49,7 +50,7 @@ from locust.runners import MasterRunner, LocalRunner
 IMAGE_PATH = os.environ.get(
     "IMAGE_PATH", "loadtests/fixtures/test-dog-synthetic.jpg"
 )
-AUTH_TOKEN = os.environ.get("AUTH_TOKEN", "")
+AUTH_TOKEN = os.environ.get("AUTH_TOKEN") or os.environ.get("ANIMALMIND_TEST_TOKEN", "")
 API_KEY = os.environ.get("API_KEY", "")
 
 # If AUTH_TOKEN does not look like a JWT (no dots), treat it as an API_KEY as well
@@ -261,8 +262,14 @@ def on_locust_init(environment, **kwargs):
     """Print instructions when Locust starts."""
     if isinstance(environment.runner, (MasterRunner, LocalRunner)):
         print("\n" + "=" * 60)
-        print("PeloNaRoupa Load Test")
+        print("PeloNaRoupa / AnimalMind Load Test")
         print(f"  IMAGE_PATH : {IMAGE_PATH}")
         print(f"  AUTH_TOKEN : {'SET [OK]' if AUTH_TOKEN else 'NOT SET [WARN]'}")
         print(f"  API_KEY    : {'SET [OK]' if API_KEY else 'NOT SET [WARN]'}")
         print("=" * 60 + "\n")
+
+
+# ── Aliases for backwards compatibility ─────────────────────────────────────────
+AnimalMindUser = ClassifyBreedUser
+AnimalMindSSEUser = SSEUser
+

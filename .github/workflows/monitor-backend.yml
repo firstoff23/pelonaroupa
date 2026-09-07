@@ -1,0 +1,25 @@
+name: Monitor AnimalMind backend
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    name: Check readiness and metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ANIMALMIND_BACKEND_URL: https://firstoff-animalmind-backend.hf.space
+      MONITOR_TIMEOUT_SECONDS: "20"
+      MONITOR_MAX_SSE_CLIENTS: "90"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run backend monitor
+        run: python3 scripts/monitor_backend.py

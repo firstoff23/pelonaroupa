@@ -201,7 +201,7 @@ def metrics():
         "# TYPE animalmind_warmup_ready gauge",
         f"animalmind_warmup_ready {1 if _vit_model is not None else 0}",
     ])
-    return PlainTextResponse("\\n".join(lines) + "\\n", media_type="text/plain; version=0.0.4")
+    return PlainTextResponse("\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
 
 
 # --- Globals: DB pool e Redis client ---

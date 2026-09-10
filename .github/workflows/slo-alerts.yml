@@ -1,0 +1,92 @@
+name: 🔔 AnimalMind – SLO Alerts
+
+on:
+  schedule:
+    # Every 15 minutes (same cadence as monitor-backend.yml)
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      slack_notify:
+        description: "Send Slack notification even if OK"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  slo-check:
+    name: Check SLOs and alert on violation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      ANIMALMIND_BACKEND_URL: https://firstoff-animalmind-backend.hf.space
+      MONITOR_TIMEOUT_SECONDS: "20"
+      # SLO thresholds (can be overridden via repository variables)
+      MAX_READY_MS: "5000"
+      MAX_ERROR_RATE: "0.01"
+      MAX_SSE_CLIENTS: "90"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Run SLO checker ────────────────────────────────────────────────────
+      - name: Run SLO checker
+        id: slo
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          set +e
+          python3 scripts/check_slos.py | tee /tmp/slo_report.json
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+          # Store violations count for summary
+          VIOLATIONS=$(python3 -c "
+          import json, sys
+          r = json.load(open('/tmp/slo_report.json'))
+          print(len(r.get('violations', [])))
+          " 2>/dev/null || echo "0")
+          echo "violations=$VIOLATIONS" >> "$GITHUB_OUTPUT"
+          exit $EXIT_CODE
+
+      # ── Upload JSON report as artifact (always, for audit trail) ───────────
+      - name: Upload SLO report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slo-report-${{ github.run_number }}
+          path: /tmp/slo_report.json
+          retention-days: 30
+
+      # ── Annotate the job summary ───────────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          STATUS="${{ steps.slo.outputs.exit_code == '0' && '✅ All SLOs OK' || '🔴 SLO VIOLATION' }}"
+          VIOLATIONS="${{ steps.slo.outputs.violations }}"
+          echo "## $STATUS" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Violations:** $VIOLATIONS" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Backend:** \`$ANIMALMIND_BACKEND_URL\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### SLO Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`json" >> "$GITHUB_STEP_SUMMARY"
+          cat /tmp/slo_report.json >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+      # ── Send email via GitHub notification (built-in: job failure → email) ─
+      # GitHub automatically sends email to repo watchers when a workflow fails.
+      # No extra step needed — the non-zero exit from the SLO checker triggers it.
+      #
+      # For Slack, add SLACK_WEBHOOK_URL as a repository secret (Settings →
+      # Secrets and variables → Actions) and the check_slos.py script will
+      # POST to it automatically when a violation is detected.
+
+      - name: Fail if SLO violated (triggers GitHub email notification)
+        if: steps.slo.outputs.exit_code != '0'
+        run: |
+          echo "::error::SLO violation detected. See job summary for details."
+          exit 1

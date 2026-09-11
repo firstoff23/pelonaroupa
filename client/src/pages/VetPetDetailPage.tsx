@@ -410,7 +410,7 @@ export default function VetPetDetailPage({
                 >
                   <div className="flex h-20 w-full items-end rounded-xl bg-secondary/50 px-1">
                     <div
-                      className="w-full rounded-lg bg-gradient-to-t from-primary to-cyan-300"
+                      className="w-full rounded-lg bg-gradient-to-t from-primary to-secondary/60"
                       style={{ height: `${height}%` }}
                     />
                   </div>

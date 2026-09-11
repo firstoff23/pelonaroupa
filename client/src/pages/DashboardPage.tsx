@@ -1032,12 +1032,12 @@ export default function DashboardPage() {
             {invitations.map((inv) => (
               <div
                 key={inv.id}
-                className="bg-gradient-to-r from-cyan-950/40 to-secondary/40 border border-cyan-500/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
+                className="bg-gradient-to-r from-secondary/15 to-primary/15 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
               >
                 <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-cyan-400 mt-0.5 shrink-0" />
+                  <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">
+                    <h4 className="text-xs font-semibold text-primary uppercase tracking-wide">
                       {t("dashboardPage.invitationTitle")}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">

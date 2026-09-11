@@ -11,9 +11,9 @@
   --color-text-muted: #6b7280;
   --color-outline: rgba(45, 115, 155, 0.15);
 
-  --font-outfit: "Inter", system-ui, sans-serif;
   --font-inter: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  /* Legacy aliases — all map to Inter (Serene Corporate typography) */
   --font-satoshi: "Inter", system-ui, sans-serif;
 
   --spacing-base: 8px;

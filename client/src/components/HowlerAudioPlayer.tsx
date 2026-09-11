@@ -121,7 +121,7 @@ export function HowlerAudioPlayer({ audioUrl }: HowlerAudioPlayerProps) {
 
       <div className="w-16 h-2 bg-secondary/80 rounded-full overflow-hidden relative shrink-0 border border-border/30">
         <div
-          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-75"
+          className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-75"
           style={{ width: `${progress}%` }}
         />
       </div>

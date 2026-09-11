@@ -182,6 +182,7 @@
   background: color-mix(in oklab, var(--card) 95%, transparent);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
+  -webkit-user-select: none;
   user-select: none;
 }
 

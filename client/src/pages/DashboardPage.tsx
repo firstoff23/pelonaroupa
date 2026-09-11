@@ -662,10 +662,10 @@ export default function DashboardPage() {
                   <Link key={a.id} to={`/animal/${a.id}`}>
                     <div
                       className={cn(
-                        "min-w-[210px] rounded-2xl border p-3 transition-all active-scale tap-highlight-none",
+                        "min-w-52.5 rounded-2xl border p-3 transition-all active-scale tap-highlight-none",
                         isActiveAnimal
                           ? "border-mood-primary/35 bg-mood-primary/10 shadow-[0_4px_20px_rgba(var(--mood-color-rgb),0.06)]"
-                          : "border-border/70 bg-[var(--color-surface)]",
+                          : "border-border/70 bg-surface",
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -892,7 +892,7 @@ export default function DashboardPage() {
                       className={cn(
                         "px-3 py-1 rounded-full text-[10px] font-semibold transition-all tap-highlight-none",
                         dashboardDays === d
-                          ? "bg-[var(--color-primary)] text-white shadow-sm"
+                          ? "bg-(--color-primary) text-white shadow-sm"
                           : "text-muted-foreground hover:text-foreground",
                       )}
                     >
@@ -932,7 +932,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="bg-[var(--color-surface)] border border-border/70 rounded-[1.75rem] p-5 shadow-[var(--shadow-sm)]">
+            <div className="bg-surface border border-border/70 rounded-[1.75rem] p-5 shadow-(--shadow-sm)">
               {dashboardChartData.length >= 2 ? (
                 <div className="space-y-4">
                   <div className="h-44 w-full">
@@ -1006,7 +1006,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="py-8 flex flex-col items-center justify-center text-center gap-2">
                   <HeartPulse className="h-8 w-8 text-muted-foreground/30" />
-                  <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
+                  <p className="text-xs text-muted-foreground max-w-50 leading-relaxed">
                     {language === "pt"
                       ? "Ainda não há dados suficientes para mostrar a evolução. Faz mais gravações!"
                       : "Not enough data yet. Keep recording!"}
@@ -1032,7 +1032,7 @@ export default function DashboardPage() {
             {invitations.map((inv) => (
               <div
                 key={inv.id}
-                className="bg-gradient-to-r from-secondary/15 to-primary/15 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
+                className="bg-linear-to-r from-secondary/15 to-primary/15 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
               >
                 <div className="flex items-start gap-3">
                   <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
@@ -1144,14 +1144,14 @@ export default function DashboardPage() {
             {animals.map((a) => (
               <span
                 key={a.id}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5 ${
                   a.isActive
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border text-muted-foreground"
                 }`}
               >
                 <span className="inline-flex items-center gap-1">
-                  <PawPrint size={11} className="flex-shrink-0" />
+                  <PawPrint size={11} className="shrink-0" />
                   {a.name}
                 </span>
                 {a.isShared && (
@@ -1186,7 +1186,7 @@ export default function DashboardPage() {
                 </p>
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex-shrink-0"
+                    className="w-10 h-10 rounded-full shrink-0"
                     style={{
                       backgroundColor: `${STATE_COLORS[todayStats.state]}33`,
                       border: `2px solid ${STATE_COLORS[todayStats.state]}55`,
@@ -1246,7 +1246,7 @@ export default function DashboardPage() {
                     {dominantBelief && (
                       <div className="bg-secondary/20 p-3 rounded-xl border border-border flex items-center gap-3">
                         <div
-                          className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center"
+                          className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center"
                           style={{
                             backgroundColor: `${
                               STATE_COLORS[
@@ -1294,7 +1294,7 @@ export default function DashboardPage() {
                             <div className="flex justify-between text-xs">
                               <span className="text-muted-foreground flex items-center gap-1.5">
                                 <span
-                                  className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                  className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                                   style={{ backgroundColor: STATE_COLORS[s] }}
                                 />
                                 <span className="truncate">
@@ -1457,7 +1457,7 @@ export default function DashboardPage() {
                   {STATES.map((s) => (
                     <div key={s} className="flex items-center gap-2">
                       <span
-                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        className="w-4 h-4 rounded-full shrink-0"
                         style={{ backgroundColor: STATE_COLORS[s] }}
                       />
                       <span
@@ -1477,3 +1477,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

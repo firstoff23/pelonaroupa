@@ -1,6 +1,6 @@
 import { Howl } from "howler";
 import { Pause, Play, Square } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface HowlerAudioPlayerProps {
   audioUrl: string;
@@ -12,7 +12,7 @@ export function HowlerAudioPlayer({ audioUrl }: HowlerAudioPlayerProps) {
   const soundRef = useRef<Howl | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -21,7 +21,7 @@ export function HowlerAudioPlayer({ audioUrl }: HowlerAudioPlayerProps) {
       soundRef.current.unload();
       soundRef.current = null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -95,11 +95,11 @@ export function HowlerAudioPlayer({ audioUrl }: HowlerAudioPlayerProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 min-w-[130px]">
+    <div className="flex items-center gap-2 min-w-32.5">
       <button
         type="button"
         onClick={handlePlay}
-        className="w-7 h-7 rounded-lg bg-secondary hover:bg-secondary/80 text-cyan-400 hover:text-cyan-300 flex items-center justify-center transition-colors shadow-sm"
+        className="w-7 h-7 rounded-lg bg-secondary hover:bg-secondary/80 text-primary-foreground hover:text-white flex items-center justify-center transition-colors shadow-sm"
         title={isPlaying ? "Pausar" : "Reproduzir"}
       >
         {isPlaying ? (
@@ -121,7 +121,7 @@ export function HowlerAudioPlayer({ audioUrl }: HowlerAudioPlayerProps) {
 
       <div className="w-16 h-2 bg-secondary/80 rounded-full overflow-hidden relative shrink-0 border border-border/30">
         <div
-          className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-75"
+          className="h-full bg-linear-to-r from-primary to-secondary rounded-full transition-all duration-75"
           style={{ width: `${progress}%` }}
         />
       </div>

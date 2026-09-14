@@ -52,6 +52,7 @@ class BodyLanguageModel(nn.Module):
 
 
 def build_default_model(input_dim: int) -> BodyLanguageModel:
+    """Build the V1 model with the same class counts used by training/inference."""
     return BodyLanguageModel(
         input_dim=input_dim,
         heads=[

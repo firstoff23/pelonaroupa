@@ -38,12 +38,16 @@ def validate(path: Path) -> dict[str, int]:
             raise ValueError(f"row {index}: empty keypoints path")
         if keypoints in keypoint_paths:
             raise ValueError(f"row {index}: duplicate keypoints path {keypoints!r}")
-        if animal_id:
-            animals[animal_id] += 1
+        if not animal_id:
+            raise ValueError(f"row {index}: empty animal_id; split integrity cannot be guaranteed")
+        animals[animal_id] += 1
+
         for head, allowed in LABELS.items():
             value = row[head].strip()
-            if value not in allowed:
+            # Blank means not supervised for this head. "unknown" means explicitly ambiguous/unobservable.
+            if value and value not in allowed:
                 raise ValueError(f"row {index}: invalid {head} label {value!r}")
+
         sample_ids.add(sample_id)
         keypoint_paths.add(keypoints)
 
@@ -51,11 +55,16 @@ def validate(path: Path) -> dict[str, int]:
         head: sum(1 for row in rows if row[head].strip() == "unknown")
         for head in LABELS
     }
+    unlabeled_counts = {
+        head: sum(1 for row in rows if not row[head].strip())
+        for head in LABELS
+    }
     return {
         "rows": len(rows),
         "unique_animals": len(animals),
         "duplicate_animals": sum(1 for count in animals.values() if count > 1),
         **{f"{head}_unknown": count for head, count in unknown_counts.items()},
+        **{f"{head}_unlabeled": count for head, count in unlabeled_counts.items()},
     }
 
 

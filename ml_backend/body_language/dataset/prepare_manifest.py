@@ -12,9 +12,10 @@ DIMS = 3
 
 def parse_pose_line(line: str) -> np.ndarray:
     parts = line.strip().split()
-    if len(parts) < 5 + KEYPOINTS * DIMS:
-        raise ValueError(f"invalid YOLO-pose row: expected at least {5 + KEYPOINTS * DIMS} values, got {len(parts)}")
-    values = np.asarray([float(x) for x in parts[5 : 5 + KEYPOINTS * DIMS]], dtype=np.float32)
+    expected = 5 + KEYPOINTS * DIMS
+    if len(parts) != expected:
+        raise ValueError(f"invalid YOLO-pose row: expected {expected} values, got {len(parts)}")
+    values = np.asarray([float(x) for x in parts[5:]], dtype=np.float32)
     return values.reshape(KEYPOINTS, DIMS)
 
 
@@ -22,7 +23,7 @@ def extract_pose(label_file: Path) -> np.ndarray:
     rows = [line for line in label_file.read_text(encoding="utf-8").splitlines() if line.strip()]
     if not rows:
         raise ValueError(f"empty label file: {label_file}")
-    # Dog-Pose contains one dog per image. Refuse ambiguous files rather than silently choosing one.
+    # Dog-Pose is expected to contain one dog per image. Refuse ambiguity instead of silently choosing one.
     if len(rows) != 1:
         raise ValueError(f"expected exactly one dog annotation in {label_file}, got {len(rows)}")
     return parse_pose_line(rows[0])
@@ -66,13 +67,13 @@ def prepare_split(root: Path, split: str, output_dir: Path) -> int:
                 "image": str(image_path.as_posix()),
                 "keypoints": str(pose_path.as_posix()),
                 "split": split,
-                # Behavior labels are deliberately absent here; add them in the annotation stage.
             }
         )
 
     manifest_path = output_dir / f"pose_manifest_{split}.csv"
+    fieldnames = ["sample_id", "image", "keypoints", "split"]
     with manifest_path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["sample_id", "image", "keypoints", "split"])
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
@@ -81,7 +82,7 @@ def prepare_split(root: Path, split: str, output_dir: Path) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Convert Ultralytics-style Dog-Pose labels to .npy + CSV manifests.")
+    parser = argparse.ArgumentParser(description="Convert Ultralytics-style Dog-Pose labels to .npy + pose-only CSV manifests.")
     parser.add_argument("--root", required=True, type=Path, help="Dog-Pose dataset root containing images/ and labels/.")
     parser.add_argument("--output", default="data/pose", type=Path)
     parser.add_argument("--split", choices=["train", "val", "both"], default="both")

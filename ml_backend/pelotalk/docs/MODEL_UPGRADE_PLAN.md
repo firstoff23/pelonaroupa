@@ -4,8 +4,9 @@ The existing dog/cat breed classifiers should be upgraded independently from Pel
 
 ## V2 evaluation gate
 - Group-aware train/validation/test split where animal identity is available.
-- Hold-out set with unseen images and, where possible, unseen breeds/sources.
-- Macro-F1, balanced accuracy and per-class recall alongside accuracy.
+- Hold-out set with unseen images from the same supported breed set and, separately, an unseen-breed/source evaluation set.
+- Standard hold-out metrics: Macro-F1, balanced accuracy and per-class recall alongside accuracy, using only classes represented in training.
+- OOD / zero-shot metrics: report results for breeds or sources intentionally absent from training as a separate protocol; do not mix these results into standard hold-out Macro-F1 or per-class recall.
 - Calibration: reliability diagram, ECE and Brier score.
 - Review preprocessing/normalization against the model's pretrained backbone.
 - Add early stopping and best-checkpoint selection.

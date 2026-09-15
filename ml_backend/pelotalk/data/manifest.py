@@ -6,6 +6,7 @@ from typing import Any
 import json
 
 REQUIRED_COLUMNS = ("sample_id", "audio_path", "source_dataset", "species", "animal_id", "breed", "recording_session", "duration_s", "sample_rate", "vocalization", "context", "emotion", "arousal", "intent", "license", "split")
+VALID_SPLITS = {"train", "validation", "test"}
 
 @dataclass
 class ManifestRow:
@@ -33,7 +34,20 @@ def normalize_label(value: Any) -> str | None:
     aliases = {"barking":"bark", "dog_bark":"bark", "woof":"bark", "meowing":"meow", "cat_meow":"meow", "purring":"purr", "growling":"growl"}
     return aliases.get(text, text)
 
+def parse_optional_float(value: Any) -> float | None:
+    if value is None: return None
+    if isinstance(value, str) and not value.strip(): return None
+    return float(value)
+
+def parse_optional_int(value: Any) -> int | None:
+    if value is None: return None
+    if isinstance(value, str) and not value.strip(): return None
+    return int(value)
+
 def row_from_mapping(row: dict[str, Any]) -> ManifestRow:
+    split = normalize_label(row.get("split"))
+    if split is not None and split not in VALID_SPLITS:
+        raise ValueError(f"invalid split={split!r}")
     return ManifestRow(
         sample_id=str(row.get("sample_id") or row.get("file_name") or Path(str(row.get("audio_path", "audio"))).stem),
         audio_path=str(row.get("audio_path") or row.get("file_name") or ""),
@@ -42,14 +56,15 @@ def row_from_mapping(row: dict[str, Any]) -> ManifestRow:
         animal_id=str(row.get("animal_id") or row.get("dog_id") or row.get("cat_id") or "unknown"),
         breed=normalize_label(row.get("breed")),
         recording_session=row.get("recording_session"),
-        duration_s=float(row["duration_s"]) if row.get("duration_s") is not None else None,
-        sample_rate=int(row["sample_rate"]) if row.get("sample_rate") is not None else None,
+        duration_s=parse_optional_float(row.get("duration_s")),
+        sample_rate=parse_optional_int(row.get("sample_rate")),
         vocalization=normalize_label(row.get("vocalization") or row.get("label")),
         context=normalize_label(row.get("context")),
         emotion=normalize_label(row.get("emotion")),
-        arousal=float(row["arousal"]) if row.get("arousal") is not None else None,
+        arousal=parse_optional_float(row.get("arousal")),
         intent=normalize_label(row.get("intent")),
         license=str(row.get("license")) if row.get("license") else None,
+        split=split,
     )
 
 def validate_rows(rows: list[ManifestRow]) -> list[str]:

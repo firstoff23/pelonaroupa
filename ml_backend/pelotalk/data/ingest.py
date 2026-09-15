@@ -36,7 +36,8 @@ def normalize_rows(rows: Iterable[dict[str, Any]], source_dataset: str) -> list[
     normalized: list[ManifestRow] = []
     for raw in rows:
         enriched = dict(raw)
-        enriched.setdefault("source_dataset", source_dataset)
+        if not str(enriched.get("source_dataset") or "").strip():
+            enriched["source_dataset"] = source_dataset
         normalized.append(row_from_mapping(enriched))
     return normalized
 

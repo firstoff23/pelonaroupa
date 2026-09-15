@@ -23,6 +23,7 @@ def audit(root: Path) -> dict[str, object]:
     reports = [basic_file_report(path) for path in files]
     empty = [item for item in reports if item["status"] == "empty"]
     missing = [item for item in reports if item["status"] == "missing"]
+    corrupt = [item for item in reports if item["status"] == "corrupt"]
     duplicates = duplicate_groups([Path(item["path"]) for item in reports if item["status"] == "ok"])
     extensions = Counter(path.suffix.lower() for path in files)
     return {
@@ -31,9 +32,10 @@ def audit(root: Path) -> dict[str, object]:
         "extensions": dict(sorted(extensions.items())),
         "empty_files": len(empty),
         "missing_files": len(missing),
+        "corrupt_files": len(corrupt),
         "duplicate_hash_groups": len(duplicates),
         "duplicate_files": sum(len(items) - 1 for items in duplicates.values()),
-        "status": "PASS" if files and not empty and not missing else "REVIEW",
+        "status": "PASS" if files and not empty and not missing and not corrupt else "REVIEW",
     }
 
 

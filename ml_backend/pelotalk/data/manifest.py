@@ -39,6 +39,22 @@ def normalize_identifier(value: Any) -> str | None:
     if not text or text.lower() in {"nan", "none", "null", "unknown"}: return None
     return text
 
+def parse_optional_float(value: Any) -> float | str | None:
+    if value is None: return None
+    if isinstance(value, str) and not value.strip(): return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+def parse_optional_int(value: Any) -> int | str | None:
+    if value is None: return None
+    if isinstance(value, str) and not value.strip(): return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return str(value)
+
 def row_from_mapping(row: dict[str, Any]) -> ManifestRow:
     return ManifestRow(
         sample_id=str(row.get("sample_id") or row.get("file_name") or Path(str(row.get("audio_path", "audio"))).stem),
@@ -48,12 +64,12 @@ def row_from_mapping(row: dict[str, Any]) -> ManifestRow:
         animal_id=normalize_identifier(row.get("animal_id")) or normalize_identifier(row.get("dog_id")) or normalize_identifier(row.get("cat_id")) or "unknown",
         breed=normalize_label(row.get("breed")),
         recording_session=row.get("recording_session"),
-        duration_s=float(row["duration_s"]) if row.get("duration_s") is not None else None,
-        sample_rate=int(row["sample_rate"]) if row.get("sample_rate") is not None else None,
+        duration_s=parse_optional_float(row.get("duration_s")),
+        sample_rate=parse_optional_int(row.get("sample_rate")),
         vocalization=normalize_label(row.get("vocalization") or row.get("label")),
         context=normalize_label(row.get("context")),
         emotion=normalize_label(row.get("emotion")),
-        arousal=float(row["arousal"]) if row.get("arousal") is not None else None,
+        arousal=parse_optional_float(row.get("arousal")),
         intent=normalize_label(row.get("intent")),
         license=str(row.get("license")) if row.get("license") else None,
     )
@@ -67,6 +83,9 @@ def validate_rows(rows: list[ManifestRow]) -> list[str]:
         if not row.audio_path: errors.append(f"missing audio_path: {row.sample_id}")
         if row.species not in {"dog", "cat", "dog_cat", "unknown"}: errors.append(f"invalid species={row.species!r}: {row.sample_id}")
         if not row.animal_id or row.animal_id.lower() in {"unknown", "nan", "none", "null"}: errors.append(f"missing animal_id: {row.sample_id}")
+        if row.duration_s is not None and not isinstance(row.duration_s, (int, float)): errors.append(f"invalid duration_s={row.duration_s!r}: {row.sample_id}")
+        if row.sample_rate is not None and not isinstance(row.sample_rate, int): errors.append(f"invalid sample_rate={row.sample_rate!r}: {row.sample_id}")
+        if row.arousal is not None and not isinstance(row.arousal, (int, float)): errors.append(f"invalid arousal={row.arousal!r}: {row.sample_id}")
     return errors
 
 def write_jsonl(rows: list[ManifestRow], path: str | Path) -> None:

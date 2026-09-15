@@ -1757,8 +1757,6 @@ export default function RecordingPage() {
                   </Tooltip>
                 </div>
 
-
-
                 <p className="text-xs text-muted-foreground text-center h-4 font-sans">
                   {isAutoMode &&
                     recordState === "idle" &&

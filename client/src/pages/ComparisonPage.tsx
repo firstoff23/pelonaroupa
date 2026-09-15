@@ -1,6 +1,5 @@
 import { AlertCircle, BarChart3, PawPrint } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { Link } from "wouter";
 import {
   Bar,
   BarChart,
@@ -16,6 +15,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Link } from "wouter";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -225,7 +225,9 @@ export default function ComparisonPage() {
           </div>
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-foreground">
-              {language === "pt" ? "Ainda não tens animais registados" : "No animals registered yet"}
+              {language === "pt"
+                ? "Ainda não tens animais registados"
+                : "No animals registered yet"}
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {language === "pt"
@@ -235,7 +237,9 @@ export default function ComparisonPage() {
           </div>
           <Link href="/perfil">
             <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-sm">
-              {language === "pt" ? "Adicionar primeiro animal" : "Add first animal"}
+              {language === "pt"
+                ? "Adicionar primeiro animal"
+                : "Add first animal"}
             </Button>
           </Link>
         </Card>

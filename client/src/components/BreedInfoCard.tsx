@@ -59,7 +59,9 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
           <span className="text-2xl font-extrabold text-primary">
             {(confidence * 100).toFixed(1)}%
           </span>
-          <p className="text-[10px] text-muted-foreground">Confiança Calibrada</p>
+          <p className="text-[10px] text-muted-foreground">
+            Confiança Calibrada
+          </p>
         </div>
       </CardHeader>
 
@@ -97,7 +99,9 @@ export const BreedInfoCard: React.FC<BreedInfoCardProps> = ({
                   className="bg-secondary/40 text-foreground border-border font-normal"
                 >
                   🌐 Origem:{" "}
-                  <strong className="ml-1 text-foreground">{info.origin}</strong>
+                  <strong className="ml-1 text-foreground">
+                    {info.origin}
+                  </strong>
                 </Badge>
               )}
               {info.life_expectancy && (

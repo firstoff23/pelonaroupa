@@ -644,7 +644,9 @@ function EmptyState({ filtered }: { filtered: boolean }) {
 
           <div className="space-y-2 max-w-xs">
             <p className="text-lg font-bold text-foreground">
-              {language === "pt" ? "Ainda não tens gravações" : "No recordings yet"}
+              {language === "pt"
+                ? "Ainda não tens gravações"
+                : "No recordings yet"}
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {language === "pt"

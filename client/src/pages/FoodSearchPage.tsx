@@ -131,10 +131,8 @@ export default function FoodSearchPage() {
           badge: language === "pt" ? "Seguro" : "Safe",
           variant: "healthy" as const,
           icon: CheckCircle,
-          colorClass:
-            "text-primary border-primary/20 bg-primary/10",
-          glowClass:
-            "hover:shadow-md hover:border-primary/30",
+          colorClass: "text-primary border-primary/20 bg-primary/10",
+          glowClass: "hover:shadow-md hover:border-primary/30",
         };
       case "caution":
         return {

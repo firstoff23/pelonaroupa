@@ -826,7 +826,9 @@ export default function DashboardPage() {
                     relatório de bem-estar.
                   </p>
                 </div>
-                <span className="text-muted-foreground text-xs">Aguardando</span>
+                <span className="text-muted-foreground text-xs">
+                  Aguardando
+                </span>
               </div>
 
               {/* Step 3 */}
@@ -843,7 +845,9 @@ export default function DashboardPage() {
                     alteração comportamental.
                   </p>
                 </div>
-                <span className="text-muted-foreground text-xs">Aguardando</span>
+                <span className="text-muted-foreground text-xs">
+                  Aguardando
+                </span>
               </div>
             </div>
           </motion.div>
@@ -1477,4 +1481,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

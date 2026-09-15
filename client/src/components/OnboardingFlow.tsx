@@ -214,10 +214,7 @@ export function OnboardingFlow() {
                   style={{ animationDuration: "3s" }}
                 />
                 <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-neutral-900 border border-neutral-800 text-primary shadow-xl">
-                  <PawPrint
-                    size={44}
-                    className="animate-pulse text-primary"
-                  />
+                  <PawPrint size={44} className="animate-pulse text-primary" />
                 </div>
                 <div className="absolute top-2 right-2 bg-neutral-900 border border-neutral-800 p-2 rounded-full text-neutral-400">
                   <Volume2 size={16} />
@@ -479,8 +476,7 @@ export function OnboardingFlow() {
                 {[
                   {
                     icon: Plus,
-                    color:
-                      "bg-primary/10 text-primary border-primary/20",
+                    color: "bg-primary/10 text-primary border-primary/20",
                     title: "Adicionar o teu pet",
                     desc: "Cria o perfil do teu cão ou gato com foto e raça.",
                     path: "/perfil",

@@ -269,11 +269,7 @@ export default function FamilyDashboard({
             {/* Create Family */}
             <Card className="p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <Plus
-                  size={14}
-                  className="text-primary"
-                  aria-hidden="true"
-                />
+                <Plus size={14} className="text-primary" aria-hidden="true" />
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Criar nova família
                 </h3>

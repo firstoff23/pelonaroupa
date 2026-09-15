@@ -33,13 +33,19 @@ def normalize_label(value: Any) -> str | None:
     aliases = {"barking":"bark", "dog_bark":"bark", "woof":"bark", "meowing":"meow", "cat_meow":"meow", "purring":"purr", "growling":"growl"}
     return aliases.get(text, text)
 
+def normalize_identifier(value: Any) -> str | None:
+    if value is None: return None
+    text = str(value).strip()
+    if not text or text.lower() in {"nan", "none", "null", "unknown"}: return None
+    return text
+
 def row_from_mapping(row: dict[str, Any]) -> ManifestRow:
     return ManifestRow(
         sample_id=str(row.get("sample_id") or row.get("file_name") or Path(str(row.get("audio_path", "audio"))).stem),
         audio_path=str(row.get("audio_path") or row.get("file_name") or ""),
         source_dataset=str(row.get("source_dataset") or row.get("dataset") or "unknown"),
         species=normalize_label(row.get("species")) or "unknown",
-        animal_id=str(row.get("animal_id") or row.get("dog_id") or row.get("cat_id") or "unknown"),
+        animal_id=normalize_identifier(row.get("animal_id")) or normalize_identifier(row.get("dog_id")) or normalize_identifier(row.get("cat_id")) or "unknown",
         breed=normalize_label(row.get("breed")),
         recording_session=row.get("recording_session"),
         duration_s=float(row["duration_s"]) if row.get("duration_s") is not None else None,
@@ -60,7 +66,7 @@ def validate_rows(rows: list[ManifestRow]) -> list[str]:
         seen.add(row.sample_id)
         if not row.audio_path: errors.append(f"missing audio_path: {row.sample_id}")
         if row.species not in {"dog", "cat", "dog_cat", "unknown"}: errors.append(f"invalid species={row.species!r}: {row.sample_id}")
-        if not row.animal_id or row.animal_id == "unknown": errors.append(f"missing animal_id: {row.sample_id}")
+        if not row.animal_id or row.animal_id.lower() in {"unknown", "nan", "none", "null"}: errors.append(f"missing animal_id: {row.sample_id}")
     return errors
 
 def write_jsonl(rows: list[ManifestRow], path: str | Path) -> None:

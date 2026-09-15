@@ -1,0 +1,43 @@
+sources:
+  - id: barkopedia
+    species: dog
+    task_roles: [vocalization, robustness]
+    direct_labels: [bark, dog_noise, other]
+    supervised_primary: true
+    notes: "Use labeled portions first; keep weak/unlabeled audio separate."
+
+  - id: dogspeak
+    species: dog
+    task_roles: [acoustic_pretraining, vocalization]
+    direct_labels: [bark]
+    supervised_primary: false
+    notes: "Strong acoustic source; do not invent intent labels. Check animal/source overlap."
+
+  - id: catmeows
+    species: cat
+    task_roles: [vocalization, context]
+    direct_labels: [meow]
+    derived_contexts: [brushing, food_wait, isolation]
+    supervised_primary: true
+    notes: "Small dataset; context is evidence, not literal intent ground truth."
+
+  - id: audioset
+    species: dog_cat
+    task_roles: [coverage, robustness, negative_examples]
+    direct_labels: [bark, yip, howl, growl, whimper, purr, meow, hiss, caterwaul]
+    supervised_primary: false
+    notes: "Use only compatible classes and preserve source provenance/licensing."
+
+  - id: catvd
+    species: dog
+    task_roles: [acoustic_pretraining, age_related_analysis]
+    direct_labels: [bark]
+    supervised_primary: false
+    notes: "Do not merge blindly with DogSpeak; audit animal-level overlap first."
+
+  - id: animalmind_sounds
+    species: dog_cat
+    task_roles: [personalization, future_supervision]
+    direct_labels: [bark, meow, purr, whine]
+    supervised_primary: false
+    notes: "Private/project data source. Use only records actually present in the dataset snapshot."

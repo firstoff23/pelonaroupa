@@ -32,16 +32,22 @@ def load_metadata(path: str | Path) -> list[dict[str, Any]]:
     raise ValueError(f"Unsupported metadata format: {path.suffix}")
 
 
-def normalize_rows(rows: Iterable[dict[str, Any]], source_dataset: str) -> list[ManifestRow]:
+def normalize_rows(
+    rows: Iterable[dict[str, Any]], source_dataset: str
+) -> list[ManifestRow]:
     normalized: list[ManifestRow] = []
     for raw in rows:
         enriched = dict(raw)
-        enriched.setdefault("source_dataset", source_dataset)
+        existing_source = enriched.get("source_dataset")
+        if existing_source is None or not str(existing_source).strip():
+            enriched["source_dataset"] = source_dataset
         normalized.append(row_from_mapping(enriched))
     return normalized
 
 
-def ingest_metadata(metadata_path: str | Path, source_dataset: str, output_path: str | Path) -> dict[str, Any]:
+def ingest_metadata(
+    metadata_path: str | Path, source_dataset: str, output_path: str | Path
+) -> dict[str, Any]:
     rows = normalize_rows(load_metadata(metadata_path), source_dataset)
     errors = validate_rows(rows)
     write_jsonl(rows, output_path)

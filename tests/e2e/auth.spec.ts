@@ -33,7 +33,44 @@ test.describe("Auth flows", () => {
     await page.route(
       "https://test.supabase.co/**/auth/v1/signup",
       async (route) => {
-        await route.fulfill({ status: 200, body: "{}" });
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            user: {
+              id: "e2e-user-id",
+              aud: "authenticated",
+              role: "authenticated",
+              email: "newuser.e2e@example.test",
+              email_confirmed_at: null,
+              phone: "",
+              confirmed_at: null,
+              last_sign_in_at: null,
+              app_metadata: {
+                provider: "email",
+                providers: ["email"],
+              },
+              user_metadata: {
+                full_name: "New E2E User",
+              },
+              identities: [
+                {
+                  identity_id: "e2e-identity-id",
+                  id: "e2e-identity-id",
+                  user_id: "e2e-user-id",
+                  identity_data: {
+                    email: "newuser.e2e@example.test",
+                  },
+                  provider: "email",
+                },
+              ],
+              created_at: "2026-01-01T00:00:00.000Z",
+              updated_at: "2026-01-01T00:00:00.000Z",
+              is_anonymous: false,
+            },
+            session: null,
+          }),
+        });
       },
     );
 

@@ -406,7 +406,6 @@ export default function CameraPage() {
           capture="environment"
           onChange={handleFileSelect}
           className="hidden"
-          aria-hidden="true"
         />
       )}
     </div>

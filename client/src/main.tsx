@@ -6,6 +6,7 @@ registerSW({ immediate: true });
 // Register Ionic PWA Elements so @capacitor/camera works on web/PWA.
 // Must be called before React renders to ensure custom elements are defined.
 import { defineCustomElements } from "@ionic/pwa-elements/loader";
+
 defineCustomElements(window);
 
 import { Capacitor } from "@capacitor/core";

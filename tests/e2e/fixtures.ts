@@ -25,7 +25,17 @@ const supabaseUser = {
   user_metadata: {
     full_name: "Tutor E2E",
   },
-  identities: [],
+  identities: [
+    {
+      identity_id: "e2e-identity-id",
+      id: "e2e-identity-id",
+      user_id: "e2e-supabase-user",
+      identity_data: {
+        email: mockUserEmail,
+      },
+      provider: "email",
+    },
+  ],
   created_at: timestamp,
   updated_at: timestamp,
 };

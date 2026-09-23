@@ -88,7 +88,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           {" "}
           <div>
             {" "}
-            <p className="text-xs text-muted-foreground">Previsão Atual do Modelo:</p>
+            <p className="text-xs text-muted-foreground">
+              Previsão Atual do Modelo:
+            </p>
             <Badge
               variant="outline"
               className="text-sm font-semibold text-primary border-primary/30 bg-primary/10 mt-1"

@@ -26,7 +26,8 @@
   --shadow-md:
     0 4px 6px -1px rgba(14, 18, 21, 0.12), 0 2px 4px -2px rgba(14, 18, 21, 0.08);
   --shadow-lg:
-    0 10px 15px -3px rgba(14, 18, 21, 0.16), 0 4px 6px -4px rgba(14, 18, 21, 0.1);
+    0 10px 15px -3px rgba(14, 18, 21, 0.16),
+    0 4px 6px -4px rgba(14, 18, 21, 0.1);
   --shadow-glow: 0 4px 14px 0 rgba(14, 18, 21, 0.08);
   --shadow-glow-secondary: 0 4px 14px 0 rgba(14, 18, 21, 0.08);
 
@@ -52,5 +53,3 @@
   --shadow-lg:
     0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
 }
-
-

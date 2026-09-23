@@ -116,10 +116,14 @@ export default function RegisterPage() {
       // Erros relacionados com password vão para o campo da password
       if (/password|senha|palavra.?passe/i.test(msg)) {
         setApiPasswordError(msg);
-      // Erros de email (já registado, email inválido, descartável)
-      } else if (/email|already.?registered|já.?registad|user.?exist|registado/i.test(msg)) {
+        // Erros de email (já registado, email inválido, descartável)
+      } else if (
+        /email|already.?registered|já.?registad|user.?exist|registado/i.test(
+          msg,
+        )
+      ) {
         setApiEmailError(msg);
-      // Erros genéricos (rate-limit, configuração, rede) vão para o banner
+        // Erros genéricos (rate-limit, configuração, rede) vão para o banner
       } else {
         setApiBannerError(msg);
       }

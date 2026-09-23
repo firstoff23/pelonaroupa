@@ -19,6 +19,7 @@ import { createClient } from "@supabase/supabase-js";
 
 // Load .env.local automatically when running with tsx
 import { config } from "dotenv";
+
 config({ path: ".env.local" });
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -90,27 +91,19 @@ async function main() {
 
   const { access_token, expires_at } = signInData.session;
 
-  console.log(
-    "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-  );
+  console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(
     "✅  JWT ACCESS TOKEN (copy this to GitHub Secrets → TEST_AUTH_TOKEN):",
   );
-  console.log(
-    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-  );
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("\n" + access_token + "\n");
-  console.log(
-    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-  );
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(
     `⏰  Token expires at: ${new Date((expires_at ?? 0) * 1000).toISOString()}`,
   );
   console.log("\n📌  Next steps:");
   console.log("  1. Copy the token above.");
-  console.log(
-    "  2. Go to GitHub → Settings → Secrets → Actions → New secret.",
-  );
+  console.log("  2. Go to GitHub → Settings → Secrets → Actions → New secret.");
   console.log("  3. Name: TEST_AUTH_TOKEN, Value: <paste token>.");
   console.log("  4. Test with:");
   console.log(
@@ -120,7 +113,9 @@ async function main() {
   console.log(
     `       -F 'file=@./loadtests/fixtures/test-dog-synthetic.jpg;type=image/jpeg'`,
   );
-  console.log("\n⚠️   DO NOT commit this token. It is only valid for ~1 hour.\n");
+  console.log(
+    "\n⚠️   DO NOT commit this token. It is only valid for ~1 hour.\n",
+  );
 }
 
 main().catch((err) => {

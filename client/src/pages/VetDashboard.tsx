@@ -254,7 +254,9 @@ export default function VetDashboard() {
 
           <main className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground">Período do relatório</p>
+              <p className="text-sm text-muted-foreground">
+                Período do relatório
+              </p>
               <div className="flex rounded-lg border border-border bg-card p-1">
                 {[30, 60, 90].map((days) => (
                   <button

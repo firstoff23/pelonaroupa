@@ -79,6 +79,7 @@ seed-supabase.mjs
 # Keystores and Android Builds
 *.jks
 *.keystore
+android/app/google-services.json
 android/builds/
 android/twa/
 

@@ -15,18 +15,13 @@ export default function NotFound() {
             aria-hidden="true"
           />
           <div className="relative grid h-20 w-20 place-items-center rounded-full bg-card border border-border">
-            <PawPrint
-              className="h-10 w-10 text-primary"
-              aria-hidden="true"
-            />
+            <PawPrint className="h-10 w-10 text-primary" aria-hidden="true" />
           </div>
         </div>
 
         {/* Copy */}
         <div className="space-y-2">
-          <h1 className="text-6xl font-black text-muted select-none">
-            404
-          </h1>
+          <h1 className="text-6xl font-black text-muted select-none">404</h1>
           <h2 className="text-lg font-bold text-foreground">
             Página não encontrada
           </h2>

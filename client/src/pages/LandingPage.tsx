@@ -2,19 +2,15 @@ import {
   ArrowRight,
   BarChart3,
   CheckCircle2,
-  Heart,
   Languages,
   Mic,
   ShieldCheck,
   Sparkles,
-  Users,
   Wifi,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { GlowingButton } from "@/components/ui/GlowingButton";
 import { Logo } from "@/components/ui/Logo";
 import {
   Tooltip,
@@ -155,7 +151,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="hidden lg:block relative w-full h-[500px] rounded-3xl overflow-hidden bg-secondary">
+          <div className="hidden lg:block relative w-full h-125 rounded-3xl overflow-hidden bg-secondary">
             <img
               src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=1200"
               srcSet="

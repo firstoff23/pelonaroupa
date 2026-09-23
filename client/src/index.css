@@ -178,12 +178,19 @@
   z-index: 50;
   display: none;
   overflow: hidden;
-  border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
-  background: color-mix(in oklab, var(--card) 95%, transparent);
+  border-top: 1px solid var(--border);
+  background: var(--card);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   -webkit-user-select: none;
   user-select: none;
+}
+
+@supports (color: color-mix(in oklab, red 50%, blue)) {
+  .bottom-nav-shell {
+    border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+    background: color-mix(in oklab, var(--card) 95%, transparent);
+  }
 }
 
 .bottom-nav-scroll {

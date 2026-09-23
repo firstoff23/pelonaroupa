@@ -11,8 +11,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { animate, motion, useMotionValue } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -1177,8 +1177,8 @@ export default function DashboardPage() {
                 variants={itemVariants}
                 className="rounded-2xl p-4 border"
                 style={{
-                  borderColor: `${STATE_COLORS[todayStats.state]}44`,
-                  background: `${STATE_COLORS[todayStats.state]}11`,
+                  borderColor: `${STATE_COLORS[todayStats.state as EmotionalState]}44`,
+                  background: `${STATE_COLORS[todayStats.state as EmotionalState]}11`,
                 }}
               >
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
@@ -1188,21 +1188,21 @@ export default function DashboardPage() {
                   <div
                     className="w-10 h-10 rounded-full shrink-0"
                     style={{
-                      backgroundColor: `${STATE_COLORS[todayStats.state]}33`,
-                      border: `2px solid ${STATE_COLORS[todayStats.state]}55`,
+                      backgroundColor: `${STATE_COLORS[todayStats.state as EmotionalState]}33`,
+                      border: `2px solid ${STATE_COLORS[todayStats.state as EmotionalState]}55`,
                     }}
                   >
                     <div
                       className="w-full h-full rounded-full"
                       style={{
-                        backgroundColor: `${STATE_COLORS[todayStats.state]}88`,
+                        backgroundColor: `${STATE_COLORS[todayStats.state as EmotionalState]}88`,
                       }}
                     />
                   </div>
                   <div>
                     <p
                       className="text-lg font-bold"
-                      style={{ color: STATE_COLORS[todayStats.state] }}
+                      style={{ color: STATE_COLORS[todayStats.state as EmotionalState] }}
                     >
                       {t(`states.${todayStats.state}`)}
                     </p>
@@ -1384,7 +1384,7 @@ export default function DashboardPage() {
                         cursor={{ fill: "oklch(0.17 0.012 264)" }}
                       />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                        {barData.map((entry) => (
+                        {barData.map((entry: { state: EmotionalState; name: string; value: number; color: string }) => (
                           <Cell
                             key={entry.state}
                             fill={STATE_COLORS[entry.state]}

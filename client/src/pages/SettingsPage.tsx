@@ -577,7 +577,9 @@ export default function SettingsPage() {
                 onClick={() => {
                   setTheme("light");
                   toast.success(
-                    language === "pt" ? "Tema claro ativado" : "Light theme enabled",
+                    language === "pt"
+                      ? "Tema claro ativado"
+                      : "Light theme enabled",
                   );
                 }}
                 className={cn(
@@ -587,7 +589,10 @@ export default function SettingsPage() {
                     : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
                 )}
               >
-                <Sun className="h-5 w-5" strokeWidth={theme === "light" ? 2.5 : 1.75} />
+                <Sun
+                  className="h-5 w-5"
+                  strokeWidth={theme === "light" ? 2.5 : 1.75}
+                />
                 <span className="text-[10px] font-semibold">
                   {language === "pt" ? "Claro" : "Light"}
                 </span>
@@ -603,7 +608,9 @@ export default function SettingsPage() {
                 onClick={() => {
                   setTheme("system");
                   toast.success(
-                    language === "pt" ? "A seguir o tema do dispositivo" : "Following device theme",
+                    language === "pt"
+                      ? "A seguir o tema do dispositivo"
+                      : "Following device theme",
                   );
                 }}
                 className={cn(
@@ -613,7 +620,10 @@ export default function SettingsPage() {
                     : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
                 )}
               >
-                <Monitor className="h-5 w-5" strokeWidth={theme === "system" ? 2.5 : 1.75} />
+                <Monitor
+                  className="h-5 w-5"
+                  strokeWidth={theme === "system" ? 2.5 : 1.75}
+                />
                 <span className="text-[10px] font-semibold">
                   {language === "pt" ? "Sistema" : "System"}
                 </span>
@@ -629,7 +639,9 @@ export default function SettingsPage() {
                 onClick={() => {
                   setTheme("dark");
                   toast.success(
-                    language === "pt" ? "Tema escuro ativado" : "Dark theme enabled",
+                    language === "pt"
+                      ? "Tema escuro ativado"
+                      : "Dark theme enabled",
                   );
                 }}
                 className={cn(
@@ -639,7 +651,10 @@ export default function SettingsPage() {
                     : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
                 )}
               >
-                <Moon className="h-5 w-5" strokeWidth={theme === "dark" ? 2.5 : 1.75} />
+                <Moon
+                  className="h-5 w-5"
+                  strokeWidth={theme === "dark" ? 2.5 : 1.75}
+                />
                 <span className="text-[10px] font-semibold">
                   {language === "pt" ? "Escuro" : "Dark"}
                 </span>

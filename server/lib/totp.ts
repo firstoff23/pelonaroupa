@@ -45,7 +45,11 @@ export function hotp(secretBytes: Uint8Array, counter: bigint): string {
  * Validates a Time-based One-Time Password (TOTP) per RFC 6238.
  * Accepts a drift window of +/- windowSteps (default 1 step = 30 seconds).
  */
-export function validateTotp(secret: string, token: string, windowSteps = 1): boolean {
+export function validateTotp(
+  secret: string,
+  token: string,
+  windowSteps = 1,
+): boolean {
   if (!secret || !token || token.length !== 6) return false;
   const secretBytes = base32Decode(secret);
   const counter = BigInt(Math.floor(Date.now() / 1000 / 30));

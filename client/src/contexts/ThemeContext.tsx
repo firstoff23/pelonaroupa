@@ -41,11 +41,10 @@ export function ThemeProvider({
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
 
   // Track the OS-level dark preference for when theme === "system"
-  const [systemDark, setSystemDark] = useState<boolean>(
-    () =>
-      typeof window !== "undefined"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-        : false,
+  const [systemDark, setSystemDark] = useState<boolean>(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      : false,
   );
 
   useEffect(() => {

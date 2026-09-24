@@ -184,10 +184,7 @@ export const animalsRouter = router({
       const userId = await effectiveUserId(ctx.user);
       await verifyAnimalOwner(input.animalId, userId);
       try {
-        return await recalculateAnimalBehaviorBaseline(
-          input.animalId,
-          userId,
-        );
+        return await recalculateAnimalBehaviorBaseline(input.animalId, userId);
       } catch {
         return getAnimalBaseline(input.animalId);
       }

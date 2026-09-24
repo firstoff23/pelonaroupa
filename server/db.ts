@@ -1272,7 +1272,8 @@ export async function getStatsForAnimal(
 // ─── POMDP Belief State & Posture & Vet sharing ──────────────────────────────
 
 export type { BeliefState } from "./domain/BayesianBeliefEngine";
-import { beliefEngine, type BeliefState } from "./domain/BayesianBeliefEngine";
+
+import { type BeliefState, beliefEngine } from "./domain/BayesianBeliefEngine";
 
 // Belief State updates
 export async function getEventBeliefState(

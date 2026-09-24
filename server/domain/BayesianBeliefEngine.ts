@@ -1,4 +1,4 @@
-import { type EmotionalState } from "../../shared/types";
+import type { EmotionalState } from "../../shared/types";
 
 export interface BeliefState {
   relaxed: number;
@@ -51,10 +51,7 @@ export class BayesianBeliefEngine {
   private readonly defaultPrior: Readonly<Omit<BeliefState, "updatedAt">>;
   private readonly decayHalfLifeMinutes: number;
 
-  constructor(
-    defaultPrior = DEFAULT_BELIEF,
-    decayHalfLifeMinutes = 30,
-  ) {
+  constructor(defaultPrior = DEFAULT_BELIEF, decayHalfLifeMinutes = 30) {
     this.defaultPrior = defaultPrior;
     this.decayHalfLifeMinutes = decayHalfLifeMinutes;
   }
@@ -77,8 +74,13 @@ export class BayesianBeliefEngine {
    *
    * Complexidade: O(|S|) temporal, O(|S|) espacial.
    */
-  public normalize(raw: Record<EmotionalState, number>): Record<EmotionalState, number> {
-    const sum = Object.values(raw).reduce((acc, val) => acc + Math.max(0, val), 0);
+  public normalize(
+    raw: Record<EmotionalState, number>,
+  ): Record<EmotionalState, number> {
+    const sum = Object.values(raw).reduce(
+      (acc, val) => acc + Math.max(0, val),
+      0,
+    );
     const safeSum = sum > 0 ? sum : 1.0;
 
     const normalized = {} as Record<EmotionalState, number>;
@@ -91,7 +93,10 @@ export class BayesianBeliefEngine {
     const currentSum = Object.values(normalized).reduce((a, b) => a + b, 0);
     const diff = Math.round((1.0 - currentSum) * 100) / 100;
     if (diff !== 0) {
-      normalized.relaxed = Math.max(0, Math.round((normalized.relaxed + diff) * 100) / 100);
+      normalized.relaxed = Math.max(
+        0,
+        Math.round((normalized.relaxed + diff) * 100) / 100,
+      );
     }
 
     return normalized;
@@ -109,7 +114,10 @@ export class BayesianBeliefEngine {
     now: Date = new Date(),
   ): BeliefState {
     const lastTime = new Date(currentBelief.updatedAt).getTime();
-    const elapsedMinutes = Math.max(0, (now.getTime() - lastTime) / (1000 * 60));
+    const elapsedMinutes = Math.max(
+      0,
+      (now.getTime() - lastTime) / (1000 * 60),
+    );
 
     if (elapsedMinutes <= 0) return currentBelief;
 
@@ -141,10 +149,16 @@ export class BayesianBeliefEngine {
    * 2. Raridade da observação (eventos raros têm maior peso de informação / surpresa).
    */
   public calculateAdaptiveAlpha(options: UpdateBeliefOptions): number {
-    const { observedState, alertSensitivity = "medium", baselineFrequency = 0, sampleSize = 0 } = options;
+    const {
+      observedState,
+      alertSensitivity = "medium",
+      baselineFrequency = 0,
+      sampleSize = 0,
+    } = options;
 
     let alpha = 0.3;
-    const isAlertOrDistress = observedState === "distress" || observedState === "alert";
+    const isAlertOrDistress =
+      observedState === "distress" || observedState === "alert";
 
     if (alertSensitivity === "high") {
       alpha = isAlertOrDistress ? 0.6 : 0.4;
@@ -183,7 +197,9 @@ export class BayesianBeliefEngine {
     const updatedRaw = {} as Record<EmotionalState, number>;
     for (const state of STATES_LIST) {
       const isObserved = state === observedState;
-      const observationLikelihood = isObserved ? Math.min(1.0, Math.max(0.0, confidence)) : 0;
+      const observationLikelihood = isObserved
+        ? Math.min(1.0, Math.max(0.0, confidence))
+        : 0;
       const prior = decayed[state] ?? this.defaultPrior[state];
       updatedRaw[state] = (1 - alpha) * prior + alpha * observationLikelihood;
     }

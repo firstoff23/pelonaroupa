@@ -88,11 +88,7 @@ export function DashboardHeader({
                 }}
                 transition={{
                   duration:
-                    mood === "calm"
-                      ? 3.0
-                      : mood === "concerned"
-                        ? 1.2
-                        : 2.0,
+                    mood === "calm" ? 3.0 : mood === "concerned" ? 1.2 : 2.0,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}

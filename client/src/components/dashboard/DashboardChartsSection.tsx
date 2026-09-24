@@ -23,10 +23,7 @@ import { VetReportButton } from "@/components/VetReportButton";
 import { cn } from "@/lib/utils";
 import type { EmotionalState } from "../../../../shared/types";
 import { STATE_COLORS } from "../../../../shared/types";
-import {
-  ConfidenceTooltip,
-  CustomTooltip,
-} from "./DashboardHelpers";
+import { ConfidenceTooltip, CustomTooltip } from "./DashboardHelpers";
 
 interface AnimalItem {
   id: number;
@@ -126,9 +123,7 @@ export function DashboardChartsSection({
             >
               <SelectTrigger className="h-9 rounded-xl border-slate-800 bg-slate-900/30 text-xs font-semibold focus:ring-0 focus:ring-offset-0">
                 <SelectValue
-                  placeholder={
-                    isPt ? "Selecionar animal" : "Select animal"
-                  }
+                  placeholder={isPt ? "Selecionar animal" : "Select animal"}
                 />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-slate-800 bg-slate-900">

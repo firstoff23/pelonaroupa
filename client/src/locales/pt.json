@@ -363,5 +363,23 @@
     "dashboard": "Painel de Controlo",
     "disclaimerTitle": "Honestidade Científica & Limitações",
     "disclaimerDesc": "O PeloNaRoupa utiliza o modelo YAMNet (classificador genérico de eventos de áudio) para estimar estados emocionais como aproximações comportamentais. Os resultados devem ser interpretados como sinais ou indícios — nunca como diagnóstico. Esta aplicação não substitui avaliação veterinária profissional."
+  },
+  "weeklyNarrative": {
+    "title": "Insights Semanais",
+    "subtitle": "Síntese comportamental baseada nas vocalizações dos últimos 7 dias",
+    "viewHistoryCta": "Ver gravações desta semana",
+    "recommendation": "Recomendação",
+    "trend": {
+      "improving": "Melhoria",
+      "stable": "Estável",
+      "concerning": "Atenção redobrada",
+      "insufficient_data": "Dados insuficientes"
+    },
+    "recommendations": {
+      "vet_consult": "Consulta veterinária recomendada se os episódios persistirem.",
+      "continue_monitoring": "Mantém o registo diário para continuar a monitorizar.",
+      "positive_routine": "Rotina positiva e consistente. Continua o bom trabalho!",
+      "record_more": "Regista pelo menos 3 vocalizações para gerar insights automáticos."
+    }
   }
 }

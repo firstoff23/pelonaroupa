@@ -14,6 +14,7 @@ import { AnimatedNumber } from "@/components/dashboard/DashboardHelpers";
 import { DashboardTrackedAnimals } from "@/components/dashboard/DashboardTrackedAnimals";
 import { TrendCard } from "@/components/TrendCard";
 import { Button } from "@/components/ui/button";
+import { WeeklyNarrativeCard } from "@/components/WeeklyNarrativeCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMood } from "@/contexts/MoodContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -425,6 +426,20 @@ export default function DashboardPage() {
               mood={mood}
               latestEventState={latestEvent?.state}
               language={language}
+            />
+          </motion.div>
+        )}
+
+        {/* Weekly Narrative Card (SATELLAI-inspired) */}
+        {!animalsLoading && !animalsError && activeAnimal && (
+          <motion.div variants={itemVariants}>
+            <WeeklyNarrativeCard
+              animalId={dashboardAnimalId || activeAnimal.id}
+              animalName={
+                displayAnimals.find(
+                  (a) => a.id === (dashboardAnimalId || activeAnimal.id),
+                )?.name
+              }
             />
           </motion.div>
         )}

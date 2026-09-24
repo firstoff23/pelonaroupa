@@ -11,7 +11,19 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDemoUserId, getSupabase } from "../db";
+import {
+  getAnimalById,
+  getDemoUserId,
+  getSupabase,
+  getTrendsEvents,
+  verifyAnimalOwner,
+} from "../db";
+import {
+  buildNarrativeCacheKey,
+  calculateWeeklyNarrative,
+  getCachedNarrative,
+  setCachedNarrative,
+} from "../services/narrative";
 
 const PERIOD_TAGS = ["manha", "tarde", "noite"] as const;
 type PeriodTag = (typeof PERIOD_TAGS)[number];
@@ -245,5 +257,57 @@ export const insightsRouter = router({
     .query(async ({ ctx, input }) => {
       const userId = await effectiveUserId(ctx.user);
       return getInsightsForAnimal(input.animalId, userId);
+    }),
+
+  getWeeklyNarrative: protectedProcedure
+    .input(
+      z.object({
+        animalId: z.number().int().positive(),
+        timezone: z.string().optional(),
+        forceRefresh: z.boolean().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      await verifyAnimalOwner(input.animalId, userId);
+
+      const animal = await getAnimalById(input.animalId, userId);
+      if (!animal) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Animal não encontrado",
+        });
+      }
+
+      const timezone = input.timezone || "Europe/Lisbon";
+      const cacheKey = buildNarrativeCacheKey(
+        input.animalId,
+        new Date(),
+        timezone,
+      );
+
+      if (!input.forceRefresh) {
+        const cached = getCachedNarrative(cacheKey);
+        if (cached) return cached;
+      }
+
+      // Fetch 7 days of events from DB
+      const events = await getTrendsEvents(input.animalId, 7);
+
+      const result = calculateWeeklyNarrative({
+        animalId: input.animalId,
+        animalName: animal.name,
+        events: events.map((e) => ({
+          id: e.id,
+          state: e.state,
+          confidence: e.confidence,
+          created_at: e.created_at,
+        })),
+        timezone,
+        periodDays: 7,
+      });
+
+      setCachedNarrative(cacheKey, result);
+      return result;
     }),
 });

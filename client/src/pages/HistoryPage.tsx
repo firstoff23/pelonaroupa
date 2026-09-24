@@ -731,13 +731,13 @@ export default function HistoryPage() {
 
   // Sync period filter
   useEffect(() => {
-    if (period === "week") {
+    if (period === "week" || period === "7d") {
       const now = new Date();
       const past = new Date();
       past.setDate(now.getDate() - 7);
       setDateFromParam(past.toISOString().split("T")[0]);
       setDateToParam(now.toISOString().split("T")[0]);
-    } else if (period === "month") {
+    } else if (period === "month" || period === "30d") {
       const now = new Date();
       const past = new Date();
       past.setDate(now.getDate() - 30);

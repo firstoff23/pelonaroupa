@@ -364,5 +364,23 @@
     "dashboard": "Dashboard",
     "disclaimerTitle": "Scientific Honesty & Limitations",
     "disclaimerDesc": "PeloNaRoupa uses the YAMNet model (a generic audio event classifier) to estimate emotional states as behavioral approximations. Results should be interpreted as signals or cues — never as a diagnosis. This application does not replace professional veterinary evaluation."
+  },
+  "weeklyNarrative": {
+    "title": "Weekly Insights",
+    "subtitle": "Behavioral synthesis based on recordings from the last 7 days",
+    "viewHistoryCta": "View recordings from this week",
+    "recommendation": "Recommendation",
+    "trend": {
+      "improving": "Improving",
+      "stable": "Stable",
+      "concerning": "Heightened attention",
+      "insufficient_data": "Insufficient data"
+    },
+    "recommendations": {
+      "vet_consult": "Veterinary consultation recommended if episodes persist.",
+      "continue_monitoring": "Maintain daily tracking to continue monitoring.",
+      "positive_routine": "Positive and consistent routine. Keep up the good work!",
+      "record_more": "Record at least 3 vocalizations to generate automatic insights."
+    }
   }
 }

@@ -1271,15 +1271,8 @@ export async function getStatsForAnimal(
 
 // ─── POMDP Belief State & Posture & Vet sharing ──────────────────────────────
 
-export interface BeliefState {
-  relaxed: number;
-  excitement: number;
-  distress: number;
-  hunger: number;
-  alert: number;
-  attention: number;
-  updatedAt: string;
-}
+export type { BeliefState } from "./domain/BayesianBeliefEngine";
+import { beliefEngine, type BeliefState } from "./domain/BayesianBeliefEngine";
 
 // Belief State updates
 export async function getEventBeliefState(
@@ -1314,33 +1307,12 @@ export async function getLatestBeliefState(
     .limit(1)
     .maybeSingle();
 
-  const defaultBelief: BeliefState = {
-    relaxed: 0.5,
-    excitement: 0.1,
-    distress: 0.1,
-    hunger: 0.1,
-    alert: 0.1,
-    attention: 0.1,
-    updatedAt: new Date().toISOString(),
-  };
-
   if (error || !recentEvent || !recentEvent.belief_state) {
-    return defaultBelief;
+    return beliefEngine.getDefaultBelief();
   }
 
   const state = recentEvent.belief_state as any as BeliefState;
-
-  // Check if it was in the last 30 minutes, otherwise decay to default
-  const lastTime = new Date(state.updatedAt).getTime();
-  const now = Date.now();
-  const diffMinutes = (now - lastTime) / (1000 * 60);
-
-  if (diffMinutes > 30) {
-    // Slowly return to relaxed default (decay)
-    return defaultBelief;
-  }
-
-  return state;
+  return beliefEngine.decayWithTime(state);
 }
 
 export async function updateBeliefStateForAnimal(
@@ -1352,55 +1324,15 @@ export async function updateBeliefStateForAnimal(
   const lastBelief = await getLatestBeliefState(animalId);
   const baseline = await getAnimalBaseline(animalId);
 
-  // Calibrate learning rate (alpha) based on alert sensitivity
-  let alpha = 0.3;
-  if (baseline.alertSensitivity === "high") {
-    // Sensitive alerts (fast update to distress/alert)
-    alpha =
-      observedState === "distress" || observedState === "alert" ? 0.6 : 0.4;
-  } else if (baseline.alertSensitivity === "low") {
-    // Resilient alerts (filter transient vocalizations)
-    alpha =
-      observedState === "distress" || observedState === "alert" ? 0.15 : 0.3;
-  }
-
   const baselineFrequency = baseline.stateDistribution?.[observedState] ?? 0;
-  const isRareForAnimal = baseline.sampleSize >= 5 && baselineFrequency < 0.1;
-  if (isRareForAnimal) {
-    alpha = Math.min(alpha + 0.15, 0.75);
-  }
 
-  const updated: Record<string, number> = {
-    relaxed: lastBelief.relaxed,
-    excitement: lastBelief.excitement,
-    distress: lastBelief.distress,
-    hunger: lastBelief.hunger,
-    alert: lastBelief.alert,
-    attention: lastBelief.attention,
-  };
-
-  // Bayesian update rule
-  STATES_LIST.forEach((s) => {
-    const isObserved = s === observedState;
-    const observationWeight = isObserved ? confidence : 0;
-    updated[s] = (1 - alpha) * (updated[s] ?? 0.1) + alpha * observationWeight;
+  const finalBelief = beliefEngine.updateBelief(lastBelief, {
+    observedState: observedState as any,
+    confidence,
+    alertSensitivity: baseline.alertSensitivity,
+    baselineFrequency,
+    sampleSize: baseline.sampleSize,
   });
-
-  // Normalize probabilities to sum up to 1.0
-  const sum = Object.values(updated).reduce((a, b) => a + b, 0);
-  STATES_LIST.forEach((s) => {
-    updated[s] = Math.round(((updated[s] ?? 0.1) / (sum || 1)) * 100) / 100;
-  });
-
-  const finalBelief: BeliefState = {
-    relaxed: updated.relaxed ?? 0,
-    excitement: updated.excitement ?? 0,
-    distress: updated.distress ?? 0,
-    hunger: updated.hunger ?? 0,
-    alert: updated.alert ?? 0,
-    attention: updated.attention ?? 0,
-    updatedAt: new Date().toISOString(),
-  };
 
   const supabase = getSupabase();
   const { error } = await supabase

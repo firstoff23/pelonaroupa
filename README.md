@@ -2,15 +2,16 @@
   <img src="./assets/pelonaroupa-banner.png" alt="Silhuetas de cão e gato com onda sonora" width="100%" />
 </p>
 
-<h1 align="center">PeloNaRoupa</h1>
+<h1 align="center">AnimalMind</h1>
 
 <p align="center">
-  <strong>Uma aplicação para registar observações, explorar comportamentos e compreender melhor o quotidiano dos animais de companhia.</strong>
+  <strong>Plataforma inteligente para registo de observações, análise acústica de bem-estar animal e acompanhamento comportamental contínuo.</strong>
 </p>
 
 <p align="center">
   <a href="https://animalmind.vercel.app">Demonstração</a> ·
   <a href="#-setup-local">Começar</a> ·
+  <a href="#-alinhamento-curricular-ctesp-tpsi---ipcb">Alinhamento Curricular</a> ·
   <a href="#-arquitetura-e-operação">Arquitetura</a> ·
   <a href="#-cuidados-e-limites">Cuidados e limites</a>
 </p>
@@ -45,17 +46,45 @@
 
 ## Visão geral
 
-O **PeloNaRoupa** é uma aplicação web/PWA em estado de MVP que combina observações do tutor com interpretação assistida de comportamento e áudio. A proposta é ajudar a organizar sinais do quotidiano, acompanhar a evolução e criar um ponto de partida mais informado para compreender o animal ao longo do tempo.
+O **AnimalMind** é uma aplicação web/PWA que combina observações do tutor com interpretação assistida de comportamento e áudio. A proposta é ajudar a organizar sinais do quotidiano, acompanhar a evolução e criar um ponto de partida mais informado para compreender o animal ao longo do tempo.
 
 > **Importante:** a aplicação oferece apoio interpretativo e não substitui aconselhamento, diagnóstico ou cuidados médico-veterinários.
 
 | Área | O que oferece |
 | --- | --- |
-| **Interpretação assistida** | Contexto para observações comportamentais e vocalizações. |
-| **Histórico do animal** | Registo de observações e evolução emocional ao longo do tempo. |
-| **Ciclo de feedback** | Possibilidade de avaliar e corrigir interpretações. |
-| **Auditoria responsável** | Área de revisão e moderação para perfis autorizados. |
-| **Experiência multiplataforma** | Aplicação React/PWA com caminho para dispositivos móveis via Capacitor. |
+| **Interpretação assistida** | Contexto para observações comportamentais e vocalizações via rede neural YAMNet. |
+| **Histórico do animal** | Registo de observações e evolução emocional ao longo do tempo com inferência POMDP. |
+| **Ciclo de feedback** | Possibilidade de avaliar e corrigir interpretações com aprendizagem adaptativa. |
+| **Modo Veterinário** | Área de revisão clínica com relatórios exportáveis em PDF para profissionais. |
+| **Experiência multiplataforma** | Aplicação React 19 / PWA com suporte offline e empacotamento móvel via Capacitor. |
+
+---
+
+## 🎓 Alinhamento Curricular: CTeSP TPSI - IPCB
+
+Este projeto foi estruturado e refatorado em estrita conformidade com as competências profissionais e técnicas preconizadas no plano de estudos do **Curso Técnico Superior Profissional (CTeSP) em Tecnologias e Programação de Sistemas de Informação** do **Instituto Politécnico de Castelo Branco (IPCB)**:
+
+### 1º Ano Curricular
+
+| Unidade Curricular (UC) | Competências & Evidências no AnimalMind |
+| :--- | :--- |
+| **Matemática** | Modelação probabilística com vetores estocásticos ($\sum_{i} p_i = 1.0$) no motor POMDP; função de decaimento temporal contínuo exponencial com meia-vida ($t_{1/2} = 4\text{h}$, $\lambda = \frac{\ln(2)}{t_{1/2}}$); interpolação linear e métricas de confiança normalizadas. Ver [`docs/ALGORITHMS.md`](./docs/ALGORITHMS.md). |
+| **Design de Interfaces** | Design de UI/UX contemporâneo e responsivo (PWA mobile-first); conformidade com acessibilidade WCAG (contraste cromático, target sizes $\ge 44\text{px}$, estados de foco); micro-interações fluidas com `motion/react`; separação clara em componentes reutilizáveis (`components/dashboard/`). |
+| **Algoritmia e Programação** | Implementação de algoritmos de inferência bayesiana com complexidade assintótica $O(\|S\|)$; manipulação de coleções e estruturas de dados fortemente tipadas em TypeScript com tipagem estrita; controlo rigoroso de fluxo sem loops redundantes ou recursões desnecessárias. |
+| **Gestão de Projetos** | Organização e modularidade de pastas (Clean Architecture); versionamento semântico no Git; documentação técnica sob o padrão Diátaxis ([`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md), [`docs/ALGORITHMS.md`](./docs/ALGORITHMS.md), [`docs/DATABASE_SCHEMA.md`](./docs/DATABASE_SCHEMA.md)); eliminação de qualquer resíduo de "vibe coding" ou templates não auditados. |
+| **Análise de Requisitos** | Especificação clara de requisitos funcionais (classificação sonora, baseline dinâmico, partilha com co-tutores, relatórios clínicos em PDF) e não funcionais (tempo de resposta $<50\text{ms}$ para o motor de crença, funcionamento offline com IndexedDB). |
+| **Modelação de Bases de Dados** | Modelação relacional normalizada em 3ª Forma Normal (3NF); integridade referencial com chaves forasteiras e `ON DELETE CASCADE`; restrições de verificação (`CHECK constraints`); diagramas entidade-relacionamento (ERD). Ver [`docs/DATABASE_SCHEMA.md`](./docs/DATABASE_SCHEMA.md). |
+
+### 2º Ano Curricular
+
+| Unidade Curricular (UC) | Competências & Evidências no AnimalMind |
+| :--- | :--- |
+| **Programação Orientada por Objetos** | Classes de domínio ricas com encapsulamento estrito (`BayesianBeliefEngine.ts`); separação entre Entidades e Value Objects (`Confidence`, `Species`, `AudioClass`); padrões de desenho (Strategy para múltiplos backends ML, Facade para a camada de dados). |
+| **Fundamentos de Teste de Software** | Pirâmide de testes completa com **41 suites de teste** e **151 testes automatizados** a correr em Vitest com 100% de sucesso; testes unitários, testes de integração de API e testes de invariantes matemáticos estocásticos. |
+| **Projeto de Bases de Dados** | Otimização de consultas SQL; criação estratégica de índices B-Tree compostos e índices GIN sobre campos `JSONB`; configuração e auditoria de políticas de segurança ao nível de linha (Row-Level Security - RLS) para isolamento multi-inquilino. |
+| **Fundamentos e Operação de SO** | Gestão de processos assíncronos no Node.js; streaming de áudio e buffers de sinal em tempo real; políticas de Content Security Policy (CSP); gestão segura de variáveis de ambiente e ficheiros protegidos. |
+| **Inglês Técnico** | Toda a documentação de arquitetura, algoritmos e esquemas de dados, bem como código, tipos TypeScript e mensagens de commit, elaborados em inglês técnico claro e rigoroso. |
+| **Projeto de Desenvolvimento de Aplicações** | Integração horizontal de todas as competências: PWA React 19 + tRPC v11 + Node.js Express Gateway + microsserviço Python FastAPI/YAMNet + Supabase PostgreSQL + n8n Webhooks. |
 
 ## Tecnologias
 

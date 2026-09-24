@@ -1,53 +1,19 @@
-import {
-  AlertCircle,
-  Apple,
-  ChevronRight,
-  Clock3,
-  HeartPulse,
-  Loader2,
-  Mail,
-  Mic,
-  PawPrint,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { AlertCircle, Apple, Clock3, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { AlertBanner } from "@/components/AlertBanner";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
-import {
-  AnimatedNumber,
-  ConfidenceTooltip,
-  CustomTooltip,
-  getHealthBadge,
-} from "@/components/dashboard/DashboardHelpers";
+import { DashboardChartsSection } from "@/components/dashboard/DashboardChartsSection";
+import { DashboardConsolidatedMood } from "@/components/dashboard/DashboardConsolidatedMood";
+import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
+import { DashboardFamilySection } from "@/components/dashboard/DashboardFamilySection";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { AnimatedNumber } from "@/components/dashboard/DashboardHelpers";
+import { DashboardTrackedAnimals } from "@/components/dashboard/DashboardTrackedAnimals";
 import { TrendCard } from "@/components/TrendCard";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { VetReportButton } from "@/components/VetReportButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMood } from "@/contexts/MoodContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -66,14 +32,6 @@ const STATES: EmotionalState[] = [
   "alert",
   "relaxed",
 ];
-
-const formatDashboardTimestamp = (value: Date | string, locale: string) =>
-  new Date(value).toLocaleString(locale, {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -98,8 +56,6 @@ const itemVariants = {
   },
 };
 
-// ─── Dashboard Page ───────────────────────────────────────────────────────────
-
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const { mood } = useMood();
@@ -107,6 +63,8 @@ export default function DashboardPage() {
 
   const [dashboardDays, setDashboardDays] = useState<7 | 30 | 90>(7);
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
+
+  // Queries
   const {
     data: animals = [],
     isLoading: animalsLoading,
@@ -118,6 +76,7 @@ export default function DashboardPage() {
   const [cachedEvents, setCachedEvents] = useState<any[]>([]);
   const [cachedBeliefState, setCachedBeliefState] = useState<any>(null);
 
+  // Hydrate offline cache
   useEffect(() => {
     getCachedData<any[]>(CACHE_KEYS.ANIMALS_LIST).then((data) => {
       if (data) setCachedAnimals(data);
@@ -227,7 +186,6 @@ export default function DashboardPage() {
     if (!dashboardStats?.dailyActivity) return [];
 
     return dashboardStats.dailyActivity.map((day) => {
-      // Find dominant state
       let dominantState = "relaxed" as EmotionalState;
       let maxCount = -1;
 
@@ -239,14 +197,10 @@ export default function DashboardPage() {
         }
       });
 
-      // format date
       const d = new Date(day.date);
       const dateLabel = d.toLocaleDateString(
         language === "pt" ? "pt-PT" : "en-US",
-        {
-          day: "2-digit",
-          month: "2-digit",
-        },
+        { day: "2-digit", month: "2-digit" },
       );
 
       return {
@@ -259,8 +213,9 @@ export default function DashboardPage() {
   }, [dashboardStats, language]);
 
   const dashboardNarrative = useMemo(() => {
-    if (!dashboardStats?.stateDistribution || dashboardStats.totalCount === 0)
+    if (!dashboardStats?.stateDistribution || dashboardStats.totalCount === 0) {
       return null;
+    }
 
     const entries = Object.entries(dashboardStats.stateDistribution);
     if (entries.length === 0) return null;
@@ -315,7 +270,6 @@ export default function DashboardPage() {
     return statesList.sort((a, b) => b.val - a.val)[0];
   }, [displayBeliefState]);
 
-  // ── Bar chart: state distribution ─────────────────────────────────────────
   const barData = useMemo(() => {
     const counts: Record<EmotionalState, number> = {
       distress: 0,
@@ -336,15 +290,12 @@ export default function DashboardPage() {
     }));
   }, [displayEvents, t]);
 
-  // ── Line chart: daily average daily confidence ──────────────────────────────
   const lineData = useMemo(() => {
     const byDay: Record<string, { sum: number; count: number }> = {};
     for (const e of displayEvents) {
       const day = new Date(e.createdAt).toLocaleDateString(
         language === "pt" ? "pt-PT" : "en-US",
-        {
-          weekday: "short",
-        },
+        { weekday: "short" },
       );
       if (!byDay[day]) byDay[day] = { sum: 0, count: 0 };
       byDay[day].sum += e.confidence;
@@ -356,33 +307,6 @@ export default function DashboardPage() {
     }));
   }, [displayEvents, language]);
 
-  // ── Dominant state today ───────────────────────────────────────────────────
-  const todayStats = useMemo(() => {
-    const today = new Date();
-    const todayEvents = displayEvents.filter((e) => {
-      const d = new Date(e.createdAt);
-      return (
-        d.getDate() === today.getDate() &&
-        d.getMonth() === today.getMonth() &&
-        d.getFullYear() === today.getFullYear()
-      );
-    });
-    if (todayEvents.length === 0) return null;
-
-    const counts: Record<string, number> = {};
-    for (const e of todayEvents) {
-      counts[e.state] = (counts[e.state] ?? 0) + 1;
-    }
-    const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-    if (!dominant) return null;
-    const [state, count] = dominant;
-    return {
-      state: state as EmotionalState,
-      pct: Math.round((count / todayEvents.length) * 100),
-      total: todayEvents.length,
-    };
-  }, [displayEvents]);
-
   const latestEvent = useMemo(() => {
     return (
       [...displayEvents].sort(
@@ -392,7 +316,6 @@ export default function DashboardPage() {
     );
   }, [displayEvents]);
 
-  const activeAnimalHealth = getHealthBadge(latestEvent?.state);
   const locale = language === "pt" ? "pt-PT" : "en-US";
 
   if (animalsLoading) {
@@ -450,161 +373,15 @@ export default function DashboardPage() {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-[1.75rem] border bg-card p-6 shadow-sm transition-all duration-500",
-              mood === "calm"
-                ? "border-mood-primary/15"
-                : mood === "concerned"
-                  ? "border-mood-primary/25"
-                  : "border-mood-primary/15",
-            )}
-          >
-            <div className="relative space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {activeAnimal && (
-                    <motion.div
-                      animate={{
-                        scale:
-                          mood === "calm"
-                            ? [1, 1.03, 1]
-                            : mood === "concerned"
-                              ? [1, 1.06, 1]
-                              : [1, 1.04, 1],
-                        boxShadow:
-                          mood === "calm"
-                            ? [
-                                "0 0 0 0px rgba(52, 168, 83, 0.2)",
-                                "0 0 0 8px rgba(52, 168, 83, 0)",
-                                "0 0 0 0px rgba(52, 168, 83, 0)",
-                              ]
-                            : mood === "concerned"
-                              ? [
-                                  "0 0 0 0px rgba(244, 180, 0, 0.4)",
-                                  "0 0 0 12px rgba(244, 180, 0, 0)",
-                                  "0 0 0 0px rgba(244, 180, 0, 0)",
-                                ]
-                              : [
-                                  "0 0 0 0px rgba(66, 133, 244, 0.3)",
-                                  "0 0 0 10px rgba(66, 133, 244, 0)",
-                                  "0 0 0 0px rgba(66, 133, 244, 0)",
-                                ],
-                      }}
-                      transition={{
-                        duration:
-                          mood === "calm"
-                            ? 3.0
-                            : mood === "concerned"
-                              ? 1.2
-                              : 2.0,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="rounded-full shrink-0"
-                    >
-                      <Avatar className="h-14 w-14 border border-mood-primary/30 bg-black/20">
-                        <AvatarImage
-                          src={
-                            "photoUrl" in activeAnimal &&
-                            typeof activeAnimal.photoUrl === "string"
-                              ? activeAnimal.photoUrl
-                              : undefined
-                          }
-                          alt={activeAnimal.name}
-                        />
-                        <AvatarFallback className="bg-mood-primary/10 text-xl">
-                          <PawPrint
-                            size={22}
-                            className="text-mood-primary/60"
-                          />
-                        </AvatarFallback>
-                      </Avatar>
-                    </motion.div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase text-mood-primary/80 transition-all duration-500">
-                      PeloNaRoupa
-                    </p>
-                    <h1 className="mt-0.5 text-2xl font-bold text-foreground">
-                      {t("dashboardPage.title")}
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground leading-snug">
-                      {activeAnimal
-                        ? mood === "calm"
-                          ? language === "pt"
-                            ? `O ${activeAnimal.name} está bem hoje`
-                            : `${activeAnimal.name} is doing well today`
-                          : mood === "concerned"
-                            ? language === "pt"
-                              ? `O ${activeAnimal.name} pode precisar de atenção — vê os detalhes`
-                              : `${activeAnimal.name} might need attention — see details`
-                            : language === "pt"
-                              ? `Sem novidades com o ${activeAnimal.name}`
-                              : `No updates for ${activeAnimal.name}`
-                        : language === "pt"
-                          ? "Comece por adicionar o seu primeiro animal."
-                          : "Start by adding your first animal."}
-                    </p>
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "rounded-full px-3 py-1 text-[11px] font-semibold shrink-0",
-                    activeAnimalHealth.className,
-                  )}
-                >
-                  <ShieldCheck className="h-3 w-3" />
-                  {activeAnimalHealth.label}
-                </Badge>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-[1.15fr_0.85fr]">
-                <Link to="/gravar">
-                  <Button className="h-auto w-full justify-between rounded-2xl px-4 py-4 text-left active-scale tap-highlight-none">
-                    <span className="flex items-center gap-3">
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/10 dark:bg-black/20">
-                        <Mic className="h-5 w-5" />
-                      </span>
-                      <span>
-                        <span className="block text-sm font-bold">
-                          {language === "pt" ? "Gravar agora" : "Record now"}
-                        </span>
-                        <span className="block text-[11px] font-medium opacity-75">
-                          {language === "pt"
-                            ? "Classificação em segundos"
-                            : "Classification in seconds"}
-                        </span>
-                      </span>
-                    </span>
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
-                </Link>
-
-                <div className="rounded-2xl border border-border bg-secondary/30 p-4">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase text-muted-foreground">
-                    <Clock3 className="h-3.5 w-3.5 text-amber-300" />
-                    {language === "pt" ? "Última gravação" : "Last recording"}
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">
-                    {latestEvent
-                      ? t(`states.${latestEvent.state as EmotionalState}`)
-                      : language === "pt"
-                        ? "Sem gravações ainda"
-                        : "No recordings yet"}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {latestEvent
-                      ? formatDashboardTimestamp(latestEvent.createdAt, locale)
-                      : language === "pt"
-                        ? "A primeira análise aparece aqui."
-                        : "The first analysis appears here."}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DashboardHeader
+            activeAnimal={activeAnimal}
+            mood={mood}
+            title={t("dashboardPage.title")}
+            language={language}
+            locale={locale}
+            latestEvent={latestEvent}
+            t={t}
+          />
         </motion.div>
 
         {/* Quick Actions */}
@@ -632,121 +409,27 @@ export default function DashboardPage() {
           </Link>
         </motion.div>
 
+        {/* Active Animal Alert Banner */}
         {activeAnimal && (
           <motion.div variants={itemVariants}>
             <AlertBanner animalId={activeAnimal.id} />
           </motion.div>
         )}
 
+        {/* Tracked Animals Carousel */}
         {!animalsLoading && !animalsError && displayAnimals.length > 0 && (
-          <motion.div variants={itemVariants} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase text-muted-foreground">
-                {language === "pt" ? "Animais acompanhados" : "Tracked animals"}
-              </h2>
-              <span className="text-[11px] text-muted-foreground">
-                {displayAnimals.length}
-              </span>
-            </div>
-            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-              {displayAnimals.map((a) => {
-                const isActiveAnimal = a.id === activeAnimal?.id;
-                const status = getHealthBadge(
-                  isActiveAnimal ? latestEvent?.state : null,
-                );
-                const photoUrl =
-                  "photoUrl" in a && typeof a.photoUrl === "string"
-                    ? a.photoUrl
-                    : undefined;
-                return (
-                  <Link key={a.id} to={`/animal/${a.id}`}>
-                    <div
-                      className={cn(
-                        "min-w-52.5 rounded-2xl border p-3 transition-all active-scale tap-highlight-none",
-                        isActiveAnimal
-                          ? "border-mood-primary/35 bg-mood-primary/10 shadow-[0_4px_20px_rgba(var(--mood-color-rgb),0.06)]"
-                          : "border-border/70 bg-surface",
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="relative shrink-0">
-                          {isActiveAnimal ? (
-                            <motion.div
-                              animate={{
-                                scale:
-                                  mood === "calm"
-                                    ? [1, 1.04, 1]
-                                    : mood === "concerned"
-                                      ? [1, 1.08, 1]
-                                      : [1, 1.06, 1],
-                              }}
-                              transition={{
-                                duration:
-                                  mood === "calm"
-                                    ? 3.0
-                                    : mood === "concerned"
-                                      ? 1.2
-                                      : 2.0,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                              }}
-                            >
-                              <Avatar className="h-12 w-12 border border-mood-primary/35 bg-black/20">
-                                <AvatarImage src={photoUrl} alt={a.name} />
-                                <AvatarFallback className="bg-mood-primary/10 text-lg">
-                                  <PawPrint
-                                    size={18}
-                                    className="text-mood-primary/60"
-                                  />
-                                </AvatarFallback>
-                              </Avatar>
-                            </motion.div>
-                          ) : (
-                            <Avatar className="h-12 w-12 border border-white/10 bg-black/20">
-                              <AvatarImage src={photoUrl} alt={a.name} />
-                              <AvatarFallback className="bg-primary/10 text-lg">
-                                <PawPrint
-                                  size={18}
-                                  className="text-primary/60"
-                                />
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-bold text-foreground">
-                            {a.name}
-                          </p>
-                          <p className="truncate text-[11px] text-muted-foreground">
-                            {a.breed ||
-                              (language === "pt"
-                                ? "Raça não definida"
-                                : "Breed not set")}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "rounded-full text-[10px] font-semibold",
-                            status.className,
-                          )}
-                        >
-                          <HeartPulse className="h-3 w-3" />
-                          {status.label}
-                        </Badge>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+          <motion.div variants={itemVariants}>
+            <DashboardTrackedAnimals
+              animals={displayAnimals}
+              activeAnimalId={activeAnimal?.id}
+              mood={mood}
+              latestEventState={latestEvent?.state}
+              language={language}
+            />
           </motion.div>
         )}
 
-        {/* ─── 4 States: error / empty / success ─── */}
+        {/* Error / Empty / Stats Cards */}
         {animalsError ? (
           <motion.div
             variants={itemVariants}
@@ -769,90 +452,10 @@ export default function DashboardPage() {
             </Button>
           </motion.div>
         ) : displayAnimals.length === 0 ? (
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col items-center justify-center py-10 text-center space-y-7 bg-card border border-border rounded-2xl p-6 shadow-md max-w-lg mx-auto"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
-              <Sparkles className="w-12 h-12 text-primary relative" />
-            </div>
-
-            <div className="space-y-1.5">
-              <h2 className="text-xl font-bold text-foreground">
-                Bem-vindo ao PeloNaRoupa!
-              </h2>
-              <p className="text-muted-foreground text-xs sm:text-sm max-w-sm leading-relaxed">
-                Vamos configurar a sua conta. Siga os passos rápidos abaixo para
-                começar a monitorizar o seu companheiro.
-              </p>
-            </div>
-
-            <div className="w-full space-y-3 text-left">
-              {/* Step 1 */}
-              <div className="flex gap-4 items-center bg-secondary/15 border border-secondary/30 rounded-2xl p-4 transition-all duration-300">
-                <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
-                  1
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-bold text-foreground">
-                    Adicionar o Seu Primeiro Animal
-                  </h4>
-                  <p className="text-[11px] text-muted-foreground">
-                    Crie o perfil com espécie, raça e idade do seu companheiro.
-                  </p>
-                </div>
-                <Link to="/definicoes">
-                  <Button
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg text-xs px-3.5 shadow-sm"
-                  >
-                    Criar Perfil
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Step 2 */}
-              <div className="flex gap-4 items-center bg-muted/20 border border-border/40 rounded-2xl p-4 opacity-60">
-                <div className="w-9 h-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm shrink-0">
-                  2
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    Gravar uma Vocalização
-                  </h4>
-                  <p className="text-[11px] text-muted-foreground/80">
-                    Capte o áudio do seu animal no gravador para obter o
-                    relatório de bem-estar.
-                  </p>
-                </div>
-                <span className="text-muted-foreground text-xs">
-                  Aguardando
-                </span>
-              </div>
-
-              {/* Step 3 */}
-              <div className="flex gap-4 items-center bg-muted/20 border border-border/40 rounded-2xl p-4 opacity-60">
-                <div className="w-9 h-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm shrink-0">
-                  3
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-sm font-semibold text-muted-foreground">
-                    Analisar Tendências
-                  </h4>
-                  <p className="text-[11px] text-muted-foreground/80">
-                    Aceda a estatísticas semanais e alertas automáticos de
-                    alteração comportamental.
-                  </p>
-                </div>
-                <span className="text-muted-foreground text-xs">
-                  Aguardando
-                </span>
-              </div>
-            </div>
+          <motion.div variants={itemVariants}>
+            <DashboardEmptyState language={language} />
           </motion.div>
         ) : (
-          /* Stats Cards */
           <motion.div
             variants={itemVariants}
             className="grid grid-cols-2 gap-3"
@@ -876,604 +479,57 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        {/* NOVA SECÇÃO: Dashboard de Bem-estar */}
-        {activeAnimal && displayAnimals.length > 0 && (
-          <motion.div variants={itemVariants} className="space-y-4 pt-2">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-foreground">
-                  {language === "pt"
-                    ? "Evolução Emocional"
-                    : "Emotional Trends"}
-                </h2>
+        {/* Pending Invitations & Family Activity */}
+        <motion.div variants={itemVariants}>
+          <DashboardFamilySection
+            invitations={invitations}
+            familyActivity={familyActivity}
+            isResponding={respondMutation.isPending}
+            onRespond={handleRespond}
+            language={language}
+            t={t}
+          />
+        </motion.div>
 
-                {/* Seletor de período */}
-                <div className="flex bg-slate-900/50 p-1 rounded-full border border-slate-800">
-                  {[7, 30, 90].map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setDashboardDays(d as 7 | 30 | 90)}
-                      className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-semibold transition-all tap-highlight-none",
-                        dashboardDays === d
-                          ? "bg-(--color-primary) text-white shadow-sm"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {d}d
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Seletor de animal (apenas se > 1 animal) */}
-              {displayAnimals.length > 1 && (
-                <Select
-                  value={String(dashboardAnimalId)}
-                  onValueChange={(val) => setSelectedAnimalId(Number(val))}
-                >
-                  <SelectTrigger className="h-9 rounded-xl border-slate-800 bg-slate-900/30 text-xs font-semibold focus:ring-0 focus:ring-offset-0">
-                    <SelectValue
-                      placeholder={
-                        language === "pt"
-                          ? "Selecionar animal"
-                          : "Select animal"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
-                    {displayAnimals.map((a) => (
-                      <SelectItem
-                        key={a.id}
-                        value={String(a.id)}
-                        className="text-xs font-semibold"
-                      >
-                        {a.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-
-            <div className="bg-surface border border-border/70 rounded-[1.75rem] p-5 shadow-(--shadow-sm)">
-              {dashboardChartData.length >= 2 ? (
-                <div className="space-y-4">
-                  <div className="h-44 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={dashboardChartData}
-                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                      >
-                        <XAxis
-                          dataKey="label"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{
-                            fontSize: 10,
-                            fill: "var(--muted-foreground)",
-                          }}
-                          dy={10}
-                        />
-                        <YAxis domain={[0, 1]} hide={true} />
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (!active || !payload?.length) return null;
-                            const data = payload[0].payload;
-                            return (
-                              <div className="bg-card border border-border rounded-xl px-3 py-2 text-xs shadow-xl flex items-center gap-2">
-                                <span>{data.emoji}</span>
-                                <div>
-                                  <p className="font-semibold text-foreground">
-                                    {t(
-                                      `states.${data.state as EmotionalState}`,
-                                    )}
-                                  </p>
-                                  <p className="text-[10px] text-muted-foreground">
-                                    {data.label}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          }}
-                          cursor={{
-                            stroke: "var(--border)",
-                            strokeWidth: 1,
-                            strokeDasharray: "4 4",
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="confidence"
-                          stroke="var(--color-primary)"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{
-                            r: 4,
-                            fill: "var(--color-primary)",
-                            stroke: "var(--background)",
-                            strokeWidth: 2,
-                          }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {dashboardNarrative && (
-                    <div className="pt-3 border-t border-border/50 text-center">
-                      <p className="text-xs text-muted-foreground font-medium">
-                        {dashboardNarrative}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="py-8 flex flex-col items-center justify-center text-center gap-2">
-                  <HeartPulse className="h-8 w-8 text-muted-foreground/30" />
-                  <p className="text-xs text-muted-foreground max-w-50 leading-relaxed">
-                    {language === "pt"
-                      ? "Ainda não há dados suficientes para mostrar a evolução. Faz mais gravações!"
-                      : "Not enough data yet. Keep recording!"}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-end pt-2 px-1">
-              <VetReportButton
-                stats={dashboardStats}
-                animalName={
-                  displayAnimals.find((a) => a.id === dashboardAnimalId)
-                    ?.name || ""
-                }
-              />
-            </div>
-          </motion.div>
-        )}
-
-        {/* Pending Invitations Banner */}
-        {invitations.length > 0 && (
-          <motion.div variants={itemVariants} className="space-y-2">
-            {invitations.map((inv) => (
-              <div
-                key={inv.id}
-                className="bg-linear-to-r from-secondary/15 to-primary/15 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
-              >
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-semibold text-primary uppercase tracking-wide">
-                      {t("dashboardPage.invitationTitle")}
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                      {language === "pt" ? (
-                        <>
-                          <strong>{inv.ownerName}</strong> quer partilhar o
-                          perfil de <strong>{inv.animalName}</strong> (
-                          {inv.animalSpecies === "dog" ? "cão" : "gato"})
-                          contigo como co-tutor (
-                          <strong>
-                            {inv.permission === "write"
-                              ? t("dashboardPage.permissionWrite")
-                              : t("dashboardPage.permissionRead")}
-                          </strong>
-                          ).
-                        </>
-                      ) : (
-                        <>
-                          <strong>{inv.ownerName}</strong> wants to share{" "}
-                          <strong>{inv.animalName}</strong>'s profile (
-                          {inv.animalSpecies === "dog" ? "dog" : "cat"}) with
-                          you as a co-guardian (
-                          <strong>
-                            {inv.permission === "write"
-                              ? t("dashboardPage.permissionWrite")
-                              : t("dashboardPage.permissionRead")}
-                          </strong>
-                          ).
-                        </>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleRespond(inv.id, "accept")}
-                    disabled={respondMutation.isPending}
-                    className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl text-xs h-8 font-semibold"
-                  >
-                    {t("dashboardPage.accept")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleRespond(inv.id, "reject")}
-                    disabled={respondMutation.isPending}
-                    className="flex-1 border-border hover:bg-secondary rounded-xl text-xs h-8 font-semibold"
-                  >
-                    {t("dashboardPage.reject")}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-        )}
-
-        {familyActivity.length > 0 && (
-          <motion.div
-            variants={itemVariants}
-            className="bg-card border border-border rounded-2xl p-4 space-y-2"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-primary">
-                {t("dashboardPage.familyActivity")}
-              </h2>
-              <Link to="/family">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 text-xs text-primary"
-                >
-                  {t("dashboardPage.view")}
-                </Button>
-              </Link>
-            </div>
-            {familyActivity.slice(0, 3).map((item) => {
-              const minutes = Math.max(
-                1,
-                Math.round(
-                  (Date.now() - new Date(item.createdAt).getTime()) / 60000,
-                ),
-              );
-              const minLabel =
-                minutes === 1
-                  ? t("dashboardPage.minuteAgo")
-                  : t("dashboardPage.minutesAgo");
-              return (
-                <p key={item.id} className="text-xs text-muted-foreground">
-                  {item.message} {t("dashboardPage.ago")} {minutes} {minLabel}
-                </p>
-              );
-            })}
-          </motion.div>
-        )}
-
-        {/* Animal selector */}
-        {!animalsLoading && !animalsError && animals.length > 1 && (
-          <motion.div
-            variants={itemVariants}
-            className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4"
-          >
-            {animals.map((a) => (
-              <span
-                key={a.id}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all flex items-center gap-1.5 ${
-                  a.isActive
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground"
-                }`}
-              >
-                <span className="inline-flex items-center gap-1">
-                  <PawPrint size={11} className="shrink-0" />
-                  {a.name}
-                </span>
-                {a.isShared && (
-                  <span className="text-[8px] bg-cyan-950 text-cyan-400 border border-cyan-500/20 px-1 py-0.5 rounded-full uppercase font-semibold">
-                    {language === "pt" ? "Co-tutor" : "Co-guardian"}
-                  </span>
-                )}
-              </span>
-            ))}
-          </motion.div>
-        )}
-
-        {/* All charts and detailed data - only show when data is loaded */}
+        {/* Detailed Charts & POMDP Belief State */}
         {!animalsLoading && !animalsError && animals.length > 0 && (
           <div className="space-y-5 flex flex-col">
             <motion.div variants={itemVariants}>
               <TrendCard animalId={activeAnimal.id} />
             </motion.div>
 
-            {/* Dominant state card */}
-            {todayStats ? (
-              <motion.div
-                variants={itemVariants}
-                className="rounded-2xl p-4 border"
-                style={{
-                  borderColor: `${STATE_COLORS[todayStats.state as EmotionalState]}44`,
-                  background: `${STATE_COLORS[todayStats.state as EmotionalState]}11`,
-                }}
-              >
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-                  {t("dashboardPage.dominantToday")}
-                </p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full shrink-0"
-                    style={{
-                      backgroundColor: `${STATE_COLORS[todayStats.state as EmotionalState]}33`,
-                      border: `2px solid ${STATE_COLORS[todayStats.state as EmotionalState]}55`,
-                    }}
-                  >
-                    <div
-                      className="w-full h-full rounded-full"
-                      style={{
-                        backgroundColor: `${STATE_COLORS[todayStats.state as EmotionalState]}88`,
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <p
-                      className="text-lg font-bold"
-                      style={{ color: STATE_COLORS[todayStats.state as EmotionalState] }}
-                    >
-                      {t(`states.${todayStats.state}`)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {todayStats.pct}% {language === "pt" ? "das" : "of"}{" "}
-                      {todayStats.total}{" "}
-                      {todayStats.total === 1
-                        ? language === "pt"
-                          ? "classificação"
-                          : "classification"
-                        : language === "pt"
-                          ? "classificações"
-                          : "classifications"}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                variants={itemVariants}
-                className="bg-card border border-border rounded-2xl p-4 text-center text-muted-foreground text-sm"
-              >
-                {t("dashboardPage.noClassToday")}
-              </motion.div>
-            )}
-
             {/* POMDP Belief State - Humor Consolidado */}
             <motion.div variants={itemVariants}>
-              <Card className="space-y-4 p-5">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                    {t("dashboardPage.consolidatedMood")}
-                  </h2>
-                  <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
-                    {t("dashboardPage.activeFilter")}
-                  </span>
-                </div>
-
-                {beliefState ? (
-                  <div className="space-y-3">
-                    {dominantBelief && (
-                      <div className="bg-secondary/20 p-3 rounded-xl border border-border flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center"
-                          style={{
-                            backgroundColor: `${
-                              STATE_COLORS[
-                                dominantBelief.state as EmotionalState
-                              ]
-                            }22`,
-                            border: `2px solid ${STATE_COLORS[dominantBelief.state as EmotionalState]}44`,
-                          }}
-                        >
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{
-                              backgroundColor:
-                                STATE_COLORS[
-                                  dominantBelief.state as EmotionalState
-                                ],
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            {t("dashboardPage.stableMoodEstimated")}
-                          </p>
-                          <p
-                            className="text-sm font-bold"
-                            style={{
-                              color:
-                                STATE_COLORS[
-                                  dominantBelief.state as EmotionalState
-                                ],
-                            }}
-                          >
-                            {t(`states.${dominantBelief.state}`)} (
-                            {Math.round(dominantBelief.val * 100)}%)
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-1">
-                      {STATES.map((s) => {
-                        const val = (beliefState as any)[s] || 0;
-                        return (
-                          <div key={s} className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-muted-foreground flex items-center gap-1.5">
-                                <span
-                                  className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                                  style={{ backgroundColor: STATE_COLORS[s] }}
-                                />
-                                <span className="truncate">
-                                  {t(`states.${s}`)}
-                                </span>
-                              </span>
-                              <span className="font-semibold text-foreground">
-                                {Math.round(val * 100)}%
-                              </span>
-                            </div>
-                            <div className="h-1.5 w-full bg-secondary/50 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${val * 100}%`,
-                                  backgroundColor: STATE_COLORS[s],
-                                }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center text-xs text-muted-foreground py-2">
-                    {t("dashboardPage.calculatingBelief")}
-                  </div>
-                )}
-
-                <div className="pt-2 border-t border-border/50">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link href="/veterinario">
-                      <Button className="w-full bg-primary hover:bg-primary/90 font-semibold text-primary-foreground shadow-sm rounded-lg text-xs h-9">
-                        {t("dashboardPage.accessVetMode")}
-                      </Button>
-                    </Link>
-                    <Link href="/family">
-                      <Button className="w-full bg-secondary text-foreground hover:bg-secondary/80 border border-border rounded-lg text-xs h-9">
-                        {t("dashboardPage.family")}
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </Card>
+              <DashboardConsolidatedMood
+                beliefState={beliefState}
+                dominantBelief={dominantBelief}
+                states={STATES}
+                t={t}
+              />
             </motion.div>
 
-            {/* Bar chart: state distribution */}
+            {/* Charts Section */}
             <motion.div variants={itemVariants}>
-              <Card className="space-y-3 p-5">
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t("dashboardPage.statesDistributionTitle")}
-                </h2>
-                {events.length === 0 ? (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                    {t("dashboardPage.noDataAvailable")}
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={180}>
-                    <BarChart
-                      data={barData}
-                      margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="oklch(0.22 0.012 264)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fill: "oklch(0.55 0.012 264)", fontSize: 9 }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                        angle={-25}
-                        textAnchor="end"
-                        height={36}
-                      />
-                      <YAxis
-                        tick={{ fill: "oklch(0.55 0.012 264)", fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        content={<CustomTooltip />}
-                        cursor={{ fill: "oklch(0.17 0.012 264)" }}
-                      />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                        {barData.map((entry: { state: EmotionalState; name: string; value: number; color: string }) => (
-                          <Cell
-                            key={entry.state}
-                            fill={STATE_COLORS[entry.state]}
-                            fillOpacity={0.85}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </Card>
-            </motion.div>
-
-            {/* Line chart: daily average confidence */}
-            <motion.div variants={itemVariants}>
-              <Card className="space-y-3 p-5">
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  {t("dashboardPage.avgConfidence")}
-                </h2>
-                {lineData.length < 2 ? (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                    {t("dashboardPage.insufficientDataChart")}
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={160}>
-                    <LineChart
-                      data={lineData}
-                      margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="oklch(0.22 0.012 264)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="day"
-                        tick={{ fill: "oklch(0.55 0.012 264)", fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        domain={[0.5, 1]}
-                        tick={{ fill: "oklch(0.55 0.012 264)", fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => `${Math.round(v * 100)}%`}
-                      />
-                      <Tooltip content={<ConfidenceTooltip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="avg"
-                        stroke="#2D739B"
-                        strokeWidth={2.5}
-                        dot={{ fill: "#2D739B", r: 4, strokeWidth: 0 }}
-                        activeDot={{ r: 6, fill: "#2D739B" }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </Card>
-            </motion.div>
-
-            {/* State legend */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-5">
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  {t("dashboardPage.legend")}
-                </h2>
-                <div className="grid grid-cols-2 gap-2">
-                  {STATES.map((s) => (
-                    <div key={s} className="flex items-center gap-2">
-                      <span
-                        className="w-4 h-4 rounded-full shrink-0"
-                        style={{ backgroundColor: STATE_COLORS[s] }}
-                      />
-                      <span
-                        className="text-sm"
-                        style={{ color: STATE_COLORS[s] }}
-                      >
-                        {t(`states.${s}`)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+              <DashboardChartsSection
+                displayAnimals={displayAnimals}
+                dashboardAnimalId={dashboardAnimalId}
+                dashboardDays={dashboardDays}
+                onDaysChange={setDashboardDays}
+                onAnimalChange={setSelectedAnimalId}
+                dashboardChartData={dashboardChartData}
+                dashboardNarrative={dashboardNarrative}
+                dashboardStats={dashboardStats}
+                selectedAnimalName={
+                  displayAnimals.find((a) => a.id === dashboardAnimalId)
+                    ?.name || ""
+                }
+                barData={barData}
+                lineData={lineData}
+                states={STATES}
+                eventsCount={events.length}
+                language={language}
+                t={t}
+              />
             </motion.div>
           </div>
         )}

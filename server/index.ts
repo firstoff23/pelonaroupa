@@ -5,7 +5,6 @@ import { createServer } from "http";
 import { createContext } from "./_core/context";
 import { registerOAuthRoutes } from "./_core/oauth";
 import { serveStatic } from "./_core/serveStatic";
-import { registerStorageProxy } from "./_core/storageProxy";
 import { appRouter } from "./routers";
 
 const app = express();
@@ -92,7 +91,6 @@ app.use((_req, res, next) => {
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-registerStorageProxy(app);
 registerOAuthRoutes(app);
 
 // ── Rate Limiting ───────────────────────────────────────────────────────────

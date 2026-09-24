@@ -133,7 +133,7 @@ export default function SettingsPage() {
     onError: (err) => {
       setMfaCodeError(
         err.message ||
-          (language === "pt" ? "CÃ³digo invÃ¡lido." : "Invalid code."),
+          (language === "pt" ? "Código inválido." : "Invalid code."),
       );
     },
   });
@@ -193,7 +193,7 @@ export default function SettingsPage() {
     onSuccess: () => {
       toast.success(
         language === "pt"
-          ? "Logs de diagnÃ³stico limpos!"
+          ? "Logs de diagnóstico limpos!"
           : "Diagnostic logs cleared!",
       );
       refetchErrors();
@@ -217,7 +217,7 @@ export default function SettingsPage() {
   const sensitivityDescs: Record<Sensitivity, string> = {
     low:
       language === "pt"
-        ? "Apenas alertas de alta confianÃ§a (â‰¥85%)"
+        ? "Apenas alertas de alta confiança (â‰¥85%)"
         : "Only high confidence alerts (â‰¥85%)",
     medium:
       language === "pt"
@@ -282,7 +282,7 @@ export default function SettingsPage() {
     onError: () =>
       toast.error(
         language === "pt"
-          ? "Erro ao guardar definiÃ§Ãµes."
+          ? "Erro ao guardar definições."
           : "Error saving settings.",
       ),
   });
@@ -323,7 +323,7 @@ export default function SettingsPage() {
     updateSettingsMutation.mutate({ notificationsEnabled: val });
     toast.success(
       language === "pt"
-        ? `NotificaÃ§Ãµes ${val ? "ativadas" : "desativadas"}`
+        ? `Notificações ${val ? "ativadas" : "desativadas"}`
         : `Notifications ${val ? "enabled" : "disabled"}`,
     );
   };
@@ -379,12 +379,12 @@ export default function SettingsPage() {
         </h1>
         <p className="text-xs text-muted-foreground">
           {language === "pt"
-            ? "Gerencie as suas preferÃªncias e informaÃ§Ãµes pessoais do PeloNaRoupa"
+            ? "Gerencie as suas preferências e informações pessoais do PeloNaRoupa"
             : "Manage your preferences and personal information for PeloNaRoupa"}
         </p>
       </div>
 
-      {/* Modo VeterinÃ¡rio */}
+      {/* Modo Veterinário */}
       {canAccessVetMode && (
         <motion.div variants={cardVariants}>
           <Card className="overflow-hidden border-border bg-card">
@@ -411,7 +411,7 @@ export default function SettingsPage() {
               >
                 <Stethoscope className="w-3.5 h-3.5" />
                 {language === "pt"
-                  ? "Abrir Modo VeterinÃ¡rio"
+                  ? "Abrir Modo Veterinário"
                   : "Open Veterinary Mode"}
               </Button>
             </CardContent>
@@ -423,7 +423,7 @@ export default function SettingsPage() {
         title={language === "pt" ? "Conta" : "Account"}
         description={
           language === "pt"
-            ? "Dados pessoais, idioma e aparÃªncia da app."
+            ? "Dados pessoais, idioma e aparência da app."
             : "Personal data, language and app appearance."
         }
       />
@@ -438,7 +438,7 @@ export default function SettingsPage() {
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Atualize o seu nome e endereÃ§o de email de contacto"
+                ? "Atualize o seu nome e endereço de email de contacto"
                 : "Update your name and contact email address"}
             </CardDescription>
           </CardHeader>
@@ -467,7 +467,7 @@ export default function SettingsPage() {
                   htmlFor="profile-email"
                   className="text-xs font-medium text-foreground"
                 >
-                  {language === "pt" ? "EndereÃ§o de Email" : "Email Address"}
+                  {language === "pt" ? "Endereço de Email" : "Email Address"}
                 </Label>
                 <Input
                   id="profile-email"
@@ -523,14 +523,14 @@ export default function SettingsPage() {
               variant={language === "pt" ? "default" : "outline"}
               onClick={() => {
                 setLanguage("pt");
-                toast.success("Idioma alterado para PortuguÃªs");
+                toast.success("Idioma alterado para Português");
               }}
               className="flex-1 text-xs h-9 font-semibold active-scale tap-highlight-none gap-1.5"
             >
               {language === "pt" && (
                 <Check className="w-3.5 h-3.5 stroke-[2.5px]" />
               )}
-              PortuguÃªs (PT)
+              Português (PT)
             </Button>
             <Button
               variant={language === "en" ? "default" : "outline"}
@@ -564,7 +564,7 @@ export default function SettingsPage() {
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground mt-0.5">
                 {language === "pt"
-                  ? "Selecione o esquema de cores da aplicaÃ§Ã£o"
+                  ? "Selecione o esquema de cores da aplicação"
                   : "Select the application's color scheme"}
               </CardDescription>
             </CardHeader>
@@ -598,19 +598,19 @@ export default function SettingsPage() {
         title={language === "pt" ? "Alertas" : "Alerts"}
         description={
           language === "pt"
-            ? "PreferÃªncias de notificaÃ§Ã£o e sensibilidade clÃ­nica."
+            ? "Preferências de notificação e sensibilidade clínica."
             : "Notification preferences and clinical sensitivity."
         }
       />
 
-      {/* NotificaÃ§Ãµes */}
+      {/* Notificações */}
       <motion.div variants={cardVariants}>
         <Card className="bg-card border-border overflow-hidden">
           <CardHeader className="pb-3 border-b border-border bg-muted/30">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <Bell className="w-4 h-4 text-primary" />
               {language === "pt"
-                ? "NotificaÃ§Ãµes e Alertas"
+                ? "Notificações e Alertas"
                 : "Notifications & Alerts"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
@@ -627,7 +627,7 @@ export default function SettingsPage() {
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {language === "pt"
-                    ? "Receba avisos instantÃ¢neos de comportamento"
+                    ? "Receba avisos instantâneos de comportamento"
                     : "Receive instant behavior alerts"}
                 </p>
               </div>
@@ -642,12 +642,12 @@ export default function SettingsPage() {
               <div className="space-y-0.5">
                 <Label className="text-xs font-medium text-foreground">
                   {language === "pt"
-                    ? "Alertas de AngÃºstia"
+                    ? "Alertas de Angústia"
                     : "Distress Alerts"}
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {language === "pt"
-                    ? "Apenas para detecÃ§Ãµes de choro ou ganido persistente"
+                    ? "Apenas para detecções de choro ou ganido persistente"
                     : "Only for detections of persistent crying or whining"}
                 </p>
               </div>
@@ -666,7 +666,7 @@ export default function SettingsPage() {
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {language === "pt"
-                    ? "Notifique quando hÃ¡ probabilidade de fome elevada"
+                    ? "Notifique quando há probabilidade de fome elevada"
                     : "Notify when hunger probability is high"}
                 </p>
               </div>
@@ -691,7 +691,7 @@ export default function SettingsPage() {
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Ajuste o grau de confianÃ§a exigido pela InteligÃªncia Artificial para emitir alertas"
+                ? "Ajuste o grau de confiança exigido pela Inteligência Artificial para emitir alertas"
                 : "Adjust the confidence level required by Artificial Intelligence to trigger alerts"}
             </CardDescription>
           </CardHeader>
@@ -742,7 +742,7 @@ export default function SettingsPage() {
         title={language === "pt" ? "Privacidade" : "Privacy"}
         description={
           language === "pt"
-            ? "Controle de dados, histÃ³rico local e diagnÃ³stico tÃ©cnico."
+            ? "Controle de dados, histórico local e diagnóstico técnico."
             : "Data controls, local history and technical diagnostics."
         }
       />
@@ -757,7 +757,7 @@ export default function SettingsPage() {
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Escolha como os dados recolhidos pela IA sÃ£o partilhados e armazenados"
+                ? "Escolha como os dados recolhidos pela IA são partilhados e armazenados"
                 : "Choose how data collected by AI is shared and stored"}
             </CardDescription>
           </CardHeader>
@@ -766,12 +766,12 @@ export default function SettingsPage() {
               <div className="space-y-0.5 max-w-[80%]">
                 <Label className="text-xs font-medium text-foreground">
                   {language === "pt"
-                    ? "Partilhar Dados de DiagnÃ³stico"
+                    ? "Partilhar Dados de Diagnóstico"
                     : "Share Diagnostic Data"}
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {language === "pt"
-                    ? "Contribua para a melhoria dos nossos modelos de IA de identificaÃ§Ã£o de raÃ§as e emoÃ§Ãµes enviando dados anÃ³nimos."
+                    ? "Contribua para a melhoria dos nossos modelos de IA de identificação de raças e emoções enviando dados anónimos."
                     : "Contribute to improving our breed and emotion AI models by sending anonymous data."}
                 </p>
               </div>
@@ -782,7 +782,7 @@ export default function SettingsPage() {
                   updateSettingsMutation.mutate({ shareDiagnosticData: val });
                   toast.success(
                     language === "pt"
-                      ? `Partilha de diagnÃ³stico ${val ? "autorizada" : "desativada"}`
+                      ? `Partilha de diagnóstico ${val ? "autorizada" : "desativada"}`
                       : `Diagnostic sharing ${val ? "authorized" : "disabled"}`,
                   );
                 }}
@@ -794,12 +794,12 @@ export default function SettingsPage() {
               <div className="space-y-0.5 max-w-[80%]">
                 <Label className="text-xs font-medium text-foreground">
                   {language === "pt"
-                    ? "HistÃ³rico Local Exclusivo"
+                    ? "Histórico Local Exclusivo"
                     : "Exclusive Local History"}
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {language === "pt"
-                    ? "Quando ativo, evita o caching temporÃ¡rio das classificaÃ§Ãµes na nuvem, dependendo apenas do dispositivo."
+                    ? "Quando ativo, evita o caching temporário das classificações na nuvem, dependendo apenas do dispositivo."
                     : "When active, prevents temporary cloud caching of classifications, relying only on the device."}
                 </p>
               </div>
@@ -809,7 +809,7 @@ export default function SettingsPage() {
                   setLocalHistoryOnly(val);
                   toast.success(
                     language === "pt"
-                      ? `Modo de histÃ³rico local ${val ? "ativado" : "desativado"}`
+                      ? `Modo de histórico local ${val ? "ativado" : "desativado"}`
                       : `Local history mode ${val ? "enabled" : "disabled"}`,
                   );
                 }}
@@ -820,19 +820,19 @@ export default function SettingsPage() {
         </Card>
       </motion.div>
 
-      {/* DiagnÃ³stico e Autocura */}
+      {/* Diagnóstico e Autocura */}
       <motion.div variants={cardVariants}>
         <Card className="bg-card border-border overflow-hidden shadow-sm">
           <CardHeader className="pb-3 border-b border-border bg-muted/30">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <Activity className="w-4 h-4 text-primary animate-pulse" />
               {language === "pt"
-                ? "DiagnÃ³stico e Autocura"
+                ? "Diagnóstico e Autocura"
                 : "Diagnostics & Self-Healing"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Monitorize a saÃºde do sistema e teste a recuperaÃ§Ã£o automÃ¡tica da app"
+                ? "Monitorize a saúde do sistema e teste a recuperação automática da app"
                 : "Monitor system health and test automatic app recovery"}
             </CardDescription>
           </CardHeader>
@@ -842,7 +842,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-foreground">
                   {language === "pt"
-                    ? "Estado de SaÃºde Geral:"
+                    ? "Estado de Saúde Geral:"
                     : "Overall Health State:"}
                 </span>
                 <span
@@ -936,7 +936,7 @@ export default function SettingsPage() {
                   <TooltipContent>
                     <p className="text-xs max-w-[180px]">
                       {language === "pt"
-                        ? "Modelo YAMNet de classificaÃ§Ã£o acÃºstica ativo. Analisa vocalizaÃ§Ãµes de cÃ£es e gatos."
+                        ? "Modelo YAMNet de classificação acústica ativo. Analisa vocalizações de cães e gatos."
                         : "YAMNet acoustic classification model active. Analyzes dog and cat vocalizations."}
                     </p>
                   </TooltipContent>
@@ -957,7 +957,7 @@ export default function SettingsPage() {
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-foreground">
                 {language === "pt"
-                  ? "Testar Autocura (SimulaÃ§Ã£o)"
+                  ? "Testar Autocura (Simulação)"
                   : "Test Self-Healing (Simulation)"}
               </Label>
               <div className="grid grid-cols-2 gap-2">
@@ -1135,7 +1135,7 @@ export default function SettingsPage() {
                   <Wrench className="w-5 h-5 text-muted-foreground/60 mb-1" />
                   <span className="text-[10px]">
                     {language === "pt"
-                      ? "Nenhuma aÃ§Ã£o corretiva executada ainda"
+                      ? "Nenhuma ação corretiva executada ainda"
                       : "No corrective actions executed yet"}
                   </span>
                 </div>
@@ -1199,8 +1199,8 @@ export default function SettingsPage() {
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   {language === "pt"
-                    ? "A preparar ficheiroâ€¦"
-                    : "Preparing fileâ€¦"}
+                    ? "A preparar ficheiro…"
+                    : "Preparing file…"}
                 </>
               ) : (
                 <>
@@ -1213,7 +1213,7 @@ export default function SettingsPage() {
         </Card>
       </motion.div>
 
-      {/* Sobre a AplicaÃ§Ã£o */}
+      {/* Sobre a Aplicação */}
       <motion.div variants={cardVariants}>
         <Card className="bg-card border-border overflow-hidden">
           <CardHeader className="pb-3 border-b border-border bg-muted/30">
@@ -1230,7 +1230,7 @@ export default function SettingsPage() {
               </p>
               <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">
                 {language === "pt"
-                  ? "AnÃ¡lise avanÃ§ada e monitorizaÃ§Ã£o do bem-estar e inteligÃªncia emocional animal."
+                  ? "Análise avançada e monitorização do bem-estar e inteligência emocional animal."
                   : "Advanced analysis and monitoring of animal well-being and emotional intelligence."}
               </p>
             </div>
@@ -1249,7 +1249,7 @@ export default function SettingsPage() {
                   {language === "pt" ? "Modelos Locais" : "Local Models"}
                 </p>
                 <p className="font-semibold text-foreground mt-1">
-                  YAMNet Â· YOLOv8 Â· ResNet
+                  YAMNet · YOLOv8 · ResNet
                 </p>
               </div>
             </div>
@@ -1257,7 +1257,7 @@ export default function SettingsPage() {
             <div className="pt-2 border-t border-border/50 flex flex-col gap-2">
               <p className="text-[11px] font-semibold text-foreground px-1 mb-1">
                 {language === "pt"
-                  ? "Documentos e PolÃ­ticas"
+                  ? "Documentos e Políticas"
                   : "Documents & Policies"}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -1269,7 +1269,7 @@ export default function SettingsPage() {
                 >
                   <Shield size={14} className="text-primary" />
                   {language === "pt"
-                    ? "PolÃ­tica de Privacidade"
+                    ? "Política de Privacidade"
                     : "Privacy Policy"}
                 </Button>
                 <Button
@@ -1287,17 +1287,17 @@ export default function SettingsPage() {
         </Card>
       </motion.div>
 
-      {/* SessÃ£o / Logout */}
+      {/* Sessão / Logout */}
       <motion.div variants={cardVariants}>
         <Card className="bg-card border-border overflow-hidden">
           <CardHeader className="pb-3 border-b border-border bg-muted/30">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground text-destructive">
               <LogOut className="w-4 h-4 text-destructive" />
-              {language === "pt" ? "SessÃ£o" : "Session"}
+              {language === "pt" ? "Sessão" : "Session"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Termine a sessÃ£o no seu dispositivo atual"
+                ? "Termine a sessão no seu dispositivo atual"
                 : "Sign out of your account on this device"}
             </CardDescription>
           </CardHeader>
@@ -1309,7 +1309,7 @@ export default function SettingsPage() {
                   await signOut();
                   toast.success(
                     language === "pt"
-                      ? "SessÃ£o terminada com sucesso."
+                      ? "Sessão terminada com sucesso."
                       : "Signed out successfully.",
                   );
                   setLocation("/login");
@@ -1320,7 +1320,7 @@ export default function SettingsPage() {
               className="w-full gap-2 text-xs h-9 font-semibold active-scale tap-highlight-none"
             >
               <LogOut className="w-3.5 h-3.5" />
-              {language === "pt" ? "Terminar SessÃ£o" : "Sign Out"}
+              {language === "pt" ? "Terminar Sessão" : "Sign Out"}
             </Button>
           </CardContent>
         </Card>
@@ -1333,12 +1333,12 @@ export default function SettingsPage() {
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
               <KeyRound className="w-4 h-4 text-primary" />
               {language === "pt"
-                ? "AutenticaÃ§Ã£o em 2 Fatores"
+                ? "Autenticação em 2 Fatores"
                 : "Two-Factor Authentication"}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "Protege a tua conta com um cÃ³digo TOTP (Google Authenticator, Authy)"
+                ? "Protege a tua conta com um código TOTP (Google Authenticator, Authy)"
                 : "Protect your account with a TOTP code (Google Authenticator, Authy)"}
             </CardDescription>
           </CardHeader>
@@ -1354,7 +1354,7 @@ export default function SettingsPage() {
                       ? "MFA ativo e a proteger a tua conta"
                       : "MFA active and protecting your account"
                     : language === "pt"
-                      ? "MFA nÃ£o configurado"
+                      ? "MFA não configurado"
                       : "MFA not configured"}
                 </p>
               </div>
@@ -1426,12 +1426,12 @@ export default function SettingsPage() {
             <DialogDescription className="text-xs text-muted-foreground">
               {mfaStep === "qr" &&
                 (language === "pt"
-                  ? "Passo 1 de 2 â€” Escaneia o QR code"
-                  : "Step 1 of 2 â€” Scan the QR code")}
+                  ? "Passo 1 de 2 — Escaneia o QR code"
+                  : "Step 1 of 2 — Scan the QR code")}
               {mfaStep === "verify" &&
                 (language === "pt"
-                  ? "Passo 2 de 2 â€” Confirma o cÃ³digo"
-                  : "Step 2 of 2 â€” Confirm the code")}
+                  ? "Passo 2 de 2 — Confirma o código"
+                  : "Step 2 of 2 — Confirm the code")}
               {mfaStep === "done" &&
                 (language === "pt"
                   ? "MFA configurado com sucesso!"
@@ -1452,7 +1452,7 @@ export default function SettingsPage() {
               <div className="w-full space-y-1.5">
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                   {language === "pt"
-                    ? "Abre o Google Authenticator ou Authy e escaneia o cÃ³digo. Em alternativa, insere o segredo manualmente:"
+                    ? "Abre o Google Authenticator ou Authy e escaneia o código. Em alternativa, insere o segredo manualmente:"
                     : "Open Google Authenticator or Authy and scan the code. Alternatively, enter the secret manually:"}
                 </p>
                 <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
@@ -1467,8 +1467,8 @@ export default function SettingsPage() {
                   onClick={() => setMfaStep("verify")}
                 >
                   {language === "pt"
-                    ? "JÃ¡ escaniei â€” Continuar"
-                    : "I scanned it â€” Continue"}
+                    ? "Já escaniei — Continuar"
+                    : "I scanned it — Continue"}
                 </Button>
               </DialogFooter>
             </div>
@@ -1478,7 +1478,7 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-4 py-2">
               <div className="space-y-1.5">
                 <Label htmlFor="mfa-code" className="text-xs font-medium">
-                  {language === "pt" ? "CÃ³digo de 6 dÃ­gitos" : "6-digit code"}
+                  {language === "pt" ? "Código de 6 dígitos" : "6-digit code"}
                 </Label>
                 <Input
                   id="mfa-code"
@@ -1521,7 +1521,7 @@ export default function SettingsPage() {
                   className="text-xs"
                   onClick={() => setMfaStep("qr")}
                 >
-                  {language === "pt" ? "â† Voltar" : "â† Back"}
+                  {language === "pt" ? "← Voltar" : "← Back"}
                 </Button>
               </DialogFooter>
             </div>
@@ -1538,7 +1538,7 @@ export default function SettingsPage() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {language === "pt"
-                    ? "A tua conta estÃ¡ agora protegida com autenticaÃ§Ã£o em 2 fatores."
+                    ? "A tua conta está agora protegida com autenticação em 2 fatores."
                     : "Your account is now protected with two-factor authentication."}
                 </p>
               </div>
@@ -1566,14 +1566,14 @@ export default function SettingsPage() {
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground mt-0.5">
               {language === "pt"
-                ? "AÃ§Ãµes irreversÃ­veis para a sua conta"
+                ? "Ações irreversíveis para a sua conta"
                 : "Irreversible actions for your account"}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
             <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
               {language === "pt"
-                ? "Ao apagar a sua conta, todos os seus dados pessoais, registos de saÃºde, histÃ³rico de classificaÃ§Ãµes e animais associados serÃ£o eliminados permanentemente dos nossos servidores."
+                ? "Ao apagar a sua conta, todos os seus dados pessoais, registos de saúde, histórico de classificações e animais associados serão eliminados permanentemente dos nossos servidores."
                 : "By deleting your account, all your personal data, health records, classification history, and associated animals will be permanently removed from our servers."}
             </p>
             <Button
@@ -1597,13 +1597,13 @@ export default function SettingsPage() {
             </DialogTitle>
             <DialogDescription>
               {language === "pt"
-                ? "Termos de Uso â€” Em breve"
-                : "Terms of Use â€” Coming Soon"}
+                ? "Termos de Uso — Em breve"
+                : "Terms of Use — Coming Soon"}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-xs sm:text-sm text-muted-foreground leading-relaxed">
             {language === "pt"
-              ? "Os nossos termos de utilizaÃ§Ã£o completos serÃ£o disponibilizados em breve. O uso do serviÃ§o Ã© atualmente gratuito para testes de bem-estar animal sob consentimento do tutor."
+              ? "Os nossos termos de utilização completos serão disponibilizados em breve. O uso do serviço é atualmente gratuito para testes de bem-estar animal sob consentimento do tutor."
               : "Our full terms of use will be available soon. The service is currently free for animal well-being testing under guardian consent."}
           </div>
           <Button onClick={() => setTermsOpen(false)} className="w-full">
@@ -1621,13 +1621,13 @@ export default function SettingsPage() {
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-foreground/90 font-medium">
               {language === "pt"
-                ? "Tens a certeza? Esta aÃ§Ã£o Ã© irreversÃ­vel. Todos os teus dados e animais serÃ£o eliminados permanentemente."
+                ? "Tens a certeza? Esta ação é irreversível. Todos os teus dados e animais serão eliminados permanentemente."
                 : "Are you sure? This action is irreversible. All your data and animals will be permanently deleted."}
             </DialogDescription>
           </DialogHeader>
           <div className="py-2 text-xs text-muted-foreground leading-relaxed">
             {language === "pt"
-              ? "Esta aÃ§Ã£o irÃ¡ eliminar o seu perfil no Supabase Auth, as informaÃ§Ãµes do utilizador e todos os dados associados nas tabelas de forma definitiva, bem como as gravaÃ§Ãµes de Ã¡udio. Os dados nÃ£o poderÃ£o ser recuperados."
+              ? "Esta ação irá eliminar o seu perfil no Supabase Auth, as informações do utilizador e todos os dados associados nas tabelas de forma definitiva, bem como as gravações de áudio. Os dados não poderão ser recuperados."
               : "This action will permanently delete your profile in Supabase Auth, user details, and all associated tables and audio recordings. Data cannot be recovered."}
           </div>
           <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">

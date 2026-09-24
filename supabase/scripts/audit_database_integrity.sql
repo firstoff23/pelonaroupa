@@ -95,3 +95,22 @@ JOIN pg_namespace n ON n.oid = t.relnamespace
 WHERE n.nspname = 'public'
   AND t.relname IN ('animals', 'classification_events', 'care_logs', 'animal_personalities', 'family_animals')
 ORDER BY t.relname, a.attname;
+
+-- 5. Auditoria de Utilização de Índices (pg_stat_user_indexes)
+-- Identifica índices com idx_scan = 0 (redundantes ou não utilizados que penalizam escritas)
+SELECT
+  schemaname,
+  relname AS tablename,
+  indexrelname AS indexname,
+  idx_scan,
+  idx_tup_read,
+  idx_tup_fetch,
+  pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+  CASE
+    WHEN idx_scan = 0 THEN '⚠️ REDUNDANTE / NÃO UTILIZADO (idx_scan = 0)'
+    ELSE '✅ EM USO (idx_scan > 0)'
+  END AS status_uso
+FROM pg_stat_user_indexes
+WHERE schemaname = 'public'
+  AND relname IN ('classification_events', 'animal_personalities', 'family_animals', 'animals', 'care_logs')
+ORDER BY relname, idx_scan ASC;

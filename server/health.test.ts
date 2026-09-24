@@ -9,6 +9,8 @@ import {
   getHealthRecords,
   getVaccineById,
   getVaccines,
+  insertEvent,
+  logAnalyticsEvent,
   verifyAnimalOwner,
 } from "./db";
 import { appRouter } from "./routers";
@@ -23,6 +25,8 @@ vi.mock("./db", () => ({
   getHealthRecords: vi.fn().mockResolvedValue([]),
   addHealthRecord: vi.fn().mockResolvedValue({ id: 20, animalId: 1 }),
   deleteHealthRecord: vi.fn().mockResolvedValue({ success: true }),
+  insertEvent: vi.fn().mockResolvedValue({ id: 50, state: "symptom_logged" }),
+  logAnalyticsEvent: vi.fn().mockResolvedValue(undefined),
   getDemoUserId: vi.fn().mockResolvedValue(1),
   verifyAnimalOwner: vi.fn().mockImplementation((animalId, _userId) => {
     if (animalId !== 1) {
@@ -222,6 +226,102 @@ describe("healthRouter security", () => {
       await expect(
         caller.health.deleteHealthRecord({ id: 404 }),
       ).rejects.toThrow("Registo de saúde não encontrado");
+    });
+  });
+
+  describe("logSymptoms", () => {
+    it("allows logging symptoms for owned animal and tracks into classification_events", async () => {
+      const caller = appRouter.createCaller(makeCtx());
+      const payload = {
+        animalId: 1,
+        symptomIds: ["vomiting", "diarrhea"],
+        categoryIds: ["nutrition"],
+        severity: "medium" as const,
+        symptomsSummary: "Vómitos, Diarreia",
+        notes: "Após comer nova comida",
+        date: "2026-06-15",
+      };
+
+      const result = await caller.health.logSymptoms(payload);
+
+      expect(verifyAnimalOwner).toHaveBeenCalledWith(1, 1, true);
+      expect(addHealthRecord).toHaveBeenCalledWith({
+        animalId: 1,
+        recordType: "notes",
+        category: "symptom",
+        product: "Vómitos, Diarreia",
+        result: "medium",
+        date: "2026-06-15",
+        notes: "Após comer nova comida",
+      });
+      expect(insertEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 1,
+          animalId: 1,
+          state: "symptom_logged",
+          confidence: 1.0,
+          emoji: "🩺",
+          modelUsed: "symptom_logger",
+          contextTags: expect.arrayContaining([
+            "symptom",
+            "severity:medium",
+            "symptom:vomiting",
+            "symptom:diarrhea",
+            "category:nutrition",
+          ]),
+        }),
+      );
+      expect(logAnalyticsEvent).toHaveBeenCalledWith(
+        1,
+        "symptom_logged",
+        expect.objectContaining({
+          animalId: 1,
+          severity: "medium",
+          symptomCount: 2,
+        }),
+      );
+      expect(result).toEqual({ id: 20, animalId: 1 });
+    });
+
+    it("denies logging symptoms for non-owned animal", async () => {
+      const caller = appRouter.createCaller(makeCtx());
+      const payload = {
+        animalId: 2,
+        symptomIds: ["seizures"],
+        severity: "high" as const,
+      };
+
+      await expect(caller.health.logSymptoms(payload)).rejects.toThrow(
+        "Não autorizado",
+      );
+    });
+
+    it("accepts optional photoUrl with valid format and attaches to event", async () => {
+      const caller = appRouter.createCaller(makeCtx());
+      const photoUrl =
+        "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAADwAQCdASoBAAEAAkA4JaQAA3AA/vuUAAA=";
+      const payload = {
+        animalId: 1,
+        symptomIds: ["scratching", "hair_loss"],
+        categoryIds: ["skin_coat"],
+        severity: "low" as const,
+        photoUrl,
+      };
+
+      await caller.health.logSymptoms(payload);
+
+      expect(insertEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          audioUrl: photoUrl,
+        }),
+      );
+      expect(logAnalyticsEvent).toHaveBeenCalledWith(
+        1,
+        "symptom_logged",
+        expect.objectContaining({
+          hasPhoto: true,
+        }),
+      );
     });
   });
 });

@@ -333,7 +333,8 @@
     "excitement": "Excitement",
     "hunger": "Hunger",
     "alert": "Alert",
-    "relaxed": "Relaxed"
+    "relaxed": "Relaxed",
+    "symptom_logged": "Symptom Logged"
   },
   "landing": {
     "title": "Understand what your pet is trying to tell you.",
@@ -381,6 +382,172 @@
       "continue_monitoring": "Maintain daily tracking to continue monitoring.",
       "positive_routine": "Positive and consistent routine. Keep up the good work!",
       "record_more": "Record at least 3 vocalizations to generate automatic insights."
+    }
+  },
+  "symptoms": {
+    "title": "Holistic Checkup & Symptoms",
+    "subtitle": "Systematic clinical assessment across body categories for pet monitoring",
+    "searchPlaceholder": "Search symptom or category (e.g.: vomiting, skin, cough...)",
+    "clearSearch": "Clear search",
+    "noSearchResults": "No symptoms found for \"{{query}}\"",
+    "observedSymptoms": "Observed symptoms:",
+    "selectedCount_zero": "No symptoms selected",
+    "selectedCount_one": "1 symptom selected",
+    "selectedCount_other": "{{count}} symptoms selected",
+    "selectedBadge": "selected",
+    "extraSymptomsNotice": "You selected more than 5 symptoms. The summary will include the primary ones, and all additional symptoms remain fully tracked in Veterinary Mode and the clinical timeline.",
+    "severityTitle": "General Clinical Severity:",
+    "severity": {
+      "low": "Mild",
+      "lowDesc": "Subtle signs, almost normal behavior",
+      "medium": "Moderate",
+      "mediumDesc": "Noticeable discomfort, close monitoring advised",
+      "high": "Severe",
+      "highDesc": "Major impact, high clinical risk"
+    },
+    "redFlagAlert": {
+      "title": "Warning: Red Flag / Clinical Emergency Alert",
+      "description": "Potentially critical symptoms or high severity selected. If your pet shows acute pain, seizures, or persistent breathing difficulty, contact an emergency vet or 24h hospital immediately."
+    },
+    "photoSection": {
+      "title": "Photo Record (Optional)",
+      "desc": "Attach a photo for visual examination of skin, coat, eyes, or wounds",
+      "visualCallout": "You noticed visual signs (skin/coat/wounds). You can attach a photo for a more accurate veterinary evaluation.",
+      "button": "Take / Attach Photo",
+      "remove": "Remove photo",
+      "uploading": "Processing image...",
+      "success": "Photo attached successfully"
+    },
+    "notesTitle": "Additional Observations (Optional):",
+    "notesPlaceholder": "E.g.: started last night after eating, linked to food brand change...",
+    "saveButton": "Save Clinical Checkup",
+    "saving": "Saving...",
+    "savedSuccess": "Symptoms recorded successfully!",
+    "saveError": "Failed to save symptoms.",
+    "selectAnimalPrompt": "Select an animal first.",
+    "selectSymptomPrompt": "Select at least one symptom.",
+    "historyTitle": "Clinical Symptom History",
+    "noHistory": "No symptoms logged yet.",
+    "delete": "Delete",
+    "categories": {
+      "nutrition": {
+        "title": "Nutrition & Digestion",
+        "desc": "Appetite, vomiting, diarrhea, stool and hydration"
+      },
+      "activity": {
+        "title": "Activity & Mobility",
+        "desc": "Energy, limping, gait and posture"
+      },
+      "respiratory": {
+        "title": "Respiratory & Ocular",
+        "desc": "Coughing, sneezing, breathing and discharge"
+      },
+      "skin_coat": {
+        "title": "Skin & Coat",
+        "desc": "Scratching, lesions, hair loss and dermatology"
+      },
+      "urinary": {
+        "title": "Urinary System",
+        "desc": "Frequency, pain and blood in urine"
+      },
+      "neurological": {
+        "title": "Neurological & Behavior",
+        "desc": "Seizures, disorientation and motor response"
+      },
+      "systemic": {
+        "title": "General & Weight",
+        "desc": "Body weight, fever and systemic state"
+      }
+    },
+    "items": {
+      "vomiting": {
+        "label": "Vomiting",
+        "desc": "Food or bile regurgitation/vomiting"
+      },
+      "diarrhea": {
+        "label": "Diarrhea",
+        "desc": "Loose, liquid stools or higher frequency"
+      },
+      "appetite_loss": {
+        "label": "Loss of appetite",
+        "desc": "Refusal to eat or noticeable hyporexia"
+      },
+      "excessive_drinking": {
+        "label": "Excessive drinking",
+        "desc": "Polydipsia or abnormal thirst"
+      },
+      "bad_breath": {
+        "label": "Bad breath",
+        "desc": "Strong halitosis or oral discomfort signs"
+      },
+      "bloating": {
+        "label": "Bloating",
+        "desc": "Sudden abdominal distension (Potential clinical emergency)"
+      },
+      "lethargy": {
+        "label": "Lethargy",
+        "desc": "Marked prostration and lack of energy"
+      },
+      "limping": {
+        "label": "Limping",
+        "desc": "Difficulty bearing weight on limb or stiff gait"
+      },
+      "trembling": {
+        "label": "Trembling",
+        "desc": "Body tremors or frequent shivering"
+      },
+      "coughing": {
+        "label": "Coughing",
+        "desc": "Dry cough, choking fits or expectoration"
+      },
+      "sneezing": {
+        "label": "Sneezing",
+        "desc": "Persistent sneezing in clusters"
+      },
+      "nasal_discharge": {
+        "label": "Nasal discharge",
+        "desc": "Serous, mucous or thick nasal discharge"
+      },
+      "eye_discharge": {
+        "label": "Eye discharge",
+        "desc": "Excessive tearing or eye crusting"
+      },
+      "scratching": {
+        "label": "Scratching / Itching",
+        "desc": "Compulsive scratching, paw chewing or licking"
+      },
+      "hair_loss": {
+        "label": "Hair loss",
+        "desc": "Localized bald spots or diffuse coat thinning"
+      },
+      "skin_lesions": {
+        "label": "Skin lesions / Wounds",
+        "desc": "Skin redness, crusts, scratches or open sores"
+      },
+      "blood_urine": {
+        "label": "Blood in urine",
+        "desc": "Pinkish/reddish urine or visible clots (Emergency)"
+      },
+      "urination_difficulty": {
+        "label": "Difficulty urinating",
+        "desc": "Painful straining, dripping or urinary blockage (Emergency)"
+      },
+      "seizures": {
+        "label": "Seizures",
+        "desc": "Uncontrolled spasms or loss of consciousness (Emergency)"
+      },
+      "disorientation": {
+        "label": "Disorientation",
+        "desc": "Head tilt, pacing in circles or loss of balance"
+      },
+      "weight_loss": {
+        "label": "Weight loss",
+        "desc": "Progressive weight loss without dietary changes"
+      },
+      "fever_warmth": {
+        "label": "Fever / Body warmth",
+        "desc": "Elevated body temperature, dry warm snout"
+      }
     }
   }
 }

@@ -332,7 +332,8 @@
     "excitement": "Excitação",
     "hunger": "Fome",
     "alert": "Alerta",
-    "relaxed": "Relaxado"
+    "relaxed": "Relaxado",
+    "symptom_logged": "Registo de Sintomas"
   },
   "landing": {
     "title": "Entenda o que o seu animal está a tentar dizer-lhe.",
@@ -380,6 +381,172 @@
       "continue_monitoring": "Mantém o registo diário para continuar a monitorizar.",
       "positive_routine": "Rotina positiva e consistente. Continua o bom trabalho!",
       "record_more": "Regista pelo menos 3 vocalizações para gerar insights automáticos."
+    }
+  },
+  "symptoms": {
+    "title": "Checkup Holístico & Sintomas",
+    "subtitle": "Avaliação clínica sistemática por categorias corporais para o acompanhamento do teu animal",
+    "searchPlaceholder": "Pesquisar sintoma ou categoria (ex: vómitos, pele, tosse...)",
+    "clearSearch": "Limpar pesquisa",
+    "noSearchResults": "Nenhum sintoma encontrado para \"{{query}}\"",
+    "observedSymptoms": "Sintomas observados:",
+    "selectedCount_zero": "Nenhum sintoma selecionado",
+    "selectedCount_one": "1 sintoma selecionado",
+    "selectedCount_other": "{{count}} sintomas selecionados",
+    "selectedBadge": "selecionado(s)",
+    "extraSymptomsNotice": "Selecionaste mais de 5 sintomas. O resumo do boletim incluirá os principais, e todos os sintomas adicionais ficam integralmente registados no Modo Veterinário e na timeline clínica.",
+    "severityTitle": "Gravidade Clínica Geral:",
+    "severity": {
+      "low": "Leve",
+      "lowDesc": "Sinais subtis, comportamento quase habitual",
+      "medium": "Moderado",
+      "mediumDesc": "Incómodo visível, requer vigilância próxima",
+      "high": "Grave",
+      "highDesc": "Impacto severo, risco clínico elevado"
+    },
+    "redFlagAlert": {
+      "title": "Atenção: Red Flag / Alerta de Urgência Clínica",
+      "description": "Foram detetados sintomas potencialmente críticos ou selecionada gravidade elevada. Se o teu animal apresentar dor aguda, convulsões ou dificuldade respiratória contínua, contacta de imediato um médico veterinário ou hospital 24h."
+    },
+    "photoSection": {
+      "title": "Registo Fotográfico (Opcional)",
+      "desc": "Anexe uma fotografia para avaliação visual da pele, pelo, olhos ou lesões",
+      "visualCallout": "Detetaste sinais visuais (pele/pelo/feridas). Podes anexar uma foto para avaliação veterinária mais precisa.",
+      "button": "Tirar / Anexar Foto",
+      "remove": "Remover foto",
+      "uploading": "A processar imagem...",
+      "success": "Foto anexada com sucesso"
+    },
+    "notesTitle": "Observações Adicionais (Opcional):",
+    "notesPlaceholder": "Ex: começou ontem à noite após a refeição, associado a alteração de ração...",
+    "saveButton": "Guardar Checkup Clínico",
+    "saving": "A guardar...",
+    "savedSuccess": "Sintomas registados com sucesso!",
+    "saveError": "Erro ao guardar sintomas.",
+    "selectAnimalPrompt": "Seleciona um animal primeiro.",
+    "selectSymptomPrompt": "Seleciona pelo menos um sintoma.",
+    "historyTitle": "Histórico Clínico de Sintomas",
+    "noHistory": "Nenhum sintoma registado ainda.",
+    "delete": "Apagar",
+    "categories": {
+      "nutrition": {
+        "title": "Alimentação & Digestão",
+        "desc": "Apetite, vómitos, diarreia, fezes e hidratação"
+      },
+      "activity": {
+        "title": "Atividade & Mobilidade",
+        "desc": "Energia, claudicação, andar e postura"
+      },
+      "respiratory": {
+        "title": "Respiratório & Ocular",
+        "desc": "Tosse, espirros, respiração e corrimentos"
+      },
+      "skin_coat": {
+        "title": "Pele & Pelo",
+        "desc": "Coceira, feridas, queda de pelo e dermatologia"
+      },
+      "urinary": {
+        "title": "Sistema Urinário",
+        "desc": "Frequência, dor e presença de sangue na urina"
+      },
+      "neurological": {
+        "title": "Neurológico & Comportamento",
+        "desc": "Convulsões, desorientação e resposta motora"
+      },
+      "systemic": {
+        "title": "Geral & Ponderal",
+        "desc": "Peso corporal, febre e estado sistémico"
+      }
+    },
+    "items": {
+      "vomiting": {
+        "label": "Vómitos",
+        "desc": "Regurgitação ou vómito alimentar/bilioso"
+      },
+      "diarrhea": {
+        "label": "Diarreia",
+        "desc": "Fezes moles, líquidas ou aumento de frequência"
+      },
+      "appetite_loss": {
+        "label": "Perda de apetite",
+        "desc": "Recusa alimentar ou hiporexia visível"
+      },
+      "excessive_drinking": {
+        "label": "Beber excessivo",
+        "desc": "Polidipsia ou procura anormal de água"
+      },
+      "bad_breath": {
+        "label": "Mau hálito",
+        "desc": "Halitose forte ou sinais de desconforto oral"
+      },
+      "bloating": {
+        "label": "Barriga dilatada",
+        "desc": "Distensão abdominal súbita (Potencial urgência clínica)"
+      },
+      "lethargy": {
+        "label": "Letargia / Cansaço",
+        "desc": "Prostração acentuada e falta de energia"
+      },
+      "limping": {
+        "label": "Claudicação / Mancar",
+        "desc": "Dificuldade ao apoiar a pata ou andar rígido"
+      },
+      "trembling": {
+        "label": "Tremores",
+        "desc": "Tremores corporais ou calafrios frequentes"
+      },
+      "coughing": {
+        "label": "Tosse",
+        "desc": "Tosse seca, acessos de engasgo ou expetoração"
+      },
+      "sneezing": {
+        "label": "Espirros",
+        "desc": "Espirros persistentes em salvas"
+      },
+      "nasal_discharge": {
+        "label": "Corrimento nasal",
+        "desc": "Secreção nasal serosa, mucosa ou espessa"
+      },
+      "eye_discharge": {
+        "label": "Corrimento ocular",
+        "desc": "Lacrejamento abundante ou secreção nos olhos"
+      },
+      "scratching": {
+        "label": "Coceira / Prurido",
+        "desc": "Coçar compulsivo, morder patas ou lamber excessivo"
+      },
+      "hair_loss": {
+        "label": "Queda de pelo",
+        "desc": "Peladas circunscritas ou desbaste difuso do pelo"
+      },
+      "skin_lesions": {
+        "label": "Lesões ou Feridas",
+        "desc": "Vermelhidão cutânea, crostas, arranhões ou feridas"
+      },
+      "blood_urine": {
+        "label": "Sangue na urina",
+        "desc": "Urina rosada/avermelhada ou coágulos visíveis (Urgência)"
+      },
+      "urination_difficulty": {
+        "label": "Dificuldade a urinar",
+        "desc": "Esforço doloroso, micção em gotas ou obstrução (Urgência)"
+      },
+      "seizures": {
+        "label": "Convulsões",
+        "desc": "Espasmos incontroláveis ou perda de consciência (Urgência)"
+      },
+      "disorientation": {
+        "label": "Desorientação",
+        "desc": "Cabeça inclinada, andar em círculos ou perda de equilíbrio"
+      },
+      "weight_loss": {
+        "label": "Perda de peso",
+        "desc": "Emagrecimento progressivo sem mudança alimentar"
+      },
+      "fever_warmth": {
+        "label": "Febre ou calor corporal",
+        "desc": "Temperatura corporal elevada, focinho quente e seco"
+      }
     }
   }
 }

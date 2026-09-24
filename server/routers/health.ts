@@ -12,6 +12,8 @@ import {
   getHealthRecords,
   getVaccineById,
   getVaccines,
+  insertEvent,
+  logAnalyticsEvent,
   verifyAnimalOwner,
 } from "../db";
 
@@ -115,5 +117,107 @@ export const healthRouter = router({
       }
       await verifyAnimalOwner(record.animalId, userId, true);
       return deleteHealthRecord(input.id);
+    }),
+
+  logSymptoms: protectedProcedure
+    .input(
+      z.object({
+        animalId: z.number(),
+        symptomIds: z.array(z.string()).min(1),
+        severity: z.enum(["low", "medium", "high"]),
+        symptomsSummary: sanitizedString(100).optional(),
+        notes: sanitizedString(500).nullable().optional(),
+        photoUrl: z
+          .string()
+          .nullable()
+          .optional()
+          .refine(
+            (val) => {
+              if (!val) return true;
+              if (val.startsWith("http://") || val.startsWith("https://"))
+                return true;
+              const match = val.match(/^data:([^;]+);base64,/);
+              if (!match) return false;
+              const mime = match[1];
+              const ALLOWED = [
+                "image/jpeg",
+                "image/jpg",
+                "image/png",
+                "image/webp",
+              ];
+              if (!ALLOWED.includes(mime.toLowerCase())) return false;
+              const size = (val.length * 3) / 4;
+              return size <= 5 * 1024 * 1024; // 5MB
+            },
+            { message: "Ficheiro inválido ou demasiado grande. Máximo 5MB." },
+          ),
+        date: z.string().optional(),
+        categoryIds: z.array(z.string()).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      await verifyAnimalOwner(input.animalId, userId, true);
+
+      const dateStr = input.date || new Date().toISOString().split("T")[0];
+      const rawSummary =
+        input.symptomsSummary ||
+        (input.symptomIds.length <= 4
+          ? input.symptomIds.join(", ")
+          : `${input.symptomIds.slice(0, 3).join(", ")} (+${input.symptomIds.length - 3})`);
+      const summary = rawSummary.slice(0, 100);
+
+      const healthRecord = await addHealthRecord({
+        animalId: input.animalId,
+        recordType: "notes",
+        category: "symptom",
+        product: summary,
+        result: input.severity,
+        date: dateStr,
+        notes: input.notes?.trim() || null,
+      });
+
+      const contextTags = [
+        "symptom",
+        `severity:${input.severity}`,
+        ...input.symptomIds.map((id) => `symptom:${id}`),
+        ...(input.categoryIds
+          ? input.categoryIds.map((c) => `category:${c}`)
+          : []),
+      ];
+
+      try {
+        await insertEvent({
+          userId,
+          animalId: input.animalId,
+          state: "symptom_logged",
+          confidence: 1.0,
+          emoji: "🩺",
+          modelUsed: "symptom_logger",
+          cached: false,
+          // Nota técnica: Foto de sintoma usa temporariamente o campo audioUrl como media attachment payload
+          // (a tabela classification_events ainda não tem coluna photo_url dedicada; migração para attachment_url planeada para próximo refactor).
+          audioUrl: input.photoUrl ?? null,
+          contextTags,
+        });
+      } catch (evtErr) {
+        console.warn(
+          "[Health] Could not insert classification event for symptom:",
+          evtErr,
+        );
+      }
+
+      try {
+        await logAnalyticsEvent(userId, "symptom_logged", {
+          animalId: input.animalId,
+          symptomCount: input.symptomIds.length,
+          severity: input.severity,
+          hasPhoto: !!input.photoUrl,
+        });
+      } catch (_err) {
+        // Ignore analytics failure
+      }
+
+      return healthRecord;
     }),
 });

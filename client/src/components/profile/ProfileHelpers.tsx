@@ -101,7 +101,7 @@ export function AnimalCard({
       }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className={cn(
-        "flex-shrink-0 w-36 rounded-2xl p-4 border transition-all duration-200 text-left",
+        "shrink-0 w-36 rounded-2xl p-4 border transition-all duration-200 text-left",
         "active:scale-95",
         active
           ? "border-primary bg-primary/10"

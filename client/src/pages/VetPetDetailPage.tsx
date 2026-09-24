@@ -228,7 +228,7 @@ export default function VetPetDetailPage({
   return (
     <div className="page-enter mx-auto flex min-h-full w-full max-w-lg flex-col gap-5 px-4 pb-24 pt-6">
       <section className="relative overflow-hidden rounded-3xl border border-border bg-card/90 p-5">
-        <div className="absolute right-[-20px] top-[-20px] text-primary/5 pointer-events-none select-none rotate-12">
+        <div className="absolute -right-5 -top-5 text-primary/5 pointer-events-none select-none rotate-12">
           <PawPrint size={140} />
         </div>
         <div className="relative flex items-start gap-4">

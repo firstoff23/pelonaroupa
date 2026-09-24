@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt" class="dark">
+<html lang="pt">
   <head>
     <meta charset="UTF-8" />
     <!-- Termly Consent Banner & Cookie Auto-blocking -->
@@ -35,6 +35,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.supabase.co" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- Anti-FOUC: apply theme class before React hydrates -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("animalmind-theme");
+          var dark =
+            t === "dark" ||
+            (t !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          // Fallback: dark mode by default
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

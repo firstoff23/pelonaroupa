@@ -11,6 +11,7 @@ import {
   KeyRound,
   Loader2,
   LogOut,
+  Monitor,
   Moon,
   RefreshCw,
   Shield,
@@ -70,7 +71,7 @@ type Sensitivity = "low" | "medium" | "high";
 export default function SettingsPage() {
   const { t, language, setLanguage } = useLanguage();
   const [, setLocation] = useLocation();
-  const { theme, toggleTheme, switchable } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const { signOut } = useAuth();
   const { data: dbUser, refetch: refetchUser } = trpc.auth.me.useQuery();
   const { data: settingsData, isLoading: settingsLoading } =
@@ -549,50 +550,118 @@ export default function SettingsPage() {
         </Card>
       </motion.div>
 
-      {/* Tema */}
-      {switchable && toggleTheme && (
-        <motion.div variants={cardVariants}>
-          <Card className="bg-card border-border overflow-hidden">
-            <CardHeader className="pb-3 border-b border-border bg-muted/30">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
-                {theme === "dark" ? (
-                  <Moon className="w-4 h-4 text-primary" />
-                ) : (
-                  <Sun className="w-4 h-4 text-primary" />
+      {/* Aparência / Theme */}
+      <motion.div variants={cardVariants}>
+        <Card className="bg-card border-border overflow-hidden">
+          <CardHeader className="pb-3 border-b border-border bg-muted/30">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+              {resolvedTheme === "dark" ? (
+                <Moon className="w-4 h-4 text-primary" />
+              ) : (
+                <Sun className="w-4 h-4 text-primary" />
+              )}
+              {language === "pt" ? "Aparência" : "Appearance"}
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-0.5">
+              {language === "pt"
+                ? "Escolha o esquema de cores da interface"
+                : "Choose the interface color scheme"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              {/* Claro */}
+              <button
+                type="button"
+                id="theme-light-btn"
+                onClick={() => {
+                  setTheme("light");
+                  toast.success(
+                    language === "pt" ? "Tema claro ativado" : "Light theme enabled",
+                  );
+                }}
+                className={cn(
+                  "flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-all duration-200 active:scale-95 tap-highlight-none",
+                  theme === "light"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
                 )}
-                {language === "pt" ? "Tema Visual" : "Visual Theme"}
-              </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                {language === "pt"
-                  ? "Selecione o esquema de cores da aplicação"
-                  : "Select the application's color scheme"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4 flex gap-4">
-              <Button
-                variant={theme === "light" ? "default" : "outline"}
-                onClick={() => {
-                  if (theme === "dark") toggleTheme();
-                }}
-                className="flex-1 text-xs h-9 font-semibold gap-2 active-scale tap-highlight-none"
               >
-                <Sun className="w-3.5 h-3.5" />
-                {language === "pt" ? "Claro" : "Light"}
-              </Button>
-              <Button
-                variant={theme === "dark" ? "default" : "outline"}
+                <Sun className="h-5 w-5" strokeWidth={theme === "light" ? 2.5 : 1.75} />
+                <span className="text-[10px] font-semibold">
+                  {language === "pt" ? "Claro" : "Light"}
+                </span>
+                {theme === "light" && (
+                  <Check className="h-3 w-3 stroke-[2.5px]" />
+                )}
+              </button>
+
+              {/* Sistema */}
+              <button
+                type="button"
+                id="theme-system-btn"
                 onClick={() => {
-                  if (theme === "light") toggleTheme();
+                  setTheme("system");
+                  toast.success(
+                    language === "pt" ? "A seguir o tema do dispositivo" : "Following device theme",
+                  );
                 }}
-                className="flex-1 text-xs h-9 font-semibold gap-2 active-scale tap-highlight-none"
+                className={cn(
+                  "flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-all duration-200 active:scale-95 tap-highlight-none",
+                  theme === "system"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
+                )}
               >
-                <Moon className="w-3.5 h-3.5" />
-                {language === "pt" ? "Escuro" : "Dark"}
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+                <Monitor className="h-5 w-5" strokeWidth={theme === "system" ? 2.5 : 1.75} />
+                <span className="text-[10px] font-semibold">
+                  {language === "pt" ? "Sistema" : "System"}
+                </span>
+                {theme === "system" && (
+                  <Check className="h-3 w-3 stroke-[2.5px]" />
+                )}
+              </button>
+
+              {/* Escuro */}
+              <button
+                type="button"
+                id="theme-dark-btn"
+                onClick={() => {
+                  setTheme("dark");
+                  toast.success(
+                    language === "pt" ? "Tema escuro ativado" : "Dark theme enabled",
+                  );
+                }}
+                className={cn(
+                  "flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-all duration-200 active:scale-95 tap-highlight-none",
+                  theme === "dark"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50",
+                )}
+              >
+                <Moon className="h-5 w-5" strokeWidth={theme === "dark" ? 2.5 : 1.75} />
+                <span className="text-[10px] font-semibold">
+                  {language === "pt" ? "Escuro" : "Dark"}
+                </span>
+                {theme === "dark" && (
+                  <Check className="h-3 w-3 stroke-[2.5px]" />
+                )}
+              </button>
+            </div>
+
+            {/* Status line */}
+            <p className="text-center text-[10px] text-muted-foreground">
+              {theme === "system"
+                ? language === "pt"
+                  ? `A usar o modo ${resolvedTheme === "dark" ? "escuro" : "claro"} do dispositivo`
+                  : `Using device's ${resolvedTheme === "dark" ? "dark" : "light"} mode`
+                : language === "pt"
+                  ? `Tema ${theme === "dark" ? "escuro" : "claro"} ativo manualmente`
+                  : `${theme === "dark" ? "Dark" : "Light"} theme set manually`}
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <SettingsSectionLabel
         title={language === "pt" ? "Alertas" : "Alerts"}

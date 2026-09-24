@@ -27,7 +27,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { MoodProvider } from "./contexts/MoodContext";
 import { SelfHealingProvider } from "./contexts/SelfHealingContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { useMLBackendSSE } from "./hooks/useMLBackendSSE";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import { useRealtimeNotifications } from "./hooks/useRealtimeNotifications";
@@ -148,6 +148,30 @@ function PushNotificationsBridge({ enabled }: { enabled: boolean }) {
 function MLBackendSSEBridge({ enabled }: { enabled: boolean }) {
   useMLBackendSSE({ enabled });
   return null;
+}
+
+function ThemedToaster() {
+  const { resolvedTheme } = useTheme();
+  return (
+    <Toaster
+      theme={resolvedTheme}
+      position="bottom-center"
+      toastOptions={{
+        style:
+          resolvedTheme === "dark"
+            ? {
+                background: "#161B20",
+                border: "1px solid #1F262D",
+                color: "#F8FAFC",
+              }
+            : {
+                background: "#ffffff",
+                border: "1px solid #e7e2da",
+                color: "#1d1c17",
+              },
+      }}
+    />
+  );
 }
 
 function Router() {
@@ -535,19 +559,9 @@ function App() {
         <AuthProvider>
           <SelfHealingProvider>
             <LanguageProvider>
-              <ThemeProvider defaultTheme="dark">
+              <ThemeProvider defaultTheme="system">
                 <TooltipProvider>
-                  <Toaster
-                    theme="dark"
-                    position="bottom-center"
-                    toastOptions={{
-                      style: {
-                        background: "#161B20",
-                        border: "1px solid #1F262D",
-                        color: "#F5F0E8",
-                      },
-                    }}
-                  />
+                  <ThemedToaster />
                   <MoodProvider>
                     <ReactErrorBoundary FallbackComponent={GlobalFallback}>
                       <Router />

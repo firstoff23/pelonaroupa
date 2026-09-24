@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { AlertBanner } from "@/components/AlertBanner";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
+import { DailyCareWidget } from "@/components/care/DailyCareWidget";
 import { CompanionAvatar } from "@/components/companion/CompanionAvatar";
 import { CompanionSheet } from "@/components/companion/CompanionSheet";
 import { resolveCompanionState } from "@/components/companion/companionStates";
@@ -534,6 +535,20 @@ export default function DashboardPage() {
                 displayAnimals.find(
                   (a) => a.id === (dashboardAnimalId || activeAnimal.id),
                 )?.name
+              }
+            />
+          </motion.div>
+        )}
+
+        {/* Daily Care Widget (Inspiração 4: Coordenação Familiar) */}
+        {!animalsLoading && !animalsError && activeAnimal && (
+          <motion.div variants={itemVariants}>
+            <DailyCareWidget
+              animalId={dashboardAnimalId || activeAnimal.id}
+              animalName={
+                displayAnimals.find(
+                  (a) => a.id === (dashboardAnimalId || activeAnimal.id),
+                )?.name || activeAnimal.name
               }
             />
           </motion.div>

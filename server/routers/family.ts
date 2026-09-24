@@ -2,8 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import {
+  addCareLog,
   createFamilyGroup,
   createFamilyInviteForUser,
+  deleteCareLog,
+  getCareBoardForAnimal,
+  getCareLogsHistory,
   getDemoUserId,
   getFamilyActivityForUser,
   getFamilyAnimalsForUser,
@@ -78,4 +82,72 @@ export const familyRouter = router({
     const userId = await effectiveUserId(ctx.user);
     return getFamilyActivityForUser(userId);
   }),
+
+  // ─── Daily Care Board / Coordenação Familiar (Inspiração 4 - Fetch) ────────
+  getCareBoard: protectedProcedure
+    .input(
+      z.object({
+        animalId: z.number(),
+        timezone: z.string().optional(),
+        date: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      return getCareBoardForAnimal(
+        input.animalId,
+        userId,
+        input.timezone,
+        input.date,
+      );
+    }),
+
+  logCare: protectedProcedure
+    .input(
+      z.object({
+        animalId: z.number(),
+        careType: z.enum(["feeding", "medication", "walk", "hygiene", "other"]),
+        careSubtype: z.string().optional(),
+        title: z.string().min(1).max(150),
+        notes: z.string().max(500).optional(),
+        timezone: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      return addCareLog({
+        animalId: input.animalId,
+        userId,
+        careType: input.careType,
+        careSubtype: input.careSubtype,
+        title: input.title,
+        notes: input.notes,
+        timezone: input.timezone,
+      });
+    }),
+
+  deleteCareLog: protectedProcedure
+    .input(
+      z.object({
+        logId: z.number(),
+        animalId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      await deleteCareLog(input.logId, input.animalId, userId);
+      return { success: true };
+    }),
+
+  getCareHistory: protectedProcedure
+    .input(
+      z.object({
+        animalId: z.number(),
+        limit: z.number().default(20),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = await effectiveUserId(ctx.user);
+      return getCareLogsHistory(input.animalId, userId, input.limit);
+    }),
 });

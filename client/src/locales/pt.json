@@ -591,5 +591,51 @@
       "viewHistory": "Ver histórico completo",
       "recordNew": "Fazer nova gravação"
     }
+  },
+  "care": {
+    "title": "Quadro de Cuidados Diários",
+    "subtitle": "Coordenação de tarefas para {{name}} entre co-tutores",
+    "completedOf": "{{completed}} / {{total}} cuidados concluídos hoje",
+    "successToast": "Cuidado registado com sucesso!",
+    "deleteToast": "Registo de cuidado removido.",
+    "bioacousticTitle": "Estado Sonoro de Hoje (Informativo)",
+    "bioacousticRecorded": "Última vocalização analisada hoje às {{time}}:",
+    "bioacousticEmpty": "Ainda não foram analisadas vocalizações hoje.",
+    "routineTitle": "Rotina do Dia",
+    "addCare": "Outro cuidado",
+    "pending": "Pendente hoje",
+    "done": "Feito",
+    "doneBy": "Feito por {{user}}",
+    "markDone": "Marcar",
+    "removeLog": "Remover marcação",
+    "customTitle": "Outros Cuidados de Hoje",
+    "dialogTitle": "Registar Cuidado Diário",
+    "dialogDesc": "Assinala o cuidado concluído para manter a família informada.",
+    "careType": "Tipo de cuidado",
+    "titleLabel": "Título",
+    "notesLabel": "Notas adicionais (opcional)",
+    "notesPlaceholder": "Ex: Comeu 120g de ração com apetite normal...",
+    "cancel": "Cancelar",
+    "saving": "A guardar...",
+    "saveButton": "Guardar",
+    "types": {
+      "feeding": "Alimentação",
+      "walk": "Passeio / Exercício",
+      "medication": "Medicação / Tratamento",
+      "hygiene": "Higiene / Banho / Escovagem",
+      "other": "Outro cuidado"
+    },
+    "routine": {
+      "breakfast": "Pequeno-almoço",
+      "dinner": "Jantar",
+      "daily_walk": "Passeio diário",
+      "medication": "Medicação do dia",
+      "hygiene": "Escovagem / Higiene"
+    },
+    "widget": {
+      "openBoard": "Abrir quadro",
+      "completedToday": "concluídos hoje",
+      "audioAnalyzedToday": "Áudio analisado hoje"
+    }
   }
 }

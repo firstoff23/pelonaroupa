@@ -592,5 +592,51 @@
       "viewHistory": "View complete history",
       "recordNew": "Record new audio"
     }
+  },
+  "care": {
+    "title": "Daily Care Board",
+    "subtitle": "Care coordination for {{name}} across co-guardians",
+    "completedOf": "{{completed}} / {{total}} cares completed today",
+    "successToast": "Care logged successfully!",
+    "deleteToast": "Care log removed.",
+    "bioacousticTitle": "Today's Audio Status (Informative)",
+    "bioacousticRecorded": "Last vocalization analyzed today at {{time}}:",
+    "bioacousticEmpty": "No vocalizations analyzed yet today.",
+    "routineTitle": "Daily Routine",
+    "addCare": "Other care",
+    "pending": "Pending today",
+    "done": "Done",
+    "doneBy": "Done by {{user}}",
+    "markDone": "Mark done",
+    "removeLog": "Remove log",
+    "customTitle": "Other Care Logged Today",
+    "dialogTitle": "Log Daily Care",
+    "dialogDesc": "Mark completed care to keep the co-guardians updated.",
+    "careType": "Care type",
+    "titleLabel": "Title",
+    "notesLabel": "Additional notes (optional)",
+    "notesPlaceholder": "E.g. Ate 120g with regular appetite...",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saveButton": "Save",
+    "types": {
+      "feeding": "Feeding",
+      "walk": "Walk / Exercise",
+      "medication": "Medication",
+      "hygiene": "Hygiene / Grooming",
+      "other": "Other"
+    },
+    "routine": {
+      "breakfast": "Breakfast",
+      "dinner": "Dinner",
+      "daily_walk": "Daily walk",
+      "medication": "Daily medication",
+      "hygiene": "Grooming / Hygiene"
+    },
+    "widget": {
+      "openBoard": "Open board",
+      "completedToday": "completed today",
+      "audioAnalyzedToday": "Audio analyzed today"
+    }
   }
 }

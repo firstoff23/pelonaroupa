@@ -4105,3 +4105,257 @@ export async function reviewFeedbackAnnotation(
   if (error) throw error;
   return data;
 }
+
+// ─── Care Logs & Daily Care Board (Inspiração 4 - Fetch) ──────────────────────
+
+import {
+  type CareLogEntry,
+  type DailyCareBoardData,
+  getCareDateForTimezone,
+  ROUTINE_CARE_DEFINITIONS,
+  type RoutineCareItemStatus,
+} from "../shared/care";
+import { notifyFamilyCareLogged } from "./services/careNotifications";
+
+export async function addCareLog(data: {
+  animalId: number;
+  userId: number;
+  careType: string;
+  careSubtype?: string;
+  title: string;
+  notes?: string | null;
+  timezone?: string;
+}): Promise<CareLogEntry> {
+  await verifyAnimalOwner(data.animalId, data.userId, true);
+
+  const supabase = getSupabase();
+  const careDate = getCareDateForTimezone(data.timezone);
+  const now = new Date().toISOString();
+
+  const { data: inserted, error } = await supabase
+    .from("care_logs")
+    .insert({
+      animal_id: data.animalId,
+      user_id: data.userId,
+      care_type: data.careType,
+      care_subtype: data.careSubtype || null,
+      title: data.title.trim(),
+      notes: data.notes?.trim() || null,
+      care_date: careDate,
+      completed_at: now,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  const userSummary = await getUserSummary(data.userId);
+
+  // Trigger grouped family notification asynchronously
+  try {
+    const animal = await getAnimalById(data.animalId, data.userId);
+    if (animal) {
+      void notifyFamilyCareLogged({
+        animalId: data.animalId,
+        animalName: animal.name,
+        loggedByUserId: data.userId,
+        loggedByUserName: userSummary.name,
+        careType: data.careType,
+        title: data.title.trim(),
+      });
+    }
+  } catch (_notifErr) {
+    // Graceful degradation
+  }
+
+  return {
+    id: Number(inserted.id),
+    animalId: Number(inserted.animal_id),
+    userId: Number(inserted.user_id),
+    userName: userSummary.name,
+    careType: inserted.care_type as any,
+    careSubtype: inserted.care_subtype,
+    title: inserted.title,
+    notes: inserted.notes,
+    careDate: inserted.care_date,
+    completedAt: inserted.completed_at,
+  };
+}
+
+export async function getCareBoardForAnimal(
+  animalId: number,
+  userId: number,
+  timezone = "Europe/Lisbon",
+  specificDate?: string,
+): Promise<DailyCareBoardData> {
+  await verifyAnimalOwner(animalId, userId, false);
+
+  const targetDate = specificDate || getCareDateForTimezone(timezone);
+  const supabase = getSupabase();
+
+  // 1. Fetch care logs for the specific date
+  const { data: logs, error } = await supabase
+    .from("care_logs")
+    .select("*")
+    .eq("animal_id", animalId)
+    .eq("care_date", targetDate)
+    .order("completed_at", { ascending: true });
+
+  if (error && error.code !== "PGRST116") {
+    console.warn("[Care] Failed to load care_logs:", error);
+  }
+
+  const logList: CareLogEntry[] = [];
+  for (const row of logs || []) {
+    const userSummary = await getUserSummary(Number(row.user_id));
+    logList.push({
+      id: Number(row.id),
+      animalId: Number(row.animal_id),
+      userId: Number(row.user_id),
+      userName: userSummary.name,
+      careType: row.care_type as any,
+      careSubtype: row.care_subtype,
+      title: row.title,
+      notes: row.notes,
+      careDate: row.care_date,
+      completedAt: row.completed_at,
+    });
+  }
+
+  // 2. Map routine care items to their completion status
+  const routineItems: RoutineCareItemStatus[] = ROUTINE_CARE_DEFINITIONS.map(
+    (def) => {
+      const match = logList.find((log) => {
+        if (log.careSubtype && log.careSubtype === def.careSubtype) {
+          return true;
+        }
+        return false;
+      });
+
+      return {
+        definition: def,
+        isCompleted: !!match,
+        completedLog: match,
+      };
+    },
+  );
+
+  // Custom care logs that are not part of routine definitions
+  const customLogs = logList.filter(
+    (log) =>
+      !ROUTINE_CARE_DEFINITIONS.some(
+        (def) => log.careSubtype && def.careSubtype === log.careSubtype,
+      ),
+  );
+
+  const completedCount = routineItems.filter((i) => i.isCompleted).length;
+
+  // 3. Informative bioacoustic status of the day (Refinement 2: read-only status from classification_events)
+  let bioacousticStatus = {
+    hasRecordedToday: false,
+    lastEventTime: null as string | null,
+    state: null as string | null,
+    emoji: null as string | null,
+    confidence: null as number | null,
+  };
+
+  try {
+    // Start and end of the care day in ISO string range
+    const startDayIso = `${targetDate}T00:00:00.000Z`;
+    const endDayIso = `${targetDate}T23:59:59.999Z`;
+
+    const { data: events } = await supabase
+      .from("classification_events")
+      .select("created_at, state, emoji, confidence")
+      .eq("animal_id", animalId)
+      .gte("created_at", startDayIso)
+      .lte("created_at", endDayIso)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (events && events.length > 0) {
+      const ev = events[0];
+      const timeStr = new Date(ev.created_at).toLocaleTimeString("pt-PT", {
+        timeZone: timezone,
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      bioacousticStatus = {
+        hasRecordedToday: true,
+        lastEventTime: timeStr,
+        state: ev.state,
+        emoji: ev.emoji,
+        confidence: Number(ev.confidence),
+      };
+    }
+  } catch (_bioErr) {
+    // Ignore bioacoustic query failure
+  }
+
+  return {
+    animalId,
+    careDate: targetDate,
+    timezone,
+    completedCount,
+    totalRoutineCount: ROUTINE_CARE_DEFINITIONS.length,
+    routineItems,
+    customLogs,
+    bioacousticStatus,
+  };
+}
+
+export async function deleteCareLog(
+  logId: number,
+  animalId: number,
+  userId: number,
+): Promise<boolean> {
+  await verifyAnimalOwner(animalId, userId, true);
+
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from("care_logs")
+    .delete()
+    .eq("id", logId)
+    .eq("animal_id", animalId);
+
+  if (error) throw error;
+  return true;
+}
+
+export async function getCareLogsHistory(
+  animalId: number,
+  userId: number,
+  limit = 20,
+): Promise<CareLogEntry[]> {
+  await verifyAnimalOwner(animalId, userId, false);
+
+  const supabase = getSupabase();
+  const { data: rows, error } = await supabase
+    .from("care_logs")
+    .select("*")
+    .eq("animal_id", animalId)
+    .order("completed_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  const result: CareLogEntry[] = [];
+  for (const row of rows || []) {
+    const userSummary = await getUserSummary(Number(row.user_id));
+    result.push({
+      id: Number(row.id),
+      animalId: Number(row.animal_id),
+      userId: Number(row.user_id),
+      userName: userSummary.name,
+      careType: row.care_type as any,
+      careSubtype: row.care_subtype,
+      title: row.title,
+      notes: row.notes,
+      careDate: row.care_date,
+      completedAt: row.completed_at,
+    });
+  }
+
+  return result;
+}

@@ -14,11 +14,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
+import { DailyCareBoard } from "@/components/care/DailyCareBoard";
 import FamilyInvite from "@/components/FamilyInvite";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
 
 // Maps raw role values from the DB to readable Portuguese labels
 function getRoleLabel(role: string): { label: string; className: string } {
@@ -151,6 +153,11 @@ export default function FamilyDashboard({
     enabled: isAuthenticated && hasFamilyData,
     retry: false,
   });
+  const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
+  const activeAnimal =
+    animalsQuery.data?.find((a) => a.id === selectedAnimalId) ??
+    animalsQuery.data?.[0];
+
   const activityQuery = trpc.family.getActivity.useQuery(undefined, {
     enabled: isAuthenticated && hasFamilyData,
     retry: false,
@@ -365,6 +372,37 @@ export default function FamilyDashboard({
         {hasFamilyData && (
           <>
             <FamilyInvite />
+
+            {/* Daily Care Board (Inspiração 4: Coordenação Familiar) */}
+            {activeAnimal && (
+              <Card className="p-4 sm:p-5 space-y-4">
+                {animalsQuery.data && animalsQuery.data.length > 1 && (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                    {animalsQuery.data.map((animal) => (
+                      <button
+                        key={animal.id}
+                        type="button"
+                        onClick={() => setSelectedAnimalId(animal.id)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 active-scale",
+                          activeAnimal.id === animal.id
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "bg-secondary/20 text-muted-foreground hover:text-foreground hover:bg-secondary/30",
+                        )}
+                      >
+                        <PawPrint size={12} />
+                        <span>{animal.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <DailyCareBoard
+                  animalId={activeAnimal.id}
+                  animalName={activeAnimal.name}
+                  isOwnerOrWriteAllowed={true}
+                />
+              </Card>
+            )}
 
             {/* Members */}
             <Card className="p-4 space-y-3">

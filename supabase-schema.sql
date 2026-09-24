@@ -97,3 +97,22 @@ CREATE TABLE IF NOT EXISTS analytics_events (
 -- Create indexes for analytics_events
 CREATE INDEX idx_analytics_events_name ON analytics_events(event_name);
 CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at DESC);
+
+-- Create care_logs table (Coordenação Familiar / Daily Care Board)
+CREATE TABLE IF NOT EXISTS care_logs (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  animal_id BIGINT NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  care_type VARCHAR(50) NOT NULL,
+  care_subtype VARCHAR(50),
+  title VARCHAR(150) NOT NULL,
+  notes TEXT,
+  care_date DATE NOT NULL,
+  completed_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Create indexes for care_logs
+CREATE INDEX idx_care_logs_animal_care_date ON care_logs(animal_id, care_date);
+CREATE INDEX idx_care_logs_user_id ON care_logs(user_id);
+

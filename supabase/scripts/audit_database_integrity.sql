@@ -96,21 +96,24 @@ WHERE n.nspname = 'public'
   AND t.relname IN ('animals', 'classification_events', 'care_logs', 'animal_personalities', 'family_animals')
 ORDER BY t.relname, a.attname;
 
--- 5. Auditoria de Utilização de Índices (pg_stat_user_indexes)
--- Identifica índices com idx_scan = 0 (redundantes ou não utilizados que penalizam escritas)
+-- 5. Auditoria de Utilização de Índices (pg_stat_user_indexes + pg_index)
+-- Distingue restrições estruturais (Primary Key, UNIQUE) de índices secundários
 SELECT
-  schemaname,
-  relname AS tablename,
-  indexrelname AS indexname,
-  idx_scan,
-  idx_tup_read,
-  idx_tup_fetch,
-  pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+  s.schemaname,
+  s.relname AS tablename,
+  s.indexrelname AS indexname,
+  s.idx_scan,
+  s.idx_tup_read,
+  s.idx_tup_fetch,
+  pg_size_pretty(pg_relation_size(s.indexrelid)) AS index_size,
   CASE
-    WHEN idx_scan = 0 THEN '⚠️ REDUNDANTE / NÃO UTILIZADO (idx_scan = 0)'
-    ELSE '✅ EM USO (idx_scan > 0)'
+    WHEN i.indisprimary THEN '🛡️ CHAVE PRIMÁRIA (Estrutural - Obrigatória)'
+    WHEN i.indisunique THEN '🔒 RESTRIÇÃO UNIQUE (Integridade - Obrigatória)'
+    WHEN s.idx_scan > 0 THEN '✅ EM USO (' || s.idx_scan || ' scans)'
+    ELSE 'ℹ️ RECÉM-CRIADO / NÃO UTILIZADO (idx_scan = 0)'
   END AS status_uso
-FROM pg_stat_user_indexes
-WHERE schemaname = 'public'
-  AND relname IN ('classification_events', 'animal_personalities', 'family_animals', 'animals', 'care_logs')
-ORDER BY relname, idx_scan ASC;
+FROM pg_stat_user_indexes s
+JOIN pg_index i ON i.indexrelid = s.indexrelid
+WHERE s.schemaname = 'public'
+  AND s.relname IN ('classification_events', 'animal_personalities', 'family_animals', 'animals', 'care_logs')
+ORDER BY s.relname, s.idx_scan ASC;

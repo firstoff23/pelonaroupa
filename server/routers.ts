@@ -14,6 +14,7 @@ import { insightsRouter } from "./routers/insights";
 import { pushRouter } from "./routers/push";
 import { settingsRouter } from "./routers/settings";
 import { trendsRouter } from "./routers/trends";
+import { personalityRouter } from "./routers/personality";
 import { vetRouter } from "./routers/vet";
 
 /**
@@ -37,6 +38,7 @@ export const appRouter = router({
   feedback: feedbackRouter,
   analytics: analyticsRouter,
   settings: settingsRouter,
+  personality: personalityRouter,
 });
 
 export type AppRouter = typeof appRouter;

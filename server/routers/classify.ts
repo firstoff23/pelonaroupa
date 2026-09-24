@@ -14,6 +14,7 @@ import {
   getAnalysisUsage,
   getAnimalBaseline,
   getAnimalById,
+  getSupabase,
   insertEvent,
   recalculateAnimalBehaviorBaseline,
   savePostureForEvent,
@@ -23,6 +24,7 @@ import {
   verifyAnimalOwner,
 } from "../db";
 import { effectiveUserId } from "../lib/authHelpers";
+import { inferAndSavePersonality } from "../services/personality";
 
 const STATES: EmotionalState[] = [
   "distress",
@@ -317,6 +319,11 @@ export const classifyRouter = router({
             err,
           );
         }
+
+        // Inspiração 5 – update personality profile (fire-and-forget; never blocks response)
+        inferAndSavePersonality(getSupabase(), animalId).catch((err) =>
+          console.warn("[Personality] Inference failed (non-critical):", err),
+        );
 
         if (result.state === "distress" || result.state === "alert") {
           const animalName = targetAnimal?.name || "O seu animal";

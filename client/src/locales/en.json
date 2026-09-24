@@ -549,5 +549,48 @@
         "desc": "Elevated body temperature, dry warm snout"
       }
     }
+  },
+  "companion": {
+    "title": "Emotional Companion",
+    "tapForDetails": "Tap to view 7-day summary",
+    "insufficientData": "Insufficient data",
+    "states": {
+      "calm": "Calm",
+      "curious": "Curious",
+      "attentive": "Attentive",
+      "alert": "Alert",
+      "hungry": "Hungry",
+      "worried": "Worried",
+      "sleeping": "Resting"
+    },
+    "descriptions": {
+      "calm": "{{name}} has been mostly calm and serene over the last 7 days.",
+      "curious": "{{name}} displayed elevated energy and curiosity this week.",
+      "attentive": "{{name}} remained focused and receptive to environmental stimuli.",
+      "alert": "{{name}} showed frequent signs of hypervigilance or sound reactions.",
+      "hungry": "{{name}} vocalized repeatedly for meals or food routines.",
+      "worried": "{{name}} expressed moments of discomfort or distress this week.",
+      "sleeping": "{{name}} does not have enough vocalizations yet to consolidate their state."
+    },
+    "ariaLabels": {
+      "calm": "Emotional companion: {{name}} is calm",
+      "curious": "Emotional companion: {{name}} is curious and energetic",
+      "attentive": "Emotional companion: {{name}} is attentive and watchful",
+      "alert": "Emotional companion: {{name}} is alert",
+      "hungry": "Emotional companion: {{name}} is hungry",
+      "worried": "Emotional companion: {{name}} is worried or uncomfortable",
+      "sleeping": "Emotional companion: {{name}} is resting due to lack of data"
+    },
+    "emptyState": {
+      "title": "Discover {{name}}'s mood",
+      "description": "Log at least 3 vocalizations to reveal the emotional companion.",
+      "cta": "Record vocalization"
+    },
+    "sheet": {
+      "distributionTitle": "Last 7 Days Distribution",
+      "totalEvents": "{{count}} records analyzed",
+      "viewHistory": "View complete history",
+      "recordNew": "Record new audio"
+    }
   }
 }

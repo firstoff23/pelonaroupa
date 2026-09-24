@@ -548,5 +548,48 @@
         "desc": "Temperatura corporal elevada, focinho quente e seco"
       }
     }
+  },
+  "companion": {
+    "title": "Companheiro Emocional",
+    "tapForDetails": "Toca para ver o resumo dos 7 dias",
+    "insufficientData": "Dados insuficientes",
+    "states": {
+      "calm": "Calmo",
+      "curious": "Curioso",
+      "attentive": "Vigilante",
+      "alert": "Alerta",
+      "hungry": "Com fome",
+      "worried": "Preocupado",
+      "sleeping": "A descansar"
+    },
+    "descriptions": {
+      "calm": "O {{name}} esteve maioritariamente calmo e sereno nos últimos 7 dias.",
+      "curious": "O {{name}} mostrou energia elevada e curiosidade esta semana.",
+      "attentive": "O {{name}} esteve focado e recetivo aos estímulos do ambiente.",
+      "alert": "O {{name}} apresentou sinais frequentes de hipervigilância ou reação a ruídos.",
+      "hungry": "O {{name}} vocalizou repetidamente por alimento ou rotina de refeição.",
+      "worried": "O {{name}} expressou episódios de desconforto ou angústia esta semana.",
+      "sleeping": "O {{name}} ainda não tem vocalizações suficientes para consolidar o estado."
+    },
+    "ariaLabels": {
+      "calm": "Companheiro emocional: {{name}} está calmo",
+      "curious": "Companheiro emocional: {{name}} está curioso e animado",
+      "attentive": "Companheiro emocional: {{name}} está vigilante e atento",
+      "alert": "Companheiro emocional: {{name}} está em alerta",
+      "hungry": "Companheiro emocional: {{name}} está com fome",
+      "worried": "Companheiro emocional: {{name}} está preocupado ou com desconforto",
+      "sleeping": "Companheiro emocional: {{name}} está a descansar por falta de dados"
+    },
+    "emptyState": {
+      "title": "Conhece o estado do {{name}}",
+      "description": "Regista pelo menos 3 vocalizações para revelar o companheiro emocional.",
+      "cta": "Gravar vocalização"
+    },
+    "sheet": {
+      "distributionTitle": "Distribuição dos últimos 7 dias",
+      "totalEvents": "{{count}} registos analisados",
+      "viewHistory": "Ver histórico completo",
+      "recordNew": "Fazer nova gravação"
+    }
   }
 }

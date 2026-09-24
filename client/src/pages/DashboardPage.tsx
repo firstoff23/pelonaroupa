@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { AlertBanner } from "@/components/AlertBanner";
 import { AppShellSkeleton } from "@/components/AppShellSkeleton";
+import { CompanionAvatar } from "@/components/companion/CompanionAvatar";
+import { CompanionSheet } from "@/components/companion/CompanionSheet";
+import { resolveCompanionState } from "@/components/companion/companionStates";
 import { DashboardChartsSection } from "@/components/dashboard/DashboardChartsSection";
 import { DashboardConsolidatedMood } from "@/components/dashboard/DashboardConsolidatedMood";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
@@ -64,6 +67,7 @@ export default function DashboardPage() {
 
   const [dashboardDays, setDashboardDays] = useState<7 | 30 | 90>(7);
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
+  const [isCompanionSheetOpen, setIsCompanionSheetOpen] = useState(false);
 
   // Queries
   const {
@@ -256,6 +260,19 @@ export default function DashboardPage() {
     language,
   ]);
 
+  const companionAnimal = useMemo(() => {
+    return (
+      displayAnimals.find((a) => a.id === dashboardAnimalId) || activeAnimal
+    );
+  }, [displayAnimals, dashboardAnimalId, activeAnimal]);
+
+  const companionResolution = useMemo(() => {
+    return resolveCompanionState(
+      dashboardStats?.stateDistribution,
+      dashboardStats?.totalCount,
+    );
+  }, [dashboardStats]);
+
   const dominantBelief = useMemo(() => {
     if (!displayBeliefState) return null;
     const { relaxed, excitement, distress, hunger, alert, attention } =
@@ -426,6 +443,84 @@ export default function DashboardPage() {
               mood={mood}
               latestEventState={latestEvent?.state}
               language={language}
+            />
+          </motion.div>
+        )}
+
+        {/* Emotional Companion Card (Inspiração 3) */}
+        {!animalsLoading && !animalsError && companionAnimal && (
+          <motion.div variants={itemVariants}>
+            <button
+              type="button"
+              onClick={() => setIsCompanionSheetOpen(true)}
+              className="w-full text-left p-3.5 sm:p-4 rounded-3xl bg-card border border-border/70 hover:border-primary/40 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between gap-3 group active-scale cursor-pointer"
+              aria-label={
+                t("companion.tapForDetails" as any) ||
+                (language === "pt"
+                  ? "Toca para ver o resumo dos 7 dias"
+                  : "Tap to view 7-day summary")
+              }
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="shrink-0 p-1 rounded-2xl bg-secondary/20 group-hover:scale-105 transition-transform duration-200">
+                  <CompanionAvatar
+                    stateId={companionResolution.stateId}
+                    species={companionAnimal.species}
+                    size={64}
+                    animalName={companionAnimal.name}
+                  />
+                </div>
+
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-sm sm:text-base text-foreground truncate">
+                      {companionAnimal.name}
+                    </span>
+                    <span className="text-muted-foreground text-xs">—</span>
+                    <span
+                      className={cn(
+                        "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                        companionResolution.config.badgeClass,
+                      )}
+                    >
+                      {t(companionResolution.config.labelKey as any) ||
+                        (language === "pt"
+                          ? companionResolution.config.fallbackLabelPt
+                          : companionResolution.config.fallbackLabelEn)}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground truncate">
+                    {companionResolution.stateId === "sleeping"
+                      ? t("companion.insufficientData" as any) ||
+                        (language === "pt"
+                          ? "Poucos registos nos últimos 7 dias"
+                          : "Few records in the last 7 days")
+                      : `${companionResolution.percentage}% ${
+                          language === "pt"
+                            ? "dos últimos 7 dias"
+                            : "over the last 7 days"
+                        }`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all text-xs flex items-center gap-1 font-medium pl-1">
+                <span className="hidden sm:inline text-[11px]">
+                  {t("companion.tapForDetails" as any) ||
+                    (language === "pt" ? "Detalhes" : "Details")}
+                </span>
+                <span className="text-base leading-none">›</span>
+              </div>
+            </button>
+
+            <CompanionSheet
+              open={isCompanionSheetOpen}
+              onOpenChange={setIsCompanionSheetOpen}
+              resolution={companionResolution}
+              animal={companionAnimal}
+              distribution={dashboardStats?.stateDistribution}
+              narrative={dashboardNarrative}
             />
           </motion.div>
         )}

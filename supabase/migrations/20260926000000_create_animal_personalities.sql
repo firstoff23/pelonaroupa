@@ -55,55 +55,142 @@ CREATE TRIGGER trg_animal_personalities_updated_at
 CREATE INDEX IF NOT EXISTS idx_animal_personalities_animal_id
   ON public.animal_personalities (animal_id);
 
--- ─── Row Level Security ───────────────────────────────────────────────────
+-- ─── Permissions & Row Level Security ─────────────────────────────────────────
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.animal_personalities TO authenticated, service_role;
+
 ALTER TABLE public.animal_personalities ENABLE ROW LEVEL SECURITY;
 
--- Policy: tutor (direct owner) can read/write their own animals' personalities
-CREATE POLICY "owner_rw_personality" ON public.animal_personalities
-  AS PERMISSIVE FOR ALL
+-- Helper schema & functions (idempotent and resilient)
+CREATE SCHEMA IF NOT EXISTS private;
+
+CREATE OR REPLACE FUNCTION private.current_app_user_id()
+RETURNS BIGINT
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT id
+  FROM public.users
+  WHERE email = (auth.jwt() ->> 'email')
+  LIMIT 1
+$$;
+
+CREATE OR REPLACE FUNCTION private.can_access_animal(check_animal_id BIGINT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_user_id BIGINT;
+  v_has_access BOOLEAN := FALSE;
+BEGIN
+  v_user_id := private.current_app_user_id();
+  IF v_user_id IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  -- 1. Direct owner
+  SELECT EXISTS (
+    SELECT 1 FROM public.animals a
+    WHERE a.id = check_animal_id AND a.user_id = v_user_id
+  ) INTO v_has_access;
+
+  IF v_has_access THEN
+    RETURN TRUE;
+  END IF;
+
+  -- 2. Family member (if family_animals exists)
+  IF to_regclass('public.family_animals') IS NOT NULL AND to_regclass('public.family_members') IS NOT NULL THEN
+    EXECUTE 'SELECT EXISTS (
+      SELECT 1 FROM public.family_animals fa
+      JOIN public.family_members fm ON fm.family_id = fa.family_id
+      WHERE fa.animal_id = $1 AND fm.user_id = $2
+    )' INTO v_has_access USING check_animal_id, v_user_id;
+
+    IF v_has_access THEN
+      RETURN TRUE;
+    END IF;
+  END IF;
+
+  -- 3. Vet access (if vet_pet_access or vet_shares exists)
+  IF to_regclass('public.vet_pet_access') IS NOT NULL THEN
+    EXECUTE 'SELECT EXISTS (
+      SELECT 1 FROM public.vet_pet_access vpa
+      WHERE vpa.animal_id = $1
+        AND vpa.status = ''active''
+        AND (vpa.vet_user_id = $2 OR LOWER(vpa.vet_email) = LOWER(COALESCE(auth.jwt() ->> ''email'', '''')))
+    )' INTO v_has_access USING check_animal_id, v_user_id;
+
+    IF v_has_access THEN
+      RETURN TRUE;
+    END IF;
+  ELSIF to_regclass('public.vet_shares') IS NOT NULL THEN
+    EXECUTE 'SELECT EXISTS (
+      SELECT 1 FROM public.vet_shares vs
+      WHERE vs.animal_id = $1
+        AND (vs.status IS NULL OR vs.status = ''active'')
+        AND (vs.vet_user_id = $2 OR LOWER(vs.vet_email) = LOWER(COALESCE(auth.jwt() ->> ''email'', '''')))
+    )' INTO v_has_access USING check_animal_id, v_user_id;
+
+    IF v_has_access THEN
+      RETURN TRUE;
+    END IF;
+  END IF;
+
+  RETURN FALSE;
+END;
+$$;
+
+GRANT USAGE ON SCHEMA private TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION private.current_app_user_id() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION private.can_access_animal(BIGINT) TO authenticated, service_role;
+
+-- Policy: read personality (tutor, family, vet)
+DROP POLICY IF EXISTS "access_animal_personalities_select" ON public.animal_personalities;
+DROP POLICY IF EXISTS "owner_rw_personality" ON public.animal_personalities;
+DROP POLICY IF EXISTS "family_read_personality" ON public.animal_personalities;
+DROP POLICY IF EXISTS "vet_read_personality" ON public.animal_personalities;
+
+CREATE POLICY "access_animal_personalities_select"
+  ON public.animal_personalities
+  FOR SELECT
   TO authenticated
   USING (
-    animal_id IN (
-      SELECT id FROM public.animals
-      WHERE user_id = (
-        SELECT id FROM public.users WHERE open_id = auth.uid()::text
-      )
-    )
+    private.can_access_animal(animal_personalities.animal_id)
+  );
+
+-- Policy: manage personality (owner / family)
+DROP POLICY IF EXISTS "access_animal_personalities_insert" ON public.animal_personalities;
+CREATE POLICY "access_animal_personalities_insert"
+  ON public.animal_personalities
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    private.can_access_animal(animal_personalities.animal_id)
+  );
+
+DROP POLICY IF EXISTS "access_animal_personalities_update" ON public.animal_personalities;
+CREATE POLICY "access_animal_personalities_update"
+  ON public.animal_personalities
+  FOR UPDATE
+  TO authenticated
+  USING (
+    private.can_access_animal(animal_personalities.animal_id)
   )
   WITH CHECK (
-    animal_id IN (
-      SELECT id FROM public.animals
-      WHERE user_id = (
-        SELECT id FROM public.users WHERE open_id = auth.uid()::text
-      )
-    )
+    private.can_access_animal(animal_personalities.animal_id)
   );
 
--- Policy: family members (from animal_shares) can read personality
-CREATE POLICY "family_read_personality" ON public.animal_personalities
-  AS PERMISSIVE FOR SELECT
+DROP POLICY IF EXISTS "access_animal_personalities_delete" ON public.animal_personalities;
+CREATE POLICY "access_animal_personalities_delete"
+  ON public.animal_personalities
+  FOR DELETE
   TO authenticated
   USING (
-    animal_id IN (
-      SELECT animal_id FROM public.animal_shares
-      WHERE shared_with_user_id = (
-        SELECT id FROM public.users WHERE open_id = auth.uid()::text
-      )
-      AND status = 'accepted'
-    )
-  );
-
--- Policy: vets can read personality for animals they have access to
-CREATE POLICY "vet_read_personality" ON public.animal_personalities
-  AS PERMISSIVE FOR SELECT
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.vet_animal_access vaa
-      JOIN public.users u ON u.id = vaa.vet_user_id
-      WHERE vaa.animal_id = animal_personalities.animal_id
-        AND u.open_id = auth.uid()::text
-    )
+    private.can_access_animal(animal_personalities.animal_id)
   );
 
 COMMENT ON TABLE  public.animal_personalities                    IS 'Behavioral personality profile per animal (Inspiração 5). One row per animal, upserted after each inference run.';

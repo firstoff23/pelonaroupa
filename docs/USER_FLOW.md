@@ -100,13 +100,25 @@ O sistema de rotas é gerido pelo `wouter` em [`client/src/App.tsx`](file:///d:/
 | `/calendario` | `HealthCalendarPage` | **Protegida** | Sim | Calendário de intervenções: vacinas, desparasitações e consultas. |
 | `/health` | `HealthPage` | **Protegida** | Sim | Boletim de saúde detalhado e registo de peso histórico. |
 | `/definicoes` | `SettingsPage` | **Protegida** | Não | Configurações gerais: Idioma (PT/EN), Tema, Notificações e Segurança. |
-| `/veterinario` | `VetPage` | **Protegida** | Sim | Vista do tutor para partilha com a clínica e exportação de PDF. |
-| `/vet` | `VetDashboardPage` | **Protegida** | Não | Painel dedicado a médicos veterinários para gestão de múltiplos pacientes. |
+| `/veterinario` | `VetPage` | **Protegida** | Sim | **[Visão do Tutor]** Exportação de Dossiê Clínico em PDF e partilha do animal com o médico veterinário via email. |
+| `/vet` | `VetDashboardPage` | **Protegida** | Não | **[Portal Profissional do Veterinário / Clínica]** Painel exclusivo para médicos veterinários autenticados gerirem múltiplos pacientes e alertas clínicos. |
 | `/vet/animal/:id` | `VetPetDetailPage` | **Protegida** | Sim | Ficha clínica avançada com notas confidenciais veterinárias. |
-| `/vigilancia` | `SurveillancePage` | **Protegida** | Sim | Monitorização contínua em segundo plano com microfone aberto. |
-| `/monitor` | `MonitorPage` | **Protegida** | Sim | Monitor áudio em tempo real de ruídos ambientais. |
+| `/vigilancia` | `SurveillancePage` | **Protegida** | Sim | **[Modo Vigilância Nativo Mobile - Capacitor]** Exclusivo para Android/iOS com `VoiceRecorder`, `ForegroundService` e ciclos de economia de bateria com ecrã desligado. |
+| `/monitor` | `MonitorPage` | **Protegida** | Sim | **[Monitorização Áudio Web & Mobile]** Escuta contínua no navegador/desktop via WebAudio / MediaRecorder com feed visual de eventos. |
 | `/comparison` | `ComparisonPage` | **Protegida** | Sim | Comparação analítica entre dois animais da mesma família. |
 | `/feedback-audit`| `FeedbackAuditPage` | **Protegida** | Não | Auditoria técnica aos palpites corrigidos pelo tutor para treino de ML. |
+
+### 2.1 Distinção entre Rotas com Nomes e Propósitos Semelhantes
+
+Para evitar qualquer ambiguidade arquitetural, o sistema separa explicitamente os perfis de utilizador e as plataformas de execução:
+
+1. **`/veterinario` (Visão do Tutor) vs `/vet` (Portal do Médico Veterinário):**
+   * **`/veterinario` (`VetPage.tsx`):** Destina-se ao **Tutor / Dono**. Apresenta um sumário executivo de saúde do pet, permite compilar e descarregar um relatório em PDF (`jsPDF`) e partilhar a ficha do animal com um médico veterinário inserindo o email da clínica.
+   * **`/vet` (`VetDashboardPage.tsx`):** Destina-se exclusivamente ao **Profissional de Saúde Animal** (papéis `vet`, `veterinarian`, `clinic_admin`, `admin`). Funciona como um painel clínico multi-paciente, onde o médico veterinário pesquisa entre todos os animais que lhe foram partilhados por diferentes clientes, filtra por estado de alerta (`requires_attention`) e acede à ficha individual em `/vet/animal/:id`.
+
+2. **`/monitor` (Web/Desktop Universal) vs `/vigilancia` (Mobile Nativo Capacitor):**
+   * **`/monitor` (`MonitorPage.tsx`):** É a solução universal baseada em normas web (`MediaRecorder API` e WebAudio). Permite a qualquer computador ou navegador móvel manter a escuta aberta enquanto a aba estiver ativa, registando chunks contínuos e exibindo um registo gráfico em tempo real.
+   * **`/vigilancia` (`SurveillancePage.tsx`):** É uma funcionalidade nativa desenhada estritamente para dispositivos móveis (`Capacitor.isNativePlatform()`). Recorre a plugins de baixo nível (`capacitor-voice-recorder`, `keep-awake` e `@capawesome-team/capacitor-android-foreground-service`). Opera com o ecrã do telemóvel desligado e em segundo plano através de um serviço de primeiro plano no Android, utilizando ciclos intercalados (5 segundos de gravação / 10 segundos de descanso) para minimizar o consumo de bateria e aquecimento térmico.
 
 ---
 
@@ -314,6 +326,9 @@ mindmap
 4. **Fuso Horário na Coordenação Familiar:**
    * *Problema:* Co-tutores em fusos diferentes poderem marcar tarefas no "dia errado".
    * *Mitigação Implementada:* A coluna `care_date` na tabela `care_logs` é normalizada de acordo com o fuso horário da família configurado no perfil.
+5. **Conectividade e Sincronização Offline:**
+   * *Problema:* O utilizador encontra-se no parque ou numa zona rural sem cobertura de rede móvel e quer registar uma vocalização, sintomas ou consultar a lista de animais.
+   * *Implementação Real no Código:* O sistema não se limita a `localStorage`. Utiliza o motor **IndexedDB** do browser gerido pela biblioteca `idb-keyval` (base de dados `animalmind-offline-cache`), conforme implementado em [`client/src/lib/offlineCache.ts`](file:///d:/AnimalMind/client/src/lib/offlineCache.ts). Mantém em cache local os animais ativos (`animals-list`), histórico recente de eventos e dicionário de alimentos. As ações e ficheiros áudio gravados sem rede são guardados numa fila transacional em IndexedDB ([`client/src/lib/offlineQueue.ts`](file:///d:/AnimalMind/client/src/lib/offlineQueue.ts)), sendo automaticamente sincronizados pelo componente `OfflineActionsSyncer` assim que a ligação à internet é restabelecida.
 
 ---
 

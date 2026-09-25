@@ -83,6 +83,20 @@ Please report security issues responsibly via one of:
   - Employs an in-memory TTL prefix cache and a 3-second fail-open timeout for resilient UX.
 - **Audit Note:** The Supabase Database Advisor only checks the cloud dashboard setting flag, so this finding may remain visible in the dashboard until upgraded to Pro+. The compensating control fully satisfies the security requirement.
 
+### ⚠️ SMS MFA — Intentionally Omitted in Favor of Cryptographic TOTP
+- **Context:** SMS-based Multi-Factor Authentication is unavailable on the Supabase Free plan and requires dedicated paid telephony providers (e.g. Twilio, MessageBird).
+- **Security Assessment (NIST SP 800-63B):** SMS-delivered OTPs are considered deprecated and unsafe for sensitive platforms due to inherent cellular network risks:
+  - **SIM Swapping / Port-Out fraud:** Attackers impersonate victims to convince mobile carriers to transfer numbers.
+  - **SS7 Signaling Vulnerabilities:** Telecom routing vulnerabilities allow intercepting plaintext SMS worldwide.
+  - **Phishing & Interception:** Susceptible to real-time SMS capture and lock-screen preview snooping.
+- **Implemented Solution (TOTP RFC 6238):**
+  - Fully implemented with native Node.js cryptography (`server/lib/totp.ts`, HMAC-SHA1 with ±90s drift window).
+  - Compatible with Google Authenticator, 1Password, Authy, Apple Passwords, Bitwarden.
+  - Immunity to SIM swapping and SS7 interception.
+  - Custo zero de infraestrutura e funcionamento 100% offline (modo avião).
+  - Gestão e ativação intuitiva com código QR em `/definicoes`.
+- **Future Action:** SMS may only be considered as an optional accessibility fallback for users without smartphones if upgraded to Supabase Pro+, but TOTP remains the primary recommended security factor.
+
 ---
 
 ## Scope

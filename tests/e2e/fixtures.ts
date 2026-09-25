@@ -330,7 +330,7 @@ function procedureData(procedure: string, input: any) {
   }
 }
 
-async function mockSupabase(page: Page) {
+export async function mockSupabase(page: Page) {
   const isSupabaseUrl = (url: URL) =>
     url.hostname.includes("supabase.co") ||
     url.hostname.includes("supabase.in") ||
@@ -431,7 +431,7 @@ async function mockTrpc(page: Page) {
   });
 }
 
-async function installBrowserMocks(page: Page) {
+export async function installBrowserMocks(page: Page) {
   await page.addInitScript(() => {
     (window as any).__E2E__ = true;
     (window as any).playwright = true;

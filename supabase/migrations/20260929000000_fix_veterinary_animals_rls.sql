@@ -19,6 +19,8 @@ DROP POLICY IF EXISTS "allow_vets_read_animals" ON public.animals;
 DROP POLICY IF EXISTS "vets_select_animals" ON public.animals;
 DROP POLICY IF EXISTS "veterinary_read_animals" ON public.animals;
 DROP POLICY IF EXISTS "vets_read_animals" ON public.animals;
+DROP POLICY IF EXISTS "staff_read_all_animals" ON public.animals;
+DROP POLICY IF EXISTS "select_animals" ON public.animals;
 DROP POLICY IF EXISTS "veterinary_read_shared_animals_strict" ON public.animals;
 
 -- ─── 2. Criar Policy Estrita para Veterinários em public.animals ───────────────

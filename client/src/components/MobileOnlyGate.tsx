@@ -1,4 +1,4 @@
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, X } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 import { Logo } from "@/components/ui/Logo";
@@ -66,7 +66,7 @@ function DesktopMobileNotice({ onContinue }: { onContinue: () => void }) {
             type="button"
             onClick={onContinue}
             data-testid="continue-on-desktop-button"
-            className="w-full h-10 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium text-xs transition-colors flex items-center justify-center gap-2"
+            className="w-full h-10 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <Monitor className="size-4" />
             Continuar no browser (Modo Desktop)
@@ -92,17 +92,64 @@ export function MobileOnlyGate({ children }: { children: React.ReactNode }) {
     }
     return false;
   });
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const handleContinue = () => {
     try {
       localStorage.setItem(DESKTOP_STORAGE_KEY, "true");
     } catch {}
     setBypass(true);
+    setBannerDismissed(false);
+  };
+
+  const handleResetBypass = () => {
+    try {
+      localStorage.removeItem(DESKTOP_STORAGE_KEY);
+    } catch {}
+    setBypass(false);
   };
 
   if (isMobile === false && !bypass) {
     return <DesktopMobileNotice onContinue={handleContinue} />;
   }
 
-  return <>{children}</>;
+  const showBanner = isMobile === false && bypass && !bannerDismissed;
+
+  return (
+    <>
+      {showBanner && (
+        <aside
+          role="status"
+          aria-label="Aviso de Modo Desktop"
+          data-testid="desktop-reset-banner"
+          className="sticky top-0 z-[100] h-10 bg-primary/10 border-b border-primary/20 backdrop-blur-md px-4 flex items-center justify-between text-xs text-foreground select-none"
+        >
+          <div className="flex items-center gap-2">
+            <Monitor className="size-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span>
+              Modo Desktop ativo ·{" "}
+              <button
+                type="button"
+                onClick={handleResetBypass}
+                data-testid="reset-desktop-bypass"
+                className="font-medium text-primary hover:underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                Voltar ao ecrã mobile
+              </button>
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setBannerDismissed(true)}
+            data-testid="dismiss-desktop-banner"
+            aria-label="Dispensar aviso na sessão"
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors cursor-pointer"
+          >
+            <X className="size-3.5" aria-hidden="true" />
+          </button>
+        </aside>
+      )}
+      {children}
+    </>
+  );
 }

@@ -853,11 +853,16 @@ export default function AnimalDetailPage({
                     await overridePersonalityMutation.mutateAsync({
                       animalId,
                       dimensions: {
-                        vocalExpressiveness: dims.vocalExpressiveness,
-                        stressResilience: dims.stressResilience,
-                        energyLevel: dims.energyLevel,
-                        sociability: dims.sociability,
-                        independence: dims.independence,
+                        vocalExpressiveness:
+                          dims.vocalExpressiveness ?? personality.vocalExpressiveness ?? 50,
+                        stressResilience:
+                          dims.stressResilience ?? personality.stressResilience ?? 50,
+                        energyLevel:
+                          dims.energyLevel ?? personality.energyLevel ?? 50,
+                        sociability:
+                          dims.sociability ?? personality.sociability ?? 50,
+                        independence:
+                          dims.independence ?? personality.independence ?? 50,
                       },
                     });
                   }}

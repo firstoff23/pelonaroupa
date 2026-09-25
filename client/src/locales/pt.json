@@ -628,6 +628,7 @@
     "routine": {
       "breakfast": "Pequeno-almoço",
       "dinner": "Jantar",
+      "walk": "Passeio / Exercício Diário",
       "daily_walk": "Passeio diário",
       "medication": "Medicação do dia",
       "hygiene": "Escovagem / Higiene"

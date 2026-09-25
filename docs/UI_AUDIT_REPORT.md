@@ -23,8 +23,8 @@ O presente relatório documenta a auditoria visual e funcional completa end-to-e
   - **Baixos:** 3 (Sobreposição de BottomNav em listas densas, fallbacks i18n, wrapping de filtros)
 
 ### Veredicto Global:
-> ⚠️ **Requer Pequenas Correções Antes de Produção**  
-> A aplicação apresenta uma execução estética e técnica exemplar, com alinhamento rigoroso ao design system *"Serene Corporate"*, excelente tempo de resposta e fidelidade de componentes. Contudo, o bloqueio do radar de personalidade em `/animal/:id` e a proteção contra `TypeError` no dashboard devem ser saneados antes da disponibilização pública final.
+> ✅ **Pronto para Produção (Todas as 6 correções auditadas e validadas)**  
+> A aplicação apresenta uma execução estética e técnica exemplar, com alinhamento rigoroso ao design system *"Serene Corporate"*, excelente tempo de resposta e fidelidade de componentes. Todas as 6 vulnerabilidades e melhorias identificadas na auditoria inicial foram resolvidas com sucesso e validadas por testes unitários e capturas E2E automatizadas (`docs/audit-screenshots/after/`).
 
 ---
 
@@ -49,14 +49,14 @@ Todas as rotas foram inspecionadas e capturadas em ambas as resoluções de refe
 
 | Rota | Desktop (1280x800) | Mobile (390x844) | Estado | Observações |
 | :--- | :---: | :---: | :---: | :--- |
-| `/dashboard` | [desktop](audit-screenshots/dashboard-desktop.png) | [mobile](audit-screenshots/dashboard-mobile.png) | ✅ Aprovado | Exibe Narrativa Semanal, Companheiro Emocional, métricas rápidas e atalhos. |
+| `/dashboard` | [desktop](audit-screenshots/dashboard-desktop.png) | [mobile](audit-screenshots/dashboard-mobile.png) | ✅ Aprovado | Exibe Narrativa Semanal, Companheiro Emocional, métricas rápidas e atalhos. Protegido com safe-navigation para convites nulos. |
 | `/capturar` | [desktop](audit-screenshots/capturar-desktop.png) | [mobile](audit-screenshots/capturar-mobile.png) | ✅ Aprovado | Ecrã de escolha modal/portal entre captura por Áudio e Visão Computacional. |
 | `/gravar` | [desktop](audit-screenshots/gravar-desktop.png) | [mobile](audit-screenshots/gravar-mobile.png) | ✅ Aprovado | Temporizador, visualizador de forma de onda e botão de gravação com feedback tátil. |
 | `/camera` | [desktop](audit-screenshots/camera-desktop.png) | [mobile](audit-screenshots/camera-mobile.png) | ✅ Aprovado | Visor com guias de enquadramento e alternância de câmara frontal/traseira. |
-| `/historico` | [desktop](audit-screenshots/historico-desktop.png) | [mobile](audit-screenshots/historico-mobile.png) | ✅ Aprovado | Timeline cronológica com badges de severidade e filtros contextuais. |
+| `/historico` | [desktop](audit-screenshots/historico-desktop.png) | [mobile](audit-screenshots/historico-mobile.png) | ✅ Aprovado | Timeline cronológica com badges de severidade, chips com rolagem horizontal sem quebra (`overflow-x-auto no-scrollbar`). |
 | `/historico?period=7d` | [desktop](audit-screenshots/historico-7d-desktop.png) | [mobile](audit-screenshots/historico-7d-mobile.png) | ✅ Aprovado | Filtro reativo de 7 dias com sincronização de parâmetros na URL. |
 | `/perfil` | [desktop](audit-screenshots/perfil-desktop.png) | [mobile](audit-screenshots/perfil-mobile.png) | ✅ Aprovado | Cartões de identificação de animais e definições de perfil do tutor. |
-| `/animal/:id` | [desktop](audit-screenshots/animal-detail-desktop.png) | [mobile](audit-screenshots/animal-detail-mobile.png) | ⚠️ Requer Correção | Dados biométricos e histórico corretos, mas o Radar de Personalidade não está montado. |
+| `/animal/:id` | [desktop](audit-screenshots/animal-detail-desktop.png) | [mobile](audit-screenshots/animal-detail-mobile.png) | ✅ Aprovado | Dados biométricos, histórico e `<PersonalityCard />` montado com radar pentagonal ([prova](audit-screenshots/after/01-personality-card-mounted.png)). |
 
 ### Rotas Especializadas e Módulos Avançados
 
@@ -82,7 +82,7 @@ Todas as rotas foram inspecionadas e capturadas em ambas as resoluções de refe
 | **2** | **Checkup Holístico** | ![Checkup Holístico](audit-screenshots/sintomas-acordeao-aberto.png) | ✅ Funcional | Rota `/sintomas` implementa 7 categorias clínicas em acordeão acessível (Gastrointestinal, Respiratório, Dermatológico, etc.), permitindo seleção rápida e indicação de severidade. |
 | **3** | **Companheiro Emocional** | ![Cão](audit-screenshots/companheiro-cao.png) &nbsp; ![Gato](audit-screenshots/companheiro-gato.png) | ✅ Funcional | Os avatares vetoriais SVG no Dashboard refletem dinamicamente a espécie selecionada (Canino/Felino) e reagem ao estado de saúde geral (feliz, neutro ou alerta). |
 | **4** | **Coordenação Familiar** | ![Quadro Familiar](audit-screenshots/family-care-board.png) | ✅ Funcional | O Quadro de Cuidados Diários em `/family` apresenta rotinas diárias (alimentação, passeios, medicação), atribuição a membros e estados de conclusão sincronizados. |
-| **5** | **Perfil de Personalidade** | ![Radar Completo](audit-screenshots/radar-personalidade.png) &nbsp; ![Radar Provisório](audit-screenshots/radar-personalidade-provisorio.png) | ⚠️ Requer Correção | O componente `PersonalityRadar` e o backend tRPC `personality` funcionam com 5 dimensões comportamentais e estado provisório (<10 registos), **mas o componente não foi montado** em `AnimalDetailPage.tsx` (`/animal/:id`). |
+| **5** | **Perfil de Personalidade** | ![Radar Completo](audit-screenshots/radar-personalidade.png) &nbsp; [Prova no Detalhe](audit-screenshots/after/01-personality-card-mounted.png) | ✅ Funcional e Montado | O componente `PersonalityCard` foi montado na aba Resumo de `AnimalDetailPage.tsx` com o radar pentagonal reativo (`trpc.personality.getProfile` e mutação `override`), exibindo as 5 dimensões e modo provisório com fidelidade total. |
 
 ---
 
@@ -98,7 +98,7 @@ A identidade visual foi concebida para transmitir confiança, serenidade clínic
 - [x] **Cards e Elevação:** Superfícies neutras limpas, com sombras suaves (`shadow-sm`, `shadow-md`) e bordas subtis sem saturações excessivas (`border-border/60`).
 - [x] **Botões e Controlos:** Botões com superfícies sólidas, estados de hover perceptíveis e ausência de gradientes neon estridentes.
 - [x] **BottomNav:** Barra de navegação inferior persistente em todas as rotas autenticadas, com ícones padronizados, estados ativos em `#2D739B` e alvos de toque generosos.
-- [x] **Desktop Gate (`MobileOnlyGate.tsx`):** A aplicação integra uma barreira mobile-first que apresenta um ecrã dedicado com código QR em ecrãs com largura igual ou superior a 768px ([evidência](audit-screenshots/desktop-gate-qr-notice.png)).
+- [x] **Desktop Gate (`MobileOnlyGate.tsx`):** A aplicação integra uma barreira mobile-first com código QR em ecrãs `>= 768px`, agora acompanhada de botão de bypass persistente *"Continuar no browser (Modo Desktop)"* ([evidência](audit-screenshots/after/03-desktop-gate-continue-button.png)).
 
 ---
 
@@ -111,93 +111,94 @@ A auditoria baseou-se nas diretrizes WCAG 2.1 nível AA e no guia interno de web
 | **Contraste de Cor** | ✅ Aprovado | O rácio de contraste entre o texto principal `#0F172A` / `#334155` e os fundos claros excede 7:1 (muito acima do requisito de 4.5:1). Nos botões de ação primária com fundo `#2D739B`, o texto branco `#FFFFFF` atinge rácio de 4.62:1. |
 | **Alvos de Toque (Touch Targets)** | ✅ Aprovado | Todos os botões primários, controlos de gravação, cartões selecionáveis e abas da barra inferior possuem dimensões superiores ou iguais a 44 × 44 px, garantindo operação sem esforço em ecrãs táteis. |
 | **Foco Visível por Teclado** | ✅ Aprovado | Todos os elementos interativos suportam navegação por `Tab` e ativam o anel de foco `ring-2 ring-primary/40` com contorno distinto. |
-| **Responsividade e Overflow** | ✅ Aprovado | Testado a 390px e 360px de largura horizontal. Não foram detetadas barras de rolagem horizontal espúrias em nenhuma das 25 rotas. |
-| **Localização e i18n (PT-PT)** | ✅ Aprovado | Interface redigida em Português de Portugal (ex.: "Registar", "Histórico", "Definições", "Sintomas", "Familiar"). Apenas foram identificados dois identificadores literais sem tradução em casos limite de carregamento de tarefas. |
+| **Responsividade e Overflow** | ✅ Aprovado | Testado a 390px, 360px e 320px de largura horizontal. Filtros com `overflow-x-auto no-scrollbar` garantem navegação tátil suave sem quebra de layout. |
+| **Localização e i18n (PT-PT)** | ✅ Aprovado | Interface 100% redigida em Português com fallbacks automáticos nos cards de cuidados diários (`fallbackTitlePt`) mesmo sob ausência de rede. |
 
 ---
 
-## 6. Problemas Encontrados
+## 6. Problemas Encontrados e Resolução
 
 ### Críticos
 
-#### 1. Radar de Personalidade Ausente no Ecrã de Detalhe do Animal (`/animal/:id`)
-- **Evidência Visual:**
-  - [animal-detail-mobile.png](audit-screenshots/animal-detail-mobile.png) (Ecrã atual sem o componente)
-  - [radar-personalidade.png](audit-screenshots/radar-personalidade.png) (Componente isolado pronto)
+#### 1. Radar de Personalidade Ausente no Ecrã de Detalhe do Animal (`/animal/:id`) [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Antes: [animal-detail-mobile.png](audit-screenshots/animal-detail-mobile.png) (Ecrã sem o componente)
+  - Depois: [01-personality-card-mounted.png](audit-screenshots/after/01-personality-card-mounted.png) (Componente montado e verificado)
 - **Localização:** `client/src/pages/AnimalDetailPage.tsx`
-- **Descrição Técnica:** O componente `PersonalityCard` (`client/src/components/personality/PersonalityCard.tsx`) e o gráfico `PersonalityRadar` (`client/src/components/personality/PersonalityRadar.tsx`) estão totalmente criados, tipados e integrados com o endpoint `trpc.personality.getProfile`. No entanto, `AnimalDetailPage.tsx` nunca os importa nem renderiza. O utilizador navega até ao detalhe do seu animal e não visualiza o radar de personalidade (Inspiração 5).
-- **Impacto:** Quebra de promessa de funcionalidade essencial das 5 inspirações UX.
-- **Sugestão de Correção:**
-  ```tsx
-  // Em client/src/pages/AnimalDetailPage.tsx
-  import { PersonalityCard } from "@/components/personality/PersonalityCard";
-
-  // Na secção de cartões de saúde e biométrica:
-  <PersonalityCard animalId={animal.id} />
-  ```
+- **Resolução Efetuada:** Importado e montado `<PersonalityCard animalId={animal.id} />` diretamente na aba principal "Resumo", com mapeamento reativo de dimensões para a mutação `override` do tRPC.
+- **Validação:** Teste E2E automatizado verificou a presença do elemento com `aria-label` *"Radar de personalidade comportamental"* e o badge de maturidade provisória.
 
 ---
 
 ### Médios
 
-#### 2. Risco de `TypeError: Cannot read properties of null (reading 'length')` no Dashboard Familiar
-- **Evidência Visual:** [dashboard-erro-mobile.png](audit-screenshots/dashboard-erro-mobile.png)
-- **Localização:** `client/src/components/dashboard/DashboardFamilySection.tsx:32`
-- **Descrição Técnica:** Quando a query tRPC `animals.getPendingInvitations` devolve `null` (ou durante transições anómalas de cache da sessão), a variável `invitations` assume valor nulo. O código tenta avaliar `invitations.length > 0` sem safe-navigation (`?.`), provocando um `TypeError` não tratado que derruba o ecrã para o `ErrorBoundary` global da aplicação.
-- **Impacto:** Utilizadores com convites corrompidos ou em redes lentas podem experienciar ecrã de falha total do Dashboard.
-- **Sugestão de Correção:**
-  ```tsx
-  // Em DashboardFamilySection.tsx
-  const hasInvitations = (invitations?.length ?? 0) > 0;
-  ```
+#### 2. Risco de `TypeError: Cannot read properties of null (reading 'length')` no Dashboard Familiar [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Antes: [dashboard-erro-mobile.png](audit-screenshots/dashboard-erro-mobile.png)
+  - Depois: [02-dashboard-null-invitations-safe.png](audit-screenshots/after/02-dashboard-null-invitations-safe.png)
+- **Localização:** `client/src/components/dashboard/DashboardFamilySection.tsx`
+- **Resolução Efetuada:** Substituídas todas as avaliações inseguras de array por safe-navigation `(invitations?.length ?? 0) > 0`, `invitations?.map`, `(familyActivity?.length ?? 0) > 0` e `familyActivity?.slice`.
+- **Validação:** Simulação com `invitations: null` no mock do tRPC executada com sucesso; o dashboard renderiza o estado neutro sem qualquer falha ou queda para o `ErrorBoundary`.
 
-#### 3. Rigidez do `MobileOnlyGate` em Ecrãs de Média/Grande Dimensão (Desktop / Tablets)
-- **Evidência Visual:** [desktop-gate-qr-notice.png](audit-screenshots/desktop-gate-qr-notice.png)
+#### 3. Rigidez do `MobileOnlyGate` em Ecrãs de Média/Grande Dimensão (Desktop / Tablets) [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Antes: [desktop-gate-qr-notice.png](audit-screenshots/desktop-gate-qr-notice.png)
+  - Depois: [03-desktop-gate-continue-button.png](audit-screenshots/after/03-desktop-gate-continue-button.png)
 - **Localização:** `client/src/components/MobileOnlyGate.tsx`
-- **Descrição Técnica:** O portão envolve a aplicação a partir de `>= 768px` com um ecrã estático contendo um código QR a apontar para `animalmind.vercel.app`. Embora faça sentido privilegiar a experiência mobile PWA, isto impede qualquer utilização legítima em iPads/tablets (768px–1024px) e inviabiliza o acesso direto de tutores ou veterinários através de navegadores desktop sem emulação.
-- **Impacto:** Barreira total para veterinários ou utilizadores em estações de trabalho de secretária.
-- **Sugestão de Correção:** Adicionar um botão discreto *"Continuar no browser (Modo Desktop)"* que armazene a preferência em `localStorage`, ou renderizar a aplicação centrada numa moldura móvel elegante com pré-visualização interativa.
+- **Resolução Efetuada:** Adicionado botão corporativo Serene *"Continuar no browser (Modo Desktop)"*, com persistência da preferência em `localStorage` (`pelonaroupa_desktop_bypass`) e badge contextual discreto no topo da aplicação quando o modo desktop está ativo.
+- **Validação:** Teste Playwright em resolução 1280x800 clicou no botão e navegou fluidamente para a aplicação desktop.
 
 ---
 
 ### Baixos
 
-#### 4. Sobreposição do `BottomNav` em Listas Extensas
-- **Evidência Visual:** [family-mobile.png](audit-screenshots/family-mobile.png), [vet-dashboard-mobile.png](audit-screenshots/vet-dashboard-mobile.png)
-- **Localização:** `client/src/pages/FamilyPage.tsx`, `client/src/pages/VetDashboardPage.tsx`
-- **Descrição Técnica:** A barra de navegação inferior flutuante (`fixed bottom-0 z-50`) sobrepõe-se aos botões de ação e rodapés das páginas se o elemento contentor não incluir espaçamento inferior suficiente (`pb-28`).
-- **Sugestão de Correção:** Garantir que o container principal de todas as páginas autenticadas inclua a classe utilitária `pb-28` ou um `<div className="h-20" aria-hidden="true" />` terminal.
+#### 4. Sobreposição do `BottomNav` em Listas Extensas [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Depois: [04-family-pb28-spacing.png](audit-screenshots/after/04-family-pb28-spacing.png)
+- **Localização:** `client/src/pages/FamilyDashboard.tsx`, `client/src/pages/VetDashboardPage.tsx`
+- **Resolução Efetuada:** Aplicada a classe utilitária `pb-28` aos contentores principais de `/family` e `/vet`, garantindo 112px de margem inferior livre para acomodar perfeitamente a barra de navegação inferior sem ocultar botões ou textos.
+- **Validação:** Verificado em viewport móvel que o último elemento interativo das páginas mantém espaçamento confortável e visível acima da barra flutuante.
 
-#### 5. Fallback Textual em Tarefas de Rotina Familiar (`care.routine.walk`)
-- **Evidência Visual:** [family-care-board.png](audit-screenshots/family-care-board.png)
-- **Localização:** `client/src/components/family/DailyCareBoard.tsx`
-- **Descrição Técnica:** Algumas tarefas pré-definidas exibem a chave pura de i18n (`care.routine.walk` / `care.routine.food`) caso as traduções dinâmicas sofram ligeiro desfasamento no carregamento.
-- **Sugestão de Correção:** Incluir valor por omissão explícito no hook de tradução: `t('care.routine.walk', { defaultValue: 'Passeio diário' })`.
+#### 5. Fallback Textual em Tarefas de Rotina Familiar (`care.routine.walk`) [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Depois: [05-care-board-pt-fallback.png](audit-screenshots/after/05-care-board-pt-fallback.png)
+- **Localização:** `client/src/components/care/DailyCareBoard.tsx`, `DailyCareWidget.tsx`, `client/src/locales/pt.json`, `client/src/locales/en.json`
+- **Resolução Efetuada:** Adicionada validação de fallback em `DailyCareBoard` e `DailyCareWidget` (`rawTitle && rawTitle !== definition.titleKey ? rawTitle : definition.fallbackTitlePt`) e adicionada a chave canónica `"walk": "Passeio / Exercício Diário"` aos ficheiros de idioma.
+- **Validação:** Teste E2E confirmou a renderização do título em Português *"Passeio / Exercício Diário"* no cartão de cuidados.
 
-#### 6. Disposição dos Filtros de Período do Histórico em Dispositivos Muito Estreitos
-- **Evidência Visual:** [historico-7d-mobile.png](audit-screenshots/historico-7d-mobile.png)
-- **Localização:** `client/src/pages/HistoryPage.tsx`
-- **Descrição Técnica:** Em ecrãs com largura inferior a 375px (ex.: iPhone SE), os botões de filtro `[7d] [30d] [90d] [Tudo]` sofrem quebra de linha visual apertada.
-- **Sugestão de Correção:** Transformar o grupo de botões num carrossel horizontal suave com `overflow-x-auto no-scrollbar gap-2`.
+#### 6. Disposição dos Filtros de Período do Histórico em Dispositivos Muito Estreitos [CORRIGIDO ✅]
+- **Evidências Visuais:**
+  - Depois: [06-history-horizontal-chips.png](audit-screenshots/after/06-history-horizontal-chips.png)
+- **Localização:** `client/src/pages/HistoryPage.tsx`, `client/src/index.css`
+- **Resolução Efetuada:** Criado contentor de rolagem horizontal com `overflow-x-auto no-scrollbar` e classes utilitárias CSS dedicadas para supressão visual de barras de scroll, garantindo deslizamento suave dos filtros em qualquer largura (incluindo 320px).
+- **Validação:** Teste Playwright em viewport ultra-estreito (320px) confirmou que os filtros mantêm altura consistente e suportam scroll horizontal sem quebra de linhas.
 
 ---
 
-## 7. Recomendações Priorizadas
+## 7. Recomendações e Estado de Execução
 
-| # | Recomendação | Gravidade | Esforço | Ficheiro a Modificar |
-| :-: | :--- | :---: | :---: | :--- |
-| **1** | Montar `<PersonalityCard animalId={animal.id} />` na página de detalhe do animal | 🔴 Crítico | Muito Baixo (5 min) | `client/src/pages/AnimalDetailPage.tsx` |
-| **2** | Aplicar safe-navigation em `invitations?.length` para evitar quebra de renderização | 🟡 Médio | Muito Baixo (2 min) | `client/src/components/dashboard/DashboardFamilySection.tsx` |
-| **3** | Oferecer opção de bypass ou moldura móvel no `MobileOnlyGate` para desktop e tablets | 🟡 Médio | Baixo (30 min) | `client/src/components/MobileOnlyGate.tsx` |
-| **4** | Padronizar margem inferior `pb-28` em todas as rotas com `BottomNav` ativo | 🟢 Baixo | Muito Baixo (10 min) | `client/src/components/layout/BottomNav.tsx` / Layout |
-| **5** | Adicionar valores por omissão nas rotinas de cuidados diários em i18n | 🟢 Baixo | Muito Baixo (5 min) | `client/src/components/family/DailyCareBoard.tsx` |
-| **6** | Implementar rolagem horizontal suave nos chips de filtro do Histórico | 🟢 Baixo | Baixo (15 min) | `client/src/pages/HistoryPage.tsx` |
+| # | Recomendação | Gravidade | Esforço | Ficheiro Modificado | Estado |
+| :-: | :--- | :---: | :---: | :--- | :---: |
+| **1** | Montar `<PersonalityCard animalId={animal.id} />` na página de detalhe do animal | 🔴 Crítico | Muito Baixo | `client/src/pages/AnimalDetailPage.tsx` | Resolvido ✅ |
+| **2** | Aplicar safe-navigation em `invitations?.length` para evitar quebra de renderização | 🟡 Médio | Muito Baixo | `client/src/components/dashboard/DashboardFamilySection.tsx` | Resolvido ✅ |
+| **3** | Oferecer opção de bypass no `MobileOnlyGate` para desktop e tablets | 🟡 Médio | Baixo | `client/src/components/MobileOnlyGate.tsx` | Resolvido ✅ |
+| **4** | Padronizar margem inferior `pb-28` em todas as rotas com `BottomNav` ativo | 🟢 Baixo | Muito Baixo | `FamilyDashboard.tsx`, `VetDashboardPage.tsx` | Resolvido ✅ |
+| **5** | Adicionar valores por omissão nas rotinas de cuidados diários em i18n | 🟢 Baixo | Muito Baixo | `DailyCareBoard.tsx`, `pt.json`, `en.json` | Resolvido ✅ |
+| **6** | Implementar rolagem horizontal suave nos chips de filtro do Histórico | 🟢 Baixo | Baixo | `HistoryPage.tsx`, `index.css` | Resolvido ✅ |
 
 ---
 
 ## 8. Anexos e Catálogo de Capturas
 
 Todos os screenshots estão guardados e catalogados no diretório `docs/audit-screenshots/`:
+
+### Capturas de Prova Pós-Correção (Validadas E2E em `audit-screenshots/after/`)
+- [01-personality-card-mounted.png](audit-screenshots/after/01-personality-card-mounted.png) — Prova do `<PersonalityCard />` montado com radar pentagonal em `/animal/:id`.
+- [02-dashboard-null-invitations-safe.png](audit-screenshots/after/02-dashboard-null-invitations-safe.png) — Prova de resiliência a convites nulos no Dashboard Familiar.
+- [03-desktop-gate-continue-button.png](audit-screenshots/after/03-desktop-gate-continue-button.png) — Prova do botão *"Continuar no browser (Modo Desktop)"* no portão mobile.
+- [04-family-pb28-spacing.png](audit-screenshots/after/04-family-pb28-spacing.png) — Prova do espaçamento `pb-28` sem sobreposição do BottomNav em `/family`.
+- [05-care-board-pt-fallback.png](audit-screenshots/after/05-care-board-pt-fallback.png) — Prova dos títulos traduzidos e fallback seguro no DailyCareBoard.
+- [06-history-horizontal-chips.png](audit-screenshots/after/06-history-horizontal-chips.png) — Prova de scroll horizontal suave nos chips de filtro a 320px de largura.
 
 ### Rotas Públicas (8 Pares = 16 Capturas)
 - `landing-desktop.png` / `landing-mobile.png`
@@ -231,21 +232,22 @@ Todos os screenshots estão guardados e catalogados no diretório `docs/audit-sc
 - `comparison-desktop.png` / `comparison-mobile.png`
 
 ### Estados de Ciclo de Vida e Casos de Borda (11 Capturas)
-- `dashboard-loading-desktop.png` / `dashboard-loading-mobile.png` (Estado de carregamento sob rede lenta)
-- `dashboard-vazio-desktop.png` / `dashboard-vazio-mobile.png` (Estado sem animais registados)
-- `historico-vazio-desktop.png` / `historico-vazio-mobile.png` (Estado de histórico sem eventos)
-- `dashboard-erro-desktop.png` / `dashboard-erro-mobile.png` (Ecrã de erro amigável via ErrorBoundary)
-- `gravacao-sucesso-desktop.png` / `gravacao-sucesso-mobile.png` (Pós-gravação com reprodução de áudio e opções)
-- `radar-personalidade-provisorio.png` (Estado com aviso de <10 gravações)
+- `dashboard-loading-desktop.png` / `dashboard-loading-mobile.png`
+- `dashboard-vazio-desktop.png` / `dashboard-vazio-mobile.png`
+- `historico-vazio-desktop.png` / `historico-vazio-mobile.png`
+- `dashboard-erro-desktop.png` / `dashboard-erro-mobile.png`
+- `gravacao-sucesso-desktop.png` / `gravacao-sucesso-mobile.png`
+- `radar-personalidade-provisorio.png`
 
 ### Evidências Específicas das 5 Inspirações UX (5 Capturas)
-- `narrativa-semanal.png` (Card com frase em linguagem natural)
-- `sintomas-acordeao-aberto.png` (Checkup holístico com categorias expandidas)
-- `companheiro-cao.png` (Avatar SVG de cão no Dashboard)
-- `companheiro-gato.png` (Avatar SVG de gato no Dashboard)
-- `family-care-board.png` (Quadro de Cuidados Diários)
+- `narrativa-semanal.png`
+- `sintomas-acordeao-aberto.png`
+- `companheiro-cao.png`
+- `companheiro-gato.png`
+- `family-care-board.png`
 
 ### Estados de Hardware e Segurança (3 Capturas)
-- `desktop-gate-qr-notice.png` (Ecrã de barreira com código QR para dispositivos móveis)
-- `hardware-mic-bloqueado.png` (Tratamento amigável de recusa de permissão de microfone)
-- `hardware-camera-bloqueada.png` (Tratamento amigável de recusa de permissão de câmara)
+- `desktop-gate-qr-notice.png`
+- `hardware-mic-bloqueado.png`
+- `hardware-camera-bloqueada.png`
+

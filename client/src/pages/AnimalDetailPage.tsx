@@ -34,6 +34,7 @@ import { AppShellSkeleton } from "@/components/AppShellSkeleton";
 import FamilyShareTab from "@/components/FamilyShareTab";
 import HealthBulletinTab from "@/components/HealthBulletinTab";
 import LazyAnimal3DModel from "@/components/LazyAnimal3DModel";
+import { PersonalityCard } from "@/components/personality/PersonalityCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -116,7 +117,45 @@ export default function AnimalDetailPage({
   const { data: historyRes, isLoading: loadingHistory } =
     trpc.events.listForAnimal.useQuery({ animalId, page: 1, pageSize: 10 });
 
+  const { data: personality, isLoading: loadingPersonality } =
+    trpc.personality.get.useQuery({ animalId }, { enabled: animalId > 0 });
+
   // Mutations
+  const overridePersonalityMutation = trpc.personality.override.useMutation({
+    onSuccess: () => {
+      toast.success(
+        language === "pt"
+          ? "Personalidade atualizada com sucesso!"
+          : "Personality profile updated successfully!",
+      );
+      utils.personality.get.invalidate({ animalId });
+    },
+    onError: () =>
+      toast.error(
+        language === "pt"
+          ? "Erro ao atualizar personalidade."
+          : "Error updating personality.",
+      ),
+  });
+
+  const recalculatePersonalityMutation =
+    trpc.personality.recalculate.useMutation({
+      onSuccess: () => {
+        toast.success(
+          language === "pt"
+            ? "Perfil recalculado com sucesso!"
+            : "Profile recalculated successfully!",
+        );
+        utils.personality.get.invalidate({ animalId });
+      },
+      onError: () =>
+        toast.error(
+          language === "pt"
+            ? "Erro ao recalcular perfil."
+            : "Error recalculating profile.",
+        ),
+    });
+
   const updateBaselineMutation = trpc.animals.updateBaseline.useMutation({
     onSuccess: () => {
       toast.success(
@@ -803,6 +842,34 @@ export default function AnimalDetailPage({
                 </div>
               )}
             </div>
+
+            {/* Inspiração 5 – Perfil de Personalidade (Radar Pentagonal) */}
+            {personality && (
+              <div className="page-enter">
+                <PersonalityCard
+                  personality={personality}
+                  animalName={animal.name}
+                  onOverride={async (dims) => {
+                    await overridePersonalityMutation.mutateAsync({
+                      animalId,
+                      dimensions: {
+                        vocalExpressiveness: dims.vocalExpressiveness,
+                        stressResilience: dims.stressResilience,
+                        energyLevel: dims.energyLevel,
+                        sociability: dims.sociability,
+                        independence: dims.independence,
+                      },
+                    });
+                  }}
+                  onRecalculate={async () => {
+                    await recalculatePersonalityMutation.mutateAsync({
+                      animalId,
+                    });
+                  }}
+                  isLoading={loadingPersonality}
+                />
+              </div>
+            )}
 
             {/* 1. Gráfico de tendências dos últimos 30 dias */}
             <div className="bg-card border border-border rounded-2xl p-5 space-y-3">

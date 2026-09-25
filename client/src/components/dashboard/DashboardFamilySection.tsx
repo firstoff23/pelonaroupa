@@ -17,8 +17,8 @@ interface FamilyActivityItem {
 }
 
 interface DashboardFamilySectionProps {
-  invitations: Invitation[];
-  familyActivity: FamilyActivityItem[];
+  invitations?: Invitation[] | null;
+  familyActivity?: FamilyActivityItem[] | null;
   isResponding: boolean;
   onRespond: (invitationId: number, action: "accept" | "reject") => void;
   language: string;
@@ -38,9 +38,9 @@ export function DashboardFamilySection({
   return (
     <div className="space-y-4">
       {/* Pending Invitations */}
-      {invitations.length > 0 && (
+      {(invitations?.length ?? 0) > 0 && (
         <div className="space-y-2">
-          {invitations.map((inv) => (
+          {invitations?.map((inv) => (
             <div
               key={inv.id}
               className="bg-linear-to-r from-secondary/15 to-primary/15 border border-primary/20 rounded-2xl p-4 flex flex-col gap-3 page-enter"
@@ -108,7 +108,7 @@ export function DashboardFamilySection({
       )}
 
       {/* Family Activity Feed */}
-      {familyActivity.length > 0 && (
+      {(familyActivity?.length ?? 0) > 0 && (
         <div className="bg-card border border-border rounded-2xl p-4 space-y-2">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -124,7 +124,7 @@ export function DashboardFamilySection({
               </Button>
             </Link>
           </div>
-          {familyActivity.slice(0, 3).map((item) => {
+          {familyActivity?.slice(0, 3).map((item) => {
             const minutes = Math.max(
               1,
               Math.round(

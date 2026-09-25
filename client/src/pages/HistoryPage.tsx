@@ -1406,6 +1406,57 @@ export default function HistoryPage() {
           </div>
         )}
 
+        {/* Quick horizontal period selector (sempre acessível sem abrir painel) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+          {[
+            { label: language === "pt" ? "Todos" : "All", days: 0, key: "" },
+            { label: t("historyPage.7days"), days: 7, key: "7d" },
+            { label: t("historyPage.30days"), days: 30, key: "30d" },
+            { label: t("historyPage.90days"), days: 90, key: "90d" },
+          ].map((p) => {
+            const isSelected =
+              p.days === 0
+                ? !dateFrom && !dateTo && !period
+                : period === p.key ||
+                  (dateFrom &&
+                    dateTo &&
+                    Math.round(
+                      (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+                        (1000 * 60 * 60 * 24),
+                    ) === p.days);
+
+            return (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => {
+                  if (p.days === 0) {
+                    setDateFrom("");
+                    setDateTo("");
+                    setPeriod("");
+                  } else {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setDate(end.getDate() - p.days);
+                    setDateFrom(start.toISOString().split("T")[0]);
+                    setDateTo(end.toISOString().split("T")[0]);
+                    setPeriod(p.key);
+                  }
+                  setPage(1);
+                }}
+                className={cn(
+                  "shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150 active-scale tap-highlight-none",
+                  isSelected
+                    ? "border-primary bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "border-border bg-secondary/40 text-muted-foreground hover:text-foreground hover:border-primary/40",
+                )}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Filters panel */}
         {showFilters && (
           <div className="bg-card border border-border rounded-2xl p-4 space-y-4 page-enter">
@@ -1448,7 +1499,7 @@ export default function HistoryPage() {
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                 {t("historyPage.filterState")}
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 {ALL_STATES.map((s) => (
                   <button
                     key={s}
@@ -1457,7 +1508,7 @@ export default function HistoryPage() {
                       setPage(1);
                     }}
                     className={cn(
-                      "px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
+                      "shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
                       stateFilter === s
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border text-muted-foreground hover:border-primary/50",
@@ -1478,14 +1529,14 @@ export default function HistoryPage() {
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                 {language === "pt" ? "Gatilho / Contexto" : "Trigger / Context"}
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                 <button
                   onClick={() => {
                     setContextTagFilter("all");
                     setPage(1);
                   }}
                   className={cn(
-                    "px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
+                    "shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
                     contextTagFilter === "all"
                       ? "border-primary bg-primary/10 text-primary font-semibold"
                       : "border-border text-muted-foreground hover:border-primary/50",
@@ -1508,7 +1559,7 @@ export default function HistoryPage() {
                         setPage(1);
                       }}
                       className={cn(
-                        "px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
+                        "shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150",
                         contextTagFilter === tagId
                           ? "border-primary bg-primary/10 text-primary font-semibold"
                           : "border-border text-muted-foreground hover:border-primary/50",
@@ -1558,7 +1609,7 @@ export default function HistoryPage() {
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                 {t("historyPage.quickPeriod")}
               </p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
                 {[
                   { label: t("historyPage.7days"), days: 7 },
                   { label: t("historyPage.30days"), days: 30 },
@@ -1569,7 +1620,7 @@ export default function HistoryPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs h-8 border-border bg-secondary hover:bg-secondary/80 text-foreground"
+                    className="shrink-0 text-xs h-8 border-border bg-secondary hover:bg-secondary/80 text-foreground"
                     onClick={() => {
                       const end = new Date();
                       const start = new Date();
@@ -1589,11 +1640,11 @@ export default function HistoryPage() {
 
         {/* Active filter badges */}
         {(isFiltered || animalIdFilter) && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {animalIdFilter && (
               <Badge
                 variant="secondary"
-                className="text-xs gap-1 inline-flex items-center"
+                className="shrink-0 text-xs gap-1 inline-flex items-center"
               >
                 <PawPrint size={10} />
                 {filterAnimal?.name ?? `#${animalIdFilter}`}
@@ -1607,19 +1658,19 @@ export default function HistoryPage() {
               </Badge>
             )}
             {stateFilter !== "all" && (
-              <Badge variant="secondary" className="text-xs gap-1">
+              <Badge variant="secondary" className="shrink-0 text-xs gap-1">
                 {STATE_EMOJIS[stateFilter as EmotionalState]}{" "}
                 {t(`states.${stateFilter}` as any) ||
                   STATE_LABELS[stateFilter as EmotionalState]}
               </Badge>
             )}
             {dateFrom && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="shrink-0 text-xs">
                 {t("historyPage.dateFrom")}: {dateFrom}
               </Badge>
             )}
             {dateTo && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="shrink-0 text-xs">
                 {t("historyPage.dateTo")}: {dateTo}
               </Badge>
             )}

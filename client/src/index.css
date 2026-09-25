@@ -165,6 +165,19 @@
   border-radius: 4px;
 }
 
+/* ── Scrollbar Utilities ───────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar,
+.scrollbar-none,
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ── Mobile viewport fix ───────────────────────────────────── */
 .mobile-safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);

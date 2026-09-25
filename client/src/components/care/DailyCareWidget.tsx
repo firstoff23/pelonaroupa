@@ -61,9 +61,13 @@ export function DailyCareWidget({
       {/* Routine Task Pills */}
       <div className="flex flex-wrap gap-1.5">
         {board.routineItems.map(({ definition, isCompleted }) => {
+          const rawTitle = t(definition.titleKey as any);
           const title =
-            t(definition.titleKey as any) ||
-            (isPt ? definition.fallbackTitlePt : definition.fallbackTitleEn);
+            rawTitle && rawTitle !== definition.titleKey
+              ? rawTitle
+              : isPt
+                ? definition.fallbackTitlePt
+                : definition.fallbackTitleEn;
 
           return (
             <Link key={definition.id} to="/familia">

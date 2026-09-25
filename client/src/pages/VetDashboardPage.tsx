@@ -223,7 +223,7 @@ export default function VetDashboardPage() {
   }
 
   return (
-    <div className="page-enter mx-auto flex min-h-full w-full max-w-lg flex-col gap-5 px-4 pb-24 pt-6">
+    <div className="page-enter mx-auto flex min-h-full w-full max-w-lg flex-col gap-5 px-4 pb-28 pt-6">
       <header className="space-y-4">
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center gap-3">

@@ -629,6 +629,7 @@
     "routine": {
       "breakfast": "Breakfast",
       "dinner": "Dinner",
+      "walk": "Daily Walk / Exercise",
       "daily_walk": "Daily walk",
       "medication": "Daily medication",
       "hygiene": "Grooming / Hygiene"

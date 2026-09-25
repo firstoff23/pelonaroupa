@@ -252,7 +252,7 @@ export default function FamilyDashboard({
         isOwner={currentUserIsOwner ?? false}
       />
 
-      <div className="page-enter max-w-lg mx-auto space-y-4 px-4 pt-5 pb-6 min-h-full text-slate-100">
+      <div className="page-enter max-w-lg mx-auto space-y-4 px-4 pt-5 pb-28 min-h-full text-slate-100">
         {/* Header banner */}
         <div className="p-4 rounded-2xl bg-primary/5 border border-primary/15 flex items-start gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/15">

@@ -154,11 +154,13 @@ export function DailyCareBoardContent({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {board?.routineItems.map(
             ({ definition, isCompleted, completedLog }) => {
+              const rawTitle = t(definition.titleKey as any);
               const title =
-                t(definition.titleKey as any) ||
-                (isPt
-                  ? definition.fallbackTitlePt
-                  : definition.fallbackTitleEn);
+                rawTitle && rawTitle !== definition.titleKey
+                  ? rawTitle
+                  : isPt
+                    ? definition.fallbackTitlePt
+                    : definition.fallbackTitleEn;
 
               return (
                 <div
@@ -382,9 +384,13 @@ export function DailyCareBoard({
     if (routine) {
       setSelectedCareType(routine.careType);
       setSelectedSubtype(routine.careSubtype);
+      const rawTitle = t(routine.titleKey as any);
       setCareTitle(
-        t(routine.titleKey as any) ||
-          (isPt ? routine.fallbackTitlePt : routine.fallbackTitleEn),
+        rawTitle && rawTitle !== routine.titleKey
+          ? rawTitle
+          : isPt
+            ? routine.fallbackTitlePt
+            : routine.fallbackTitleEn,
       );
     } else {
       setSelectedCareType("other");
@@ -396,9 +402,13 @@ export function DailyCareBoard({
   };
 
   const handleQuickMarkRoutine = (routine: RoutineCareDefinition) => {
+    const rawTitle = t(routine.titleKey as any);
     const title =
-      t(routine.titleKey as any) ||
-      (isPt ? routine.fallbackTitlePt : routine.fallbackTitleEn);
+      rawTitle && rawTitle !== routine.titleKey
+        ? rawTitle
+        : isPt
+          ? routine.fallbackTitlePt
+          : routine.fallbackTitleEn;
 
     logCareMutation.mutate({
       animalId,

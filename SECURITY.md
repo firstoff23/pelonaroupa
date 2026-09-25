@@ -19,6 +19,7 @@ The following security controls are implemented and active in production:
 - **Supabase Auth** — JWT tokens with automatic refresh via `onAuthStateChange(TOKEN_REFRESHED)`
 - **HTTP-only session cookies** — `HttpOnly; SameSite=Strict; Secure` on the Node.js gateway layer
 - **MFA / TOTP** — Two-factor authentication (RFC 6238) compatible with Google Authenticator and Authy. Secrets are stored server-side in `users.mfa_secret`, validated with HMAC-SHA1 and a ±90s window
+- **Leaked Password Protection (HaveIBeenPwned k-anonymity)** — Active verification against known public data breaches via `server/security/check-password-pwned.ts`. The full password never leaves the server; only a 5-character SHA-1 prefix is sent with `Add-Padding: true` and 3s timeout fail-open. Enforced on account registration and password reset.
 
 ### Brute-Force & Rate Limiting
 - **slowapi** on the FastAPI backend: 3 requests / 15 min per IP on the `/classify` endpoint
@@ -66,6 +67,21 @@ Please report security issues responsibly via one of:
 | Acknowledgement | Within 48 hours |
 | Initial assessment | Within 5 business days |
 | Fix & disclosure | As soon as possible after validation |
+
+---
+
+## Supabase Linter Advisors & Accepted Risks
+
+### ⚠️ `auth_leaked_password_protection` — Compensating Control Active
+- **Linter Finding:** `auth_leaked_password_protection` (WARN).
+- **Context:** The native Supabase Auth password leak check toggle is locked behind the paid Supabase Pro+ plan.
+- **Compensating Control:** Implemented an in-house verification service in `server/security/check-password-pwned.ts` using the official **HaveIBeenPwned API (k-anonymity model)**.
+  - Generates SHA-1 hash locally.
+  - Sends only the 5-character prefix to `https://api.pwnedpasswords.com/range/{prefix}` with `Add-Padding: true` to prevent response length side-channel attacks.
+  - Matches the remaining 35-character suffix locally on the server.
+  - Enforced before user signup (`RegisterPage.tsx`) and password reset (`ResetPasswordPage.tsx`).
+  - Employs an in-memory TTL prefix cache and a 3-second fail-open timeout for resilient UX.
+- **Audit Note:** The Supabase Database Advisor only checks the cloud dashboard setting flag, so this finding may remain visible in the dashboard until upgraded to Pro+. The compensating control fully satisfies the security requirement.
 
 ---
 

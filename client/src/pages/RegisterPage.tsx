@@ -18,10 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { validateEmailAddress } from "@/lib/disposableEmails";
+import { trpc } from "@/lib/trpc";
 
 export default function RegisterPage() {
   const { user, signUp } = useAuth();
   const [, setLocation] = useLocation();
+  const checkPwnedMutation = trpc.auth.checkPasswordPwned.useMutation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -97,6 +99,14 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
+      // 1. Verificação proativa HIBP (k-anonymity) antes de criar conta
+      const pwnedCheck = await checkPwnedMutation.mutateAsync({ password });
+      if (pwnedCheck.isPwned && pwnedCheck.message) {
+        setApiPasswordError(pwnedCheck.message);
+        setLoading(false);
+        return;
+      }
+
       await signUp(normalizedEmail, password, name.trim(), ageConfirmed);
       toast.success(
         "Conta criada com sucesso! Introduza o código enviado por email.",

@@ -12,9 +12,11 @@ import {
 } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { requireSupabase } from "@/contexts/AuthContext";
+import { trpc } from "@/lib/trpc";
 
 export default function ResetPasswordPage() {
   const [, setLocation] = useLocation();
+  const checkPwnedMutation = trpc.auth.checkPasswordPwned.useMutation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,6 +74,14 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
+      // 1. Verificação proativa HIBP (k-anonymity) antes de atualizar password
+      const pwnedCheck = await checkPwnedMutation.mutateAsync({ password });
+      if (pwnedCheck.isPwned && pwnedCheck.message) {
+        setApiError(pwnedCheck.message);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await requireSupabase().auth.updateUser({
         password,
       });

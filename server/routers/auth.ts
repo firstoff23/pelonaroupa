@@ -6,9 +6,24 @@ import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { getSupabase, updateUser } from "../db";
 import { effectiveUserId } from "../lib/authHelpers";
 import { validateTotp } from "../lib/totp";
+import { validatePasswordNotPwned } from "../security/check-password-pwned";
 
 export const authRouter = router({
   me: publicProcedure.query((opts) => opts.ctx.user),
+
+  checkPasswordPwned: publicProcedure
+    .input(
+      z.object({
+        password: z.string().min(1).max(256),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const pwnedMessage = await validatePasswordNotPwned(input.password);
+      return {
+        isPwned: Boolean(pwnedMessage),
+        message: pwnedMessage,
+      };
+    }),
 
   logout: publicProcedure.mutation(({ ctx }) => {
     const cookieOptions = getSessionCookieOptions(ctx.req);

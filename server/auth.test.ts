@@ -111,3 +111,51 @@ describe("Supabase Auth", () => {
     }
   });
 });
+
+describe("authRouter.checkPasswordPwned", () => {
+  it("deteta password comprometida via tRPC", async () => {
+    const { authRouter } = await import("./routers/auth");
+    const caller = authRouter.createCaller({
+      req: {} as any,
+      res: {} as any,
+      user: null,
+    });
+
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: async () => "C6008F9CAB4083784CBD1874F76618D2A97:9999",
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const res = await caller.checkPasswordPwned({ password: "password123" });
+    expect(res.isPwned).toBe(true);
+    expect(res.message).toContain("fuga");
+    expect(res.message).toMatch(/9[.,]?999|9999/);
+
+    vi.unstubAllGlobals();
+  });
+
+  it("permite password segura via tRPC", async () => {
+    const { authRouter } = await import("./routers/auth");
+    const caller = authRouter.createCaller({
+      req: {} as any,
+      res: {} as any,
+      user: null,
+    });
+
+    const mockFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: async () => "",
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    const res = await caller.checkPasswordPwned({ password: "SuperSecurePass#2026!" });
+    expect(res.isPwned).toBe(false);
+    expect(res.message).toBeNull();
+
+    vi.unstubAllGlobals();
+  });
+});
+

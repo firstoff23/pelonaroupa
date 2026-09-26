@@ -5,6 +5,9 @@ import { defineConfig } from "vitest/config";
 
 const templateRoot = path.resolve(import.meta.dirname);
 
+const explicitTestUrl = process.env.SUPABASE_TEST_URL;
+const explicitTestKey = process.env.SUPABASE_TEST_SERVICE_ROLE_KEY;
+
 // Load env files in priority order (later files override earlier ones)
 // .env.local → .env.production.local → .env.test
 for (const envFile of [".env.local", ".env.production.local", ".env.test"]) {
@@ -12,6 +15,14 @@ for (const envFile of [".env.local", ".env.production.local", ".env.test"]) {
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath, override: true });
   }
+}
+
+// Preserve explicitly provided test credentials (e.g. in CI or manual CLI invocation)
+if (explicitTestUrl !== undefined) {
+  process.env.SUPABASE_TEST_URL = explicitTestUrl;
+}
+if (explicitTestKey !== undefined) {
+  process.env.SUPABASE_TEST_SERVICE_ROLE_KEY = explicitTestKey;
 }
 
 // Expose VITE_ prefixed vars to the test environment

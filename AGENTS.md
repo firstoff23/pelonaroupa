@@ -33,3 +33,8 @@ Before executing any user task (building features, bug fixes, refactoring, tests
 - **Database & Security**:
   - Always enforce Row Level Security (RLS) on new Supabase tables.
   - Never execute unauthenticated destructive queries.
+- **CI/CD & Shell Scripting**:
+  - Always enable `set -o pipefail` in Bash steps when commands are piped to utilities like `gzip` or `tar`.
+  - Validate decompressed contents (e.g. `gunzip -c file.gz | wc -l`) rather than relying on file size `[ -s ]` (which accepts empty gzip headers).
+  - GitHub Actions runners are IPv4-only: any Supabase database connection in CI must use the IPv4 Session Pooler (`aws-0-[region].pooler.supabase.com:5432`), never the IPv6-only direct host (`db.[ref].supabase.co`).
+  - Always mask database credentials and secrets via `::add-mask::` before execution.

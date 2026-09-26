@@ -242,16 +242,66 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Authentication Email Templates
+[auth.email.template.confirmation]
+subject = "Confirme a sua conta no AnimalMind"
+content_path = "./supabase/templates/confirm_signup.html"
 
-# Uncomment to customize notification email template
-# [auth.email.notification.password_changed]
-# enabled = true
-# subject = "Your password has been changed"
-# content_path = "./supabase/templates/password_changed_notification.html"
+[auth.email.template.invite]
+subject = "Foi convidado para o AnimalMind"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "O seu link de acesso seguro ao AnimalMind"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.email_change]
+subject = "Confirme a alteração de email no AnimalMind"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.recovery]
+subject = "Redefinição da sua palavra-passe no AnimalMind"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.reauthentication]
+subject = "Código de verificação de segurança no AnimalMind"
+content_path = "./supabase/templates/reauthentication.html"
+
+# Security Notification Email Templates
+[auth.email.notification.password_changed]
+enabled = true
+subject = "Alerta de Segurança: A sua palavra-passe foi alterada"
+content_path = "./supabase/templates/password_changed_notification.html"
+
+[auth.email.notification.email_changed]
+enabled = true
+subject = "Alerta de Segurança: O seu endereço de email foi alterado"
+content_path = "./supabase/templates/email_changed_notification.html"
+
+[auth.email.notification.phone_changed]
+enabled = true
+subject = "Alerta de Segurança: O seu número de telefone foi alterado"
+content_path = "./supabase/templates/phone_changed_notification.html"
+
+[auth.email.notification.identity_linked]
+enabled = true
+subject = "Alerta de Segurança: Novo método de início de sessão associado"
+content_path = "./supabase/templates/identity_linked_notification.html"
+
+[auth.email.notification.identity_unlinked]
+enabled = true
+subject = "Alerta de Segurança: Método de início de sessão removido"
+content_path = "./supabase/templates/identity_unlinked_notification.html"
+
+[auth.email.notification.mfa_factor_enrolled]
+enabled = true
+subject = "Alerta de Segurança: Autenticação de dois fatores (MFA) ativada"
+content_path = "./supabase/templates/mfa_factor_enrolled_notification.html"
+
+[auth.email.notification.mfa_factor_unenrolled]
+enabled = true
+subject = "Alerta de Segurança: Autenticação de dois fatores (MFA) desativada"
+content_path = "./supabase/templates/mfa_factor_unenrolled_notification.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.

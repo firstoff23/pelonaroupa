@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Código de verificação de segurança no AnimalMind</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F1F5F9; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #0E1215;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F1F5F9; width: 100%; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <!-- Container Principal -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 580px; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E2E8F0; overflow: hidden; box-shadow: 0 4px 12px rgba(14, 18, 21, 0.04);">
+          
+          <!-- Cabeçalho / Branding -->
+          <tr>
+            <td style="background-color: #0E1215; padding: 32px 40px; text-align: left; border-bottom: 2px solid #2D739B;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: #F8FAFC;">
+                      🐾 AnimalMind <span style="font-size: 14px; font-weight: 400; color: #8C9EA6; margin-left: 8px;">• PeloNaRoupa</span>
+                    </div>
+                  </td>
+                  <td align="right">
+                    <span style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #6A8A8A; background-color: #1F262D; padding: 4px 10px; border-radius: 999px;">Verificação</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Corpo do Email -->
+          <tr>
+            <td style="padding: 40px 40px 32px 40px;">
+              <div style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #2D739B; margin-bottom: 8px;">
+                Proteção de Conta
+              </div>
+              <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 700; line-height: 1.3; color: #0E1215; letter-spacing: -0.5px;">
+                Código de confirmação de segurança
+              </h1>
+              <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                Está a executar uma ação protegida na sua conta <strong>AnimalMind</strong>. Para garantir a segurança dos seus dados, utilize o código de verificação abaixo:
+              </p>
+
+              <!-- Caixa Principal de Código OTP -->
+              <div style="background-color: #F8FAFC; border: 2px solid #2D739B; border-radius: 12px; padding: 24px; margin: 0 0 28px 0; text-align: center;">
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748B; margin-bottom: 8px;">
+                  Código de Reautenticação
+                </div>
+                <div style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #0E1215; padding: 6px 0;">
+                  {{ .Token }}
+                </div>
+                <div style="font-size: 12px; color: #94A3B8; margin-top: 8px;">
+                  Válido por 10 minutos • Não partilhe com terceiros
+                </div>
+              </div>
+
+              <!-- Caixa de Alerta de Segurança Crítico -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #FEF2F2; border-left: 4px solid #EF4444; border-radius: 4px; padding: 14px 16px; margin: 0 0 16px 0;">
+                <tr>
+                  <td style="font-size: 13px; line-height: 1.5; color: #991B1B;">
+                    ⚠️ <strong>Não solicitou esta verificação?</strong><br>
+                    Se não estava a efetuar qualquer operação no AnimalMind, a sua conta pode estar a ser acedida indevidamente. Altere imediatamente a sua palavra-passe através da aplicação ou aceda a <a href="{{ .SiteURL }}/forgot-password" style="color: #991B1B; font-weight: 700; text-decoration: underline;">Recuperar Acesso</a>.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Rodapé -->
+          <tr>
+            <td style="background-color: #F8FAFC; padding: 24px 40px; border-top: 1px solid #E2E8F0; text-align: center;">
+              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #64748B;">
+                AnimalMind • PeloNaRoupa
+              </p>
+              <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94A3B8;">
+                Gestão inteligente de saúde e bem-estar animal.<br>
+                Este é um email automático de sistema, por favor não responda a esta mensagem.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

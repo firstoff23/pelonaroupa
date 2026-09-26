@@ -170,6 +170,8 @@ describe.skipIf(!process.env.SUPABASE_TEST_URL)(
         credentialsValid = !error;
         if (!credentialsValid) return;
 
+        vi.spyOn(dbModule, "getSupabase").mockReturnValue(supabase as any);
+
         const { data: u, error: upsertErr } = await supabase
           .from("users")
           .upsert(

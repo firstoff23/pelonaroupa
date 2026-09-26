@@ -1,0 +1,39 @@
+name: Integration Tests (Supabase Local)
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  integration:
+    name: Supabase Local + Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start Supabase local
+        run: supabase start
+      - name: Get Supabase credentials
+        id: supabase
+        run: |
+          echo "url=$(supabase status -o env | grep '^API_URL' | cut -d= -f2 | tr -d '\"')" >> $GITHUB_OUTPUT
+          echo "key=$(supabase status -o env | grep '^SERVICE_ROLE_KEY' | cut -d= -f2 | tr -d '\"')" >> $GITHUB_OUTPUT
+      - name: Run integration tests
+        env:
+          SUPABASE_TEST_URL: ${{ steps.supabase.outputs.url }}
+          SUPABASE_TEST_SERVICE_ROLE_KEY: ${{ steps.supabase.outputs.key }}
+        run: pnpm exec vitest run server/mfa.verify.test.ts server/supabase.integration.test.ts
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop

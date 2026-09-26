@@ -47,8 +47,8 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
-      - name: Executar testes determinísticos
-        run: pnpm exec vitest run --exclude server/supabase-frontend-env.test.ts
+      - name: Executar testes determinísticos (unidade)
+        run: pnpm exec vitest run --exclude "**/*.integration.test.ts" --exclude "server/mfa.verify.test.ts" --exclude "server/supabase-frontend-env.test.ts"
         env:
           NODE_OPTIONS: --max-old-space-size=4096
           SUPABASE_URL: https://test.supabase.co

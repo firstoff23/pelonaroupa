@@ -49,10 +49,18 @@ The following security controls are implemented and active in production:
 - Global `ErrorBoundary` (`GlobalFallback.tsx`) catches uncaught React render errors
 
 ### Test Environment Isolation & Production Safeguards
-- **Zero-Production Guarantee in Test Runner**: `vitest.config.ts` explicitly blanks `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY` to `""` in the test environment, preventing tests from accessing production data.
-- **Staging-Only Integration**: Staging tests run only when `SUPABASE_TEST_URL` and `SUPABASE_TEST_SERVICE_ROLE_KEY` are explicitly provided via `.env.test`.
-- **Production Abort Guard**: Integration test suites inspect `SUPABASE_TEST_URL` and instantly abort with `[ABORT]` if the production project ID (`yuzqxrmtbqlnalpjehno`) is detected.
-- **Network Isolation Verification**: Automated tests (`server/security/test-isolation.test.ts`) verify that running `pnpm test` makes 0 HTTP requests to `*.supabase.co`.
+
+#### Testes de Integração
+- Correm em CI via `.github/workflows/integration-tests.yml` usando **Supabase local** (Docker efémero).
+- Nunca apontam para produção: `assertNotProductionSupabase()` bloqueia URLs com ID de produção (`yuzqxrmtbqlnalpjehno`).
+- Ativação manual: `supabase start && SUPABASE_TEST_URL=<url> pnpm test`.
+- **Zero-Production Guarantee**: `vitest.config.ts` bloqueia explicitamente `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` para `""` no ambiente de testes.
+- **Network & Architecture Isolation Verification**: Testes em `server/security/test-isolation.test.ts` verificam que `pnpm test` faz 0 chamadas HTTP a `*.supabase.co` e que `server/db.ts` não contém referências a `process.env.VITEST` nem `NODE_ENV === 'test'`.
+
+#### Gestão de Tokens
+- **NUNCA** colar tokens em comandos de terminal.
+- Usar `gh auth login` (keyring) ou variáveis de ambiente fora do histórico de shell.
+- Se um token for exposto: revogar imediatamente em https://github.com/settings/tokens.
 
 ---
 

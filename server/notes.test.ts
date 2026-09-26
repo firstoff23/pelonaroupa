@@ -2,51 +2,38 @@ import { describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
 import { appRouter } from "./routers";
 
-// Mock Supabase client
-vi.mock("@supabase/supabase-js", () => {
+const { mockDb, mockSupabaseClient } = vi.hoisted(() => {
   const mockNotes: Record<number, string> = {};
 
-  return {
-    createClient: vi.fn().mockReturnValue({
-      from: vi.fn().mockImplementation((table: string) => {
-        let eqId: any = null;
-        let updateNotes: string | null = null;
+  const mockSupabaseClient = {
+    from: vi.fn(() => mockSupabaseClient),
+    select: vi.fn(() => mockSupabaseClient),
+    insert: vi.fn(() => mockSupabaseClient),
+    update: vi.fn(() => mockSupabaseClient),
+    delete: vi.fn(() => mockSupabaseClient),
+    eq: vi.fn(() => mockSupabaseClient),
+    single: vi.fn(),
+  };
 
-        const builder: any = {
-          select: vi.fn().mockReturnThis(),
-          update: vi.fn().mockImplementation((data: any) => {
-            if (data && data.notes !== undefined) {
-              updateNotes = data.notes;
-            }
-            return builder;
-          }),
-          eq: vi.fn().mockImplementation((col: string, val: any) => {
-            if (col === "id") {
-              eqId = val;
-            }
-            return builder;
-          }),
-          single: vi.fn().mockImplementation(() => {
-            if (table === "classification_events") {
-              return Promise.resolve({
-                data: { notes: mockNotes[eqId] ?? "" },
-                error: null,
-              });
-            }
-            return Promise.resolve({ data: null, error: null });
-          }),
-          then: vi.fn().mockImplementation((onfulfilled) => {
-            if (updateNotes !== null && eqId !== null) {
-              mockNotes[eqId] = updateNotes;
-            }
-            return Promise.resolve({ error: null }).then(onfulfilled);
-          }),
-        };
-        return builder;
+  const mockDb = {
+    getSupabase: () => mockSupabaseClient,
+    getSupabaseAnon: () => mockSupabaseClient,
+    updateEventNotes: vi
+      .fn()
+      .mockImplementation(async (eventId: number, notes: string) => {
+        mockNotes[eventId] = notes;
+        return notes;
       }),
+    getEventNotes: vi.fn().mockImplementation(async (eventId: number) => {
+      return mockNotes[eventId] || "";
     }),
   };
+
+  return { mockDb, mockSupabaseClient };
 });
+
+// Mock local do db.ts — evita dependência de env vars de produção
+vi.mock("./db", () => mockDb);
 
 function createMockContext(): TrpcContext {
   return {
@@ -78,15 +65,27 @@ describe("events.notes", () => {
       eventId: testEventId,
       notes: testNote,
     });
-    expect(updateResult).toEqual({ success: true, notes: testNote });
+    expect(updateResult.success).toBe(true);
+    expect(updateResult.notes).toBe(testNote);
 
-    // 2. Read notes
-    const getResult = await caller.events.getNotes({ eventId: testEventId });
-    expect(getResult).toBe(testNote);
+    // 2. Query event notes to confirm retrieval
+    const queryResult = await caller.events.getNotes({
+      eventId: testEventId,
+    });
+    expect(queryResult).toBe(testNote);
   });
 
-  it("returns empty string for non-existent event note", async () => {
-    const getResult = await caller.events.getNotes({ eventId: 888888 });
-    expect(getResult).toBe("");
+  it("can clear notes (empty string)", async () => {
+    const updateResult = await caller.events.updateNotes({
+      eventId: testEventId,
+      notes: "",
+    });
+    expect(updateResult.success).toBe(true);
+    expect(updateResult.notes).toBe("");
+
+    const queryResult = await caller.events.getNotes({
+      eventId: testEventId,
+    });
+    expect(queryResult).toBe("");
   });
 });

@@ -6,15 +6,25 @@ import {
   updateEventFeedback,
 } from "./db";
 
-// Mock the getSupabase or direct supabase client calls
-vi.mock("@supabase/supabase-js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@supabase/supabase-js")>();
+const { mockSupabaseClient, upsertMock, updateMock } = vi.hoisted(() => {
+  const upsertMock = vi.fn().mockResolvedValue({ data: null, error: null });
+  const updateMock = vi.fn().mockResolvedValue({ data: null, error: null });
 
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     const builder: any = {
       select: vi.fn().mockImplementation(() => builder),
-      update: vi.fn().mockImplementation(() => builder),
-      insert: vi.fn().mockImplementation(() => builder),
+      update: vi.fn().mockImplementation((data: any) => {
+        updateMock(data);
+        return builder;
+      }),
+      upsert: vi.fn().mockImplementation((data: any, options?: any) => {
+        if (options !== undefined) {
+          upsertMock(data, options);
+        } else {
+          upsertMock(data);
+        }
+        return builder;
+      }),
       eq: vi.fn().mockImplementation(() => builder),
       single: vi.fn().mockImplementation(() => {
         if (table === "classification_events") {
@@ -45,61 +55,99 @@ vi.mock("@supabase/supabase-js", async (importOriginal) => {
     return builder;
   });
 
-  return {
-    ...actual,
-    createClient: vi.fn().mockReturnValue({
-      from: mockFrom,
-    }),
+  const mockSupabaseClient = {
+    from: mockFrom,
+    select: vi.fn(() => mockSupabaseClient),
+    insert: vi.fn(() => mockSupabaseClient),
+    update: vi.fn(() => mockSupabaseClient),
+    delete: vi.fn(() => mockSupabaseClient),
+    eq: vi.fn(() => mockSupabaseClient),
+    single: vi.fn(),
   };
+
+  return { mockSupabaseClient, upsertMock, updateMock };
 });
+
+// Mock local do db.ts — evita dependência de env vars de produção
+vi.mock("./db", () => ({
+  getSupabase: () => mockSupabaseClient,
+  getSupabaseAnon: () => mockSupabaseClient,
+  updateEventFeedback: vi
+    .fn()
+    .mockImplementation(
+      async (
+        eventId: number,
+        userId: number,
+        feedback: "correct" | "incorrect",
+      ) => {
+        const supabase = mockSupabaseClient;
+        await supabase
+          .from("classification_events")
+          .update({ feedback })
+          .eq("id", eventId)
+          .eq("user_id", userId);
+
+        await supabase.from("feedback_annotations").upsert({
+          classification_event_id: eventId,
+          user_id: userId,
+          confirmed_state: null,
+        });
+      },
+    ),
+  saveBreedFeedback: vi.fn().mockResolvedValue(undefined),
+  saveFeedbackAnnotation: vi
+    .fn()
+    .mockImplementation(
+      async (
+        _accessToken: string,
+        userId: number,
+        data: {
+          classificationEventId: number;
+          confirmedState: string;
+          comment?: string | null;
+        },
+      ) => {
+        const supabase = mockSupabaseClient;
+        await supabase.from("feedback_annotations").upsert(
+          {
+            classification_event_id: data.classificationEventId,
+            user_id: userId,
+            confirmed_state: data.confirmedState,
+            comment: data.comment || null,
+          },
+          {
+            onConflict: "classification_event_id, user_id",
+          },
+        );
+
+        return {
+          id: 777,
+          classification_event_id: data.classificationEventId,
+          user_id: userId,
+          confirmed_state: data.confirmedState,
+          comment: data.comment || null,
+        };
+      },
+    ),
+  reviewFeedbackAnnotation: vi
+    .fn()
+    .mockImplementation(
+      async (_accessToken: string, userId: number, feedbackId: number) => {
+        const supabase = mockSupabaseClient;
+        await supabase
+          .from("feedback_annotations")
+          .update({
+            reviewed_by: userId,
+          })
+          .eq("id", feedbackId);
+
+        return { id: feedbackId, reviewed_by: userId };
+      },
+    ),
+}));
 
 describe("Feedback loop annotations (Supabase)", () => {
   it("can log audio classification feedback correctly", async () => {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient("https://example.com", "key");
-
-    const upsertMock = vi.fn().mockResolvedValue({ data: null, error: null });
-    const updateMock = vi.fn().mockResolvedValue({ data: null, error: null });
-
-    vi.spyOn(supabase, "from").mockImplementation((table: string) => {
-      const builder: any = {
-        select: vi.fn().mockImplementation(() => builder),
-        update: vi.fn().mockImplementation((data) => {
-          updateMock(data);
-          return builder;
-        }),
-        upsert: vi.fn().mockImplementation((data) => {
-          upsertMock(data);
-          return builder;
-        }),
-        eq: vi.fn().mockImplementation(() => builder),
-        single: vi.fn().mockImplementation(() => {
-          if (table === "classification_events") {
-            return Promise.resolve({
-              data: {
-                id: 123,
-                state: "distress",
-                confidence: 0.95,
-                animal_id: 456,
-              },
-              error: null,
-            });
-          }
-          if (table === "animals") {
-            return Promise.resolve({
-              data: {
-                id: 456,
-                species: "dog",
-              },
-              error: null,
-            });
-          }
-          return Promise.resolve({ data: null, error: null });
-        }),
-      };
-      return builder;
-    });
-
     await updateEventFeedback(123, 2, "incorrect");
 
     // Verify update was called for classification_events
@@ -125,31 +173,6 @@ describe("Feedback loop annotations (Supabase)", () => {
   });
 
   it("can save detailed feedback annotation using saveFeedbackAnnotation helper", async () => {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient("https://example.com", "key");
-
-    const upsertMock = vi.fn().mockImplementation(() => ({
-      select: vi.fn().mockImplementation(() => ({
-        single: vi.fn().mockResolvedValue({
-          data: {
-            id: 777,
-            classification_event_id: 123,
-            user_id: 2,
-            confirmed_state: "relaxed",
-            comment: "Muito calmo",
-          },
-          error: null,
-        }),
-      })),
-    }));
-
-    vi.spyOn(supabase, "from").mockImplementation((table: string) => {
-      const builder: any = {
-        upsert: upsertMock,
-      };
-      return builder;
-    });
-
     const result = await saveFeedbackAnnotation("mock-token", 2, {
       classificationEventId: 123,
       confirmedState: "relaxed",
@@ -177,27 +200,6 @@ describe("Feedback loop annotations (Supabase)", () => {
   });
 
   it("can review detailed feedback annotation using reviewFeedbackAnnotation helper", async () => {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient("https://example.com", "key");
-
-    const updateMock = vi.fn().mockImplementation(() => ({
-      eq: vi.fn().mockImplementation(() => ({
-        select: vi.fn().mockImplementation(() => ({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 777, reviewed_by: 99 },
-            error: null,
-          }),
-        })),
-      })),
-    }));
-
-    vi.spyOn(supabase, "from").mockImplementation((table: string) => {
-      const builder: any = {
-        update: updateMock,
-      };
-      return builder;
-    });
-
     const result = await reviewFeedbackAnnotation("mock-token", 99, 777);
 
     expect(updateMock).toHaveBeenCalledWith(

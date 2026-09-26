@@ -19,29 +19,22 @@ export const AUDIO_RECORDINGS_BUCKET = "audio-analysis";
 // Lazy init Supabase client
 // Use Service Role Key for backend operations (has full permissions)
 export function getSupabase(accessToken?: string) {
-  const url =
-    process.env.SUPABASE_URL || (process.env.VITEST ? "http://127.0.0.1:54321" : "");
+  const url = process.env.SUPABASE_URL;
   if (!url) throw new Error("Missing SUPABASE_URL");
 
   if (accessToken) {
-    return createClient<any>(
-      url,
-      process.env.SUPABASE_ANON_KEY || (process.env.VITEST ? "mock-anon-key" : ""),
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+    return createClient<any>(url, process.env.SUPABASE_ANON_KEY || "", {
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
       },
-    );
+    });
   }
 
   if (!_supabase) {
     const key =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      (process.env.VITEST ? "mock-service-role-key" : "");
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
     if (!key) {
       throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY/SUPABASE_ANON_KEY");
     }
@@ -51,10 +44,8 @@ export function getSupabase(accessToken?: string) {
 }
 
 export function getSupabaseAnon() {
-  const url =
-    process.env.SUPABASE_URL || (process.env.VITEST ? "http://127.0.0.1:54321" : "");
-  const key =
-    process.env.SUPABASE_ANON_KEY || (process.env.VITEST ? "mock-anon-key" : "");
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
   if (!url || !key) {
     throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY");
   }

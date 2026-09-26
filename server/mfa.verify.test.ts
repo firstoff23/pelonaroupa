@@ -142,14 +142,14 @@ describe("auth.mfa.verify Unit Tests (with mock DB)", () => {
   });
 });
 
+import {
+  assertNotProductionSupabase,
+  PROD_PROJECT_ID,
+} from "./security/test-utils";
+
 // Este bloco só corre quando explicitamente configurado com SUPABASE_TEST_URL e SUPABASE_TEST_SERVICE_ROLE_KEY.
 // Em pnpm test comum ou em CI por omissão, é ignorado garantindo que NUNCA toca na BD de produção.
-const PROD_PROJECT_ID = "yuzqxrmtbqlnalpjehno";
-if (process.env.SUPABASE_TEST_URL?.includes(PROD_PROJECT_ID)) {
-  throw new Error(
-    `[ABORT] Testes de integração apontam para PRODUÇÃO. Remover SUPABASE_TEST_URL.`
-  );
-}
+assertNotProductionSupabase(process.env.SUPABASE_TEST_URL);
 
 describe.skipIf(!process.env.SUPABASE_TEST_URL)(
   "auth.mfa.verify Integration Tests (Staging)",

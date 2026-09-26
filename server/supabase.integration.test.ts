@@ -1,19 +1,28 @@
 import { createClient } from "@supabase/supabase-js";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import * as dbModule from "./db";
 import { upsertUser } from "./db";
+import { assertNotProductionSupabase } from "./security/test-utils";
 
-describe("Supabase Integration", () => {
-  let supabase: ReturnType<typeof createClient>;
-  let credentialsValid = false;
+assertNotProductionSupabase(process.env.SUPABASE_TEST_URL);
 
-  beforeAll(async () => {
-    const url = process.env.SUPABASE_URL;
-    const key =
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-    if (!url || !key) return;
+describe.skipIf(!process.env.SUPABASE_TEST_URL)(
+  "Supabase Integration (Staging)",
+  () => {
+    let supabase: ReturnType<typeof createClient>;
+    let credentialsValid = false;
 
-    try {
-      supabase = createClient(url, key);
+    beforeAll(async () => {
+      const url = process.env.SUPABASE_TEST_URL;
+      const key =
+        process.env.SUPABASE_TEST_SERVICE_ROLE_KEY ||
+        process.env.SUPABASE_TEST_ANON_KEY;
+      if (!url || !key) return;
+
+      try {
+        supabase = createClient(url, key);
+        vi.spyOn(dbModule, "getSupabase").mockReturnValue(supabase as any);
+
       // Quick connectivity check — if key is invalid this returns an error
       const { error } = await supabase.from("users").select("id").limit(1);
       credentialsValid = !error;
@@ -101,6 +110,10 @@ describe("Supabase Integration", () => {
     } catch {
       credentialsValid = false;
     }
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
   });
 
   it("conecta ao Supabase com sucesso", async () => {

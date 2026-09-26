@@ -12,6 +12,8 @@ dist/
 .env.production
 .env.*.local
 .env*
+!.env.example
+!.env.test
 
 # Vercel
 .vercel/

@@ -48,6 +48,12 @@ The following security controls are implemented and active in production:
 - React Query `QueryClient` configured with `retry: 3` and exponential backoff (`1s → 2s → 4s`)
 - Global `ErrorBoundary` (`GlobalFallback.tsx`) catches uncaught React render errors
 
+### Test Environment Isolation & Production Safeguards
+- **Zero-Production Guarantee in Test Runner**: `vitest.config.ts` explicitly blanks `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY` to `""` in the test environment, preventing tests from accessing production data.
+- **Staging-Only Integration**: Staging tests run only when `SUPABASE_TEST_URL` and `SUPABASE_TEST_SERVICE_ROLE_KEY` are explicitly provided via `.env.test`.
+- **Production Abort Guard**: Integration test suites inspect `SUPABASE_TEST_URL` and instantly abort with `[ABORT]` if the production project ID (`yuzqxrmtbqlnalpjehno`) is detected.
+- **Network Isolation Verification**: Automated tests (`server/security/test-isolation.test.ts`) verify that running `pnpm test` makes 0 HTTP requests to `*.supabase.co`.
+
 ---
 
 ## Reporting a Vulnerability

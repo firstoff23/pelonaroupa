@@ -6,8 +6,8 @@ import { defineConfig } from "vitest/config";
 const templateRoot = path.resolve(import.meta.dirname);
 
 // Load env files in priority order (later files override earlier ones)
-// .env.local → .env.production.local
-for (const envFile of [".env.local", ".env.production.local"]) {
+// .env.local → .env.production.local → .env.test
+for (const envFile of [".env.local", ".env.production.local", ".env.test"]) {
   const envPath = path.resolve(templateRoot, envFile);
   if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath, override: true });
@@ -34,6 +34,12 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    env: {
+      SUPABASE_URL: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      VITE_SUPABASE_URL: "",
+      VITE_SUPABASE_ANON_KEY: "",
+    },
     include: [
       "server/**/*.test.ts",
       "server/**/*.spec.ts",

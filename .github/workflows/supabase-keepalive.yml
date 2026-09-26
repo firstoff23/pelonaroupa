@@ -1,0 +1,50 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Executa a cada 3 dias às 08:00 UTC (margem de segurança sobre a pausa de 7 dias do plano Free)
+    - cron: '0 8 */3 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    name: Ping Supabase to prevent Free-tier pause
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::SUPABASE_URL ou SUPABASE_ANON_KEY não estão configurados como secrets no repositório."
+            echo "Configure estes secrets em: Settings -> Secrets and variables -> Actions."
+            exit 0
+          fi
+
+          # Sanitiza a URL removendo eventual barra final
+          CLEAN_URL="${SUPABASE_URL%/}"
+          TARGET_URL="${CLEAN_URL}/rest/v1/"
+
+          echo "A enviar pedido keep-alive para ${CLEAN_URL}..."
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 30 \
+            -H "User-Agent: AnimalMind-KeepAlive/1.0" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$TARGET_URL")
+
+          echo "HTTP status recebido: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 500 ]; then
+            echo "::error::Supabase devolveu HTTP $HTTP_STATUS — possível pausa ou erro de rede no projeto."
+            exit 1
+          fi
+
+          echo "✅ Supabase ativo com sucesso (HTTP $HTTP_STATUS)"

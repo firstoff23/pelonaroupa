@@ -1,0 +1,76 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Execução diária às 04:00 UTC (horário de baixo tráfego)
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Export DB dump to artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify PostgreSQL client tools
+        run: |
+          if ! command -v pg_dump &> /dev/null; then
+            echo "pg_dump não encontrado por padrão; a instalar postgresql-client..."
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          else
+            echo "✅ pg_dump já disponível no runner: $(pg_dump --version)"
+          fi
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::SUPABASE_DB_URL não configurado nos secrets — backup cancelado com segurança."
+            echo "Para ativar o backup automático, configure o secret SUPABASE_DB_URL (Connection String Session mode)."
+            exit 0
+          fi
+
+          # Mascara a connection string completa contra vazamento acidental em logs
+          echo "::add-mask::$DATABASE_URL"
+
+          TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
+          BACKUP_DIR="backups"
+          BACKUP_FILE="${BACKUP_DIR}/pelonaroupa_${TIMESTAMP}.sql.gz"
+
+          mkdir -p "$BACKUP_DIR"
+
+          echo "A iniciar exportação do esquema public da base de dados..."
+
+          # Exporta o esquema public sem donos nem privilégios específicos para portabilidade máxima
+          pg_dump "$DATABASE_URL" \
+            --schema=public \
+            --no-owner \
+            --no-privileges \
+            --no-acl \
+            --clean \
+            --if-exists \
+            | gzip > "$BACKUP_FILE"
+
+          if [ ! -s "$BACKUP_FILE" ]; then
+            echo "::error::O ficheiro de backup gerado está vazio. Verifique as permissões da string de ligação."
+            exit 1
+          fi
+
+          ls -lh "$BACKUP_DIR"
+          echo "✅ Backup gerado com sucesso: $BACKUP_FILE"
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_number }}-${{ github.run_attempt }}
+          path: backups/*.sql.gz
+          retention-days: 30
+          if-no-files-found: warn

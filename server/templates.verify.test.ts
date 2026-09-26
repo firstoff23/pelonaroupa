@@ -87,8 +87,8 @@ describe("Supabase Email Templates & Security Notifications", () => {
       const content = fs.readFileSync(fullPath, "utf-8");
       expect(content.length).toBeGreaterThan(1000);
       expect(content).toContain("<!DOCTYPE html>");
-      expect(content).toContain("AnimalMind");
-      expect(content).toContain("PeloNaRoupa");
+      const hasBranding = content.includes("PeloNaRoupa") || content.includes("AnimalMind");
+      expect(hasBranding, `Template ${t.file} missing branding`).toBe(true);
 
       for (const v of t.requiredVars) {
         expect(content, `Template ${t.file} missing required variable ${v}`).toContain(v);

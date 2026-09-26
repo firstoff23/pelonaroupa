@@ -1,85 +1,114 @@
+"""Merge pose-only manifests with independently annotated behavior labels.
+
+The pose extractor produces geometry only. This step joins human or otherwise
+approved behavior annotations; it never derives behavior labels from keypoints.
+"""
 from __future__ import annotations
 
 import argparse
 import csv
 from pathlib import Path
 
-LABEL_COLUMNS = ["posture", "head", "ears", "tail", "movement"]
-OUTPUT_COLUMNS = [
+LABEL_COLUMNS = ("posture", "head", "ears", "tail", "movement")
+ANNOTATION_COLUMNS = ("sample_id", "animal_id", *LABEL_COLUMNS)
+OUTPUT_COLUMNS = (
     "sample_id",
-    "animal_id",
     "image",
     "keypoints",
+    "split",
+    "animal_id",
     *LABEL_COLUMNS,
     "annotator",
     "source",
     "license",
     "notes",
-]
+)
 
 
-def merge(pose_manifest: Path, annotations: Path, output: Path) -> None:
-    with pose_manifest.open("r", encoding="utf-8", newline="") as fh:
-        pose_rows = {row["sample_id"]: row for row in csv.DictReader(fh)}
+def _read_rows(path: Path) -> list[dict[str, str]]:
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def merge(pose_manifest: Path, annotations: Path, output: Path) -> dict[str, int]:
+    pose_rows = _read_rows(pose_manifest)
+    annotation_rows = _read_rows(annotations)
     if not pose_rows:
-        raise ValueError("pose manifest is empty")
-
-    with annotations.open("r", encoding="utf-8", newline="") as fh:
-        annotation_rows = list(csv.DictReader(fh))
+        raise ValueError(f"pose manifest is empty: {pose_manifest}")
     if not annotation_rows:
-        raise ValueError("annotation manifest is empty")
+        raise ValueError(f"annotations are empty: {annotations}")
 
-    required = {"sample_id", "animal_id", *LABEL_COLUMNS, "annotator", "source", "license", "notes"}
-    missing = required - set(annotation_rows[0])
-    if missing:
-        raise ValueError(f"annotation manifest is missing columns: {sorted(missing)}")
+    missing_pose = {"sample_id", "image", "keypoints", "split"} - set(pose_rows[0])
+    missing_annotations = set(ANNOTATION_COLUMNS) - set(annotation_rows[0])
+    if missing_pose:
+        raise ValueError(f"pose manifest missing columns: {sorted(missing_pose)}")
+    if missing_annotations:
+        raise ValueError(f"annotations missing columns: {sorted(missing_annotations)}")
 
-    seen: set[str] = set()
-    merged: list[dict[str, str]] = []
-    for annotation in annotation_rows:
-        sample_id = annotation["sample_id"].strip()
+    annotations_by_sample: dict[str, dict[str, str]] = {}
+    for row in annotation_rows:
+        sample_id = row["sample_id"].strip()
+        animal_id = row["animal_id"].strip()
         if not sample_id:
-            raise ValueError("annotation has empty sample_id")
-        if sample_id in seen:
-            raise ValueError(f"duplicate annotation for sample_id {sample_id!r}")
-        seen.add(sample_id)
-        pose = pose_rows.get(sample_id)
-        if pose is None:
-            raise ValueError(f"annotation references unknown sample_id {sample_id!r}")
-
-        animal_id = annotation["animal_id"].strip()
+            raise ValueError("annotations contain an empty sample_id")
         if not animal_id:
-            raise ValueError(f"sample {sample_id!r} has no animal_id; refusing leakage-prone training data")
+            raise ValueError(
+                f"annotation {sample_id!r} has no animal_id; refusing unsafe split"
+            )
+        if sample_id in annotations_by_sample:
+            raise ValueError(f"duplicate annotation sample_id: {sample_id!r}")
+        annotations_by_sample[sample_id] = row
 
-        row = {
-            "sample_id": sample_id,
-            "animal_id": animal_id,
-            "image": pose["image"],
-            "keypoints": pose["keypoints"],
-            **{column: annotation[column].strip() for column in LABEL_COLUMNS},
-            "annotator": annotation["annotator"].strip(),
-            "source": annotation["source"].strip(),
-            "license": annotation["license"].strip(),
-            "notes": annotation["notes"].strip(),
-        }
+    merged: list[dict[str, str]] = []
+    unmatched_pose = 0
+    for pose in pose_rows:
+        sample_id = pose["sample_id"].strip()
+        annotation = annotations_by_sample.get(sample_id)
+        if annotation is None:
+            unmatched_pose += 1
+            continue
+        row = {column: pose.get(column, "") for column in OUTPUT_COLUMNS}
+        row.update(
+            {
+                "animal_id": annotation["animal_id"].strip(),
+                **{
+                    column: annotation.get(column, "").strip()
+                    for column in LABEL_COLUMNS
+                },
+                "annotator": annotation.get("annotator", "").strip(),
+                "source": annotation.get("source", "").strip(),
+                "license": annotation.get("license", "").strip(),
+                "notes": annotation.get("notes", "").strip(),
+            }
+        )
         merged.append(row)
 
+    if not merged:
+        raise ValueError("no pose rows matched behavioral annotations")
+
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=OUTPUT_COLUMNS)
+    with output.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=OUTPUT_COLUMNS)
         writer.writeheader()
         writer.writerows(merged)
 
-    print(f"wrote {len(merged)} annotated samples to {output}")
+    return {
+        "pose_rows": len(pose_rows),
+        "annotation_rows": len(annotation_rows),
+        "merged_rows": len(merged),
+        "unmatched_pose_rows": unmatched_pose,
+    }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Merge pose-only and behavior annotation manifests.")
+    parser = argparse.ArgumentParser(
+        description="Join pose-only rows with approved behavior annotations."
+    )
     parser.add_argument("--pose-manifest", required=True, type=Path)
     parser.add_argument("--annotations", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
-    merge(args.pose_manifest, args.annotations, args.output)
+    print(merge(args.pose_manifest, args.annotations, args.output))
 
 
 if __name__ == "__main__":

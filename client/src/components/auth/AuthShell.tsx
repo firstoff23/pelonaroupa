@@ -13,6 +13,7 @@ import {
   UserRound,
 } from "lucide-react";
 import {
+  type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
   useMemo,
@@ -354,7 +355,8 @@ export function AuthSubmitButton({
   loading,
   loadingLabel,
   disabled,
-}: {
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
   loading: boolean;
   loadingLabel: string;
@@ -365,6 +367,7 @@ export function AuthSubmitButton({
       type="submit"
       disabled={loading || disabled}
       className="h-12 w-full rounded-lg bg-primary hover:bg-primary/90 text-sm font-bold text-primary-foreground shadow-sm transition-transform active:scale-95 disabled:opacity-50"
+      {...props}
     >
       {loading ? (
         <>

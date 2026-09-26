@@ -18,11 +18,17 @@ The following security controls are implemented and active in production:
 ### Authentication & Sessions
 - **Supabase Auth** — JWT tokens with automatic refresh via `onAuthStateChange(TOKEN_REFRESHED)`
 - **HTTP-only session cookies** — `HttpOnly; SameSite=Strict; Secure` on the Node.js gateway layer
-- **MFA / TOTP** — Two-factor authentication (RFC 6238) compatible with Google Authenticator and Authy. Secrets are stored server-side in `users.mfa_secret`, validated with HMAC-SHA1 and a ±90s window
+- **MFA / TOTP** — Two-factor authentication (RFC 6238) compatible with Google Authenticator and Authy. Secrets are stored server-side in `users.mfa_secret`, validated with HMAC-SHA1 and a ±30s window (1 step drift).
+- **MFA Rate Limiting & Lockout**:
+  - Server-side tracking via `users.mfa_failed_attempts` and `users.mfa_locked_until`.
+  - 5 consecutive invalid TOTP attempts trigger a 15-minute account lockout (`TOO_MANY_REQUESTS`).
+  - Client-side defense-in-depth enforces immediate session termination (`signOut()`) after 5 failed attempts.
+  - *Nota de teste:* E2E testa lógica de frontend; rate-limit server-side coberto por testes de integração (`server/mfa.verify.test.ts`). Testes de integração correm contra projeto Supabase pelonaroupa-staging (`SUPABASE_TEST_URL`), nunca produção.
 - **Leaked Password Protection (HaveIBeenPwned k-anonymity)** — Active verification against known public data breaches via `server/security/check-password-pwned.ts`. The full password never leaves the server; only a 5-character SHA-1 prefix is sent with `Add-Padding: true` and 3s timeout fail-open. Enforced on account registration and password reset.
 
 ### Brute-Force & Rate Limiting
 - **slowapi** on the FastAPI backend: 3 requests / 15 min per IP on the `/classify` endpoint
+- **MFA TOTP brute-force defense**: 5 failed attempts -> 15 min database lockout on `users.mfa_locked_until`
 - **tRPC-level rate limiting** via `checkRateLimit()` per procedure
 
 ### Transport & Headers

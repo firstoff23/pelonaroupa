@@ -189,7 +189,7 @@ export const authRouter = router({
 
       const { data: userData, error: fetchError } = await supabase
         .from("users")
-        .select("mfa_secret")
+        .select("mfa_secret, mfa_failed_attempts, mfa_locked_until")
         .eq("id", userId)
         .single();
 
@@ -200,8 +200,45 @@ export const authRouter = router({
         });
       }
 
+      // Check if account is temporarily locked
+      if (
+        userData.mfa_locked_until &&
+        new Date(userData.mfa_locked_until).getTime() > Date.now()
+      ) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message:
+            "Conta bloqueada temporariamente. Tenta novamente mais tarde.",
+        });
+      }
+
       const isValid = validateTotp(userData.mfa_secret, input.code);
       if (!isValid) {
+        const newAttempts =
+          ((userData.mfa_failed_attempts as number | undefined) ?? 0) + 1;
+
+        if (newAttempts >= 5) {
+          await supabase
+            .from("users")
+            .update({
+              mfa_locked_until: new Date(
+                Date.now() + 15 * 60 * 1000,
+              ).toISOString(),
+              mfa_failed_attempts: 0,
+            })
+            .eq("id", userId);
+
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Demasiadas tentativas. Conta bloqueada por 15 minutos.",
+          });
+        }
+
+        await supabase
+          .from("users")
+          .update({ mfa_failed_attempts: newAttempts })
+          .eq("id", userId);
+
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Código inválido ou expirado.",
@@ -210,7 +247,11 @@ export const authRouter = router({
 
       const { error: updateError } = await supabase
         .from("users")
-        .update({ mfa_enabled: true })
+        .update({
+          mfa_enabled: true,
+          mfa_failed_attempts: 0,
+          mfa_locked_until: null,
+        })
         .eq("id", userId);
 
       if (updateError) {
@@ -220,7 +261,7 @@ export const authRouter = router({
         });
       }
 
-      return { success: true };
+      return { success: true, ok: true };
     }),
 
   "mfa.disable": protectedProcedure.mutation(async ({ ctx }) => {
@@ -229,7 +270,12 @@ export const authRouter = router({
 
     const { error } = await supabase
       .from("users")
-      .update({ mfa_secret: null, mfa_enabled: false })
+      .update({
+        mfa_secret: null,
+        mfa_enabled: false,
+        mfa_failed_attempts: 0,
+        mfa_locked_until: null,
+      })
       .eq("id", userId);
 
     if (error) {

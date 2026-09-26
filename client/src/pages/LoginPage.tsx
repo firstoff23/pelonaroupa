@@ -15,7 +15,7 @@ import { trpc } from "@/lib/trpc";
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
-  const { user, signIn, signOut } = useAuth();
+  const { user, signIn, signOut, isMfaVerified, markMfaVerified } = useAuth();
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
   const mfaVerifyMutation = trpc.auth["mfa.verify"].useMutation();
@@ -32,12 +32,41 @@ export default function LoginPage() {
   const [mfaCode, setMfaCode] = useState("");
   const [mfaError, setMfaError] = useState("");
   const [mfaLoading, setMfaLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
 
+  // Sync email from user context if present
   useEffect(() => {
     if (user?.email) {
       setEmail(user.email);
     }
   }, [user]);
+
+  // Check URL query param ?challenge=mfa
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get("challenge") === "mfa") {
+        setIsMfaChallenge(true);
+      }
+    }
+  }, []);
+
+  // Reload persistence: If user session exists but MFA is not yet verified in sessionStorage,
+  // query server to check if MFA is enabled and force challenge screen
+  useEffect(() => {
+    if (user && !isMfaVerified(user.id)) {
+      utils.auth["mfa.status"]
+        .fetch(undefined, { staleTime: 30_000 })
+        .then((status) => {
+          if (status?.enabled) {
+            setIsMfaChallenge(true);
+          }
+        })
+        .catch((err) => {
+          console.warn("[Login] Could not check MFA status on mount:", err);
+        });
+    }
+  }, [user, isMfaVerified, utils]);
 
   const normalizedEmail = email.trim();
   const isEmailValid = emailRegex.test(normalizedEmail);
@@ -68,7 +97,9 @@ export default function LoginPage() {
 
       // Check if user has MFA/TOTP active
       try {
-        const mfaStatus = await utils.auth["mfa.status"].fetch();
+        const mfaStatus = await utils.auth["mfa.status"].fetch(undefined, {
+          staleTime: 30_000,
+        });
         if (mfaStatus?.enabled) {
           setIsMfaChallenge(true);
           setLoading(false);
@@ -78,6 +109,9 @@ export default function LoginPage() {
         console.warn("[Login] Could not check MFA status:", mfaStatusErr);
       }
 
+      if (user?.id) {
+        markMfaVerified(user.id);
+      }
       toast.success("Bem-vindo de volta!");
       setLocation("/dashboard");
     } catch {
@@ -102,14 +136,38 @@ export default function LoginPage() {
     setMfaLoading(true);
     try {
       await mfaVerifyMutation.mutateAsync({ code: cleanCode });
+      setFailedAttempts(0);
+      if (user?.id) {
+        markMfaVerified(user.id);
+      }
       toast.success("Autenticação em dois passos validada com sucesso!");
       setLocation("/dashboard");
     } catch (err: unknown) {
+      const nextFailures = failedAttempts + 1;
+      setFailedAttempts(nextFailures);
+
+      if (nextFailures >= 5) {
+        try {
+          await signOut();
+        } catch {
+          // ignore
+        }
+        setIsMfaChallenge(false);
+        setMfaCode("");
+        setPassword("");
+        setFailedAttempts(0);
+        const limitMessage =
+          "Demasiadas tentativas inválidas. A sessão foi encerrada por segurança.";
+        setApiError(limitMessage);
+        toast.error(limitMessage);
+        return;
+      }
+
       const message =
         err instanceof Error && err.message
           ? err.message
           : "Código inválido ou expirado. Tente o código atual da sua aplicação.";
-      setMfaError(message);
+      setMfaError(`${message} (${nextFailures}/5 tentativas)`);
     } finally {
       setMfaLoading(false);
     }
@@ -125,6 +183,7 @@ export default function LoginPage() {
     setMfaCode("");
     setMfaError("");
     setPassword("");
+    setFailedAttempts(0);
   };
 
   return (
@@ -144,6 +203,7 @@ export default function LoginPage() {
           <div className="space-y-3 text-center text-sm">
             <button
               type="button"
+              data-testid="mfa-cancel"
               onClick={handleCancelMfa}
               className="inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
@@ -171,7 +231,12 @@ export default function LoginPage() {
       }
     >
       {isMfaChallenge ? (
-        <form onSubmit={handleMfaSubmit} className="space-y-4" noValidate>
+        <form
+          onSubmit={handleMfaSubmit}
+          className="space-y-4"
+          noValidate
+          data-testid="mfa-challenge"
+        >
           <AuthInlineNote
             icon={ShieldCheck}
             tone="neutral"
@@ -187,6 +252,7 @@ export default function LoginPage() {
 
           <AuthTextField
             id="login-mfa-code"
+            data-testid="mfa-input"
             label="Código de Autenticação (6 dígitos)"
             icon={KeyRound}
             type="text"
@@ -207,7 +273,18 @@ export default function LoginPage() {
             success={mfaCode.length === 6 ? "Código completo" : undefined}
           />
 
+          {mfaError && (
+            <div
+              data-testid="mfa-error"
+              className="text-xs font-medium text-destructive"
+              role="alert"
+            >
+              {mfaError}
+            </div>
+          )}
+
           <AuthSubmitButton
+            data-testid="mfa-submit"
             loading={mfaLoading}
             loadingLabel="A verificar código..."
             disabled={mfaCode.length !== 6 || mfaLoading}

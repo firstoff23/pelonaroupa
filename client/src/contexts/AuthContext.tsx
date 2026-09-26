@@ -53,6 +53,30 @@ export function requireSupabase() {
   return supabase;
 }
 
+export function isMfaVerified(userId?: string | null): boolean {
+  if (!userId || typeof window === "undefined") return false;
+  return window.sessionStorage.getItem(`mfa_verified:${userId}`) === "true";
+}
+
+export function markMfaVerified(userId?: string | null): void {
+  if (!userId || typeof window === "undefined") return;
+  window.sessionStorage.setItem(`mfa_verified:${userId}`, "true");
+}
+
+export function clearMfaFlag(userId?: string | null): void {
+  if (typeof window === "undefined") return;
+  if (userId) {
+    window.sessionStorage.removeItem(`mfa_verified:${userId}`);
+  } else {
+    for (let i = window.sessionStorage.length - 1; i >= 0; i--) {
+      const key = window.sessionStorage.key(i);
+      if (key?.startsWith("mfa_verified:")) {
+        window.sessionStorage.removeItem(key);
+      }
+    }
+  }
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -73,6 +97,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isEmailVerified: boolean;
   resendVerificationEmail: (email: string) => Promise<void>;
+  isMfaVerified: (userId?: string | null) => boolean;
+  markMfaVerified: (userId?: string | null) => void;
+  clearMfaFlag: (userId?: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -115,6 +142,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           "[AuthContext] Token refreshed automatically by Supabase",
         );
       }
+      if (event === "SIGNED_OUT" || !newSession) {
+        clearMfaFlag(user?.id);
+      }
       setSession(newSession);
       setUser(newSession?.user ?? null);
       syncOfflineQueueAuth(newSession);
@@ -123,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription?.unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await requireSupabase().auth.signInWithPassword({
@@ -180,6 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    clearMfaFlag(user?.id);
     const { error } = await requireSupabase().auth.signOut();
     if (error) throw error;
     setUser(null);
@@ -211,6 +242,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isEmailVerified,
     resendVerificationEmail,
+    isMfaVerified,
+    markMfaVerified,
+    clearMfaFlag,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

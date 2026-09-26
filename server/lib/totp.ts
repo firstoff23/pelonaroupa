@@ -58,3 +58,15 @@ export function validateTotp(
   }
   return false;
 }
+
+/**
+ * Generates a Time-based One-Time Password (TOTP) per RFC 6238 for a given timestamp.
+ */
+export function generateTotp(
+  secret: string,
+  timestampMs = Date.now(),
+): string {
+  const secretBytes = base32Decode(secret);
+  const counter = BigInt(Math.floor(timestampMs / 1000 / 30));
+  return hotp(secretBytes, counter);
+}

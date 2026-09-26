@@ -194,7 +194,35 @@ function getInputAt(parsedInput: unknown, index: number) {
   );
 }
 
-function trpcData(data: unknown) {
+export const mockMfaState = {
+  enabled: false,
+  verifyError: null as string | null,
+};
+
+export function setMockMfa(options: {
+  enabled?: boolean;
+  verifyError?: string | null;
+}) {
+  if (options.enabled !== undefined) mockMfaState.enabled = options.enabled;
+  if (options.verifyError !== undefined)
+    mockMfaState.verifyError = options.verifyError;
+}
+
+function trpcData(data: any) {
+  if (data && typeof data === "object" && data.__isError) {
+    return {
+      error: {
+        json: {
+          message: data.message ?? "Error",
+          code: -32600,
+          data: {
+            code: data.code ?? "BAD_REQUEST",
+            httpStatus: data.status ?? 400,
+          },
+        },
+      },
+    };
+  }
   return {
     result: {
       data: {
@@ -217,11 +245,21 @@ function procedureData(procedure: string, input: any) {
       return appUser;
     case "auth.logout":
     case "auth.deleteAccount":
+      return { success: true };
     case "auth.mfa.verify":
+      if (mockMfaState.verifyError) {
+        return {
+          __isError: true,
+          message: mockMfaState.verifyError,
+          code: "BAD_REQUEST",
+          status: 400,
+        };
+      }
+      return { success: true, ok: true };
     case "auth.mfa.disable":
       return { success: true };
     case "auth.mfa.status":
-      return { enabled: false };
+      return { enabled: mockMfaState.enabled };
     case "auth.mfa.setup":
       return {
         secret: "JBSWY3DPEHPK3PXP",
@@ -423,8 +461,13 @@ async function mockTrpc(page: Page) {
       trpcData(procedureData(procedure, getInputAt(parsedInput, index))),
     );
 
+    const hasSingleError = !isBatch && payload[0] && "error" in payload[0];
+    const errorStatus = hasSingleError
+      ? (payload[0].error?.json?.data?.httpStatus ?? 400)
+      : 200;
+
     await route.fulfill({
-      status: 200,
+      status: errorStatus,
       contentType: "application/json",
       body: JSON.stringify(isBatch ? payload : payload[0]),
     });
@@ -567,8 +610,15 @@ export async function installBrowserMocks(page: Page) {
   });
 }
 
+export async function setupPageMocks(page: Page) {
+  await installBrowserMocks(page);
+  await mockSupabase(page);
+  await mockTrpc(page);
+}
+
 export const test = base.extend({
   page: async ({ page }, use) => {
+    setMockMfa({ enabled: false, verifyError: null });
     page.on("pageerror", (err) => {
       console.error("[PAGE ERROR]", err.message, err.stack);
     });
@@ -578,9 +628,7 @@ export const test = base.extend({
         console.log(`[BROWSER ${type.toUpperCase()} LOG] ${msg.text()}`);
       }
     });
-    await installBrowserMocks(page);
-    await mockSupabase(page);
-    await mockTrpc(page);
+    await setupPageMocks(page);
     await use(page);
   },
 });

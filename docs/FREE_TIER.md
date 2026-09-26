@@ -44,6 +44,11 @@ Se o workflow falhar, pode ser corrido manualmente via **Actions → Integration
   2. Na secção **Connection String**, selecionar o modo **URI** (Session mode: `postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres`)
   3. Substituir `[YOUR-PASSWORD]` pela password configurada da BD
   4. No GitHub: **Settings** → **Secrets and variables** → **Actions** → **New repository secret** com nome `SUPABASE_DB_URL`
+
+> [!IMPORTANT]
+> **IPv6 vs. Session Pooler (IPv4):**
+> A Supabase desativou o suporte IPv4 nas ligações diretas (`db.[ref].supabase.co`), tornando-as estritamente IPv6. Como os runners do GitHub Actions operam apenas em rede **IPv4**, qualquer tentativa de usar a connection string direta falhará com `Network is unreachable`. É **estritamente obrigatório** usar o **Session Pooler** (`aws-0-[region].pooler.supabase.com:5432`) no secret `SUPABASE_DB_URL`.
+
 - **Como restaurar um backup:**
   ```bash
   # Download do artifact na aba Actions, depois descompactar e carregar:

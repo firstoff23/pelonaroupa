@@ -38,16 +38,16 @@ jobs:
             exit 0
           fi
 
-          set -eo pipefail
+          set -o pipefail
 
           # Mascara a connection string completa contra vazamento acidental em logs
           echo "::add-mask::$DATABASE_URL"
 
-          # Valida se está a usar conexão direta (IPv6-only) em vez do pooler IPv4
-          if [[ "$DATABASE_URL" == *"@db."*".supabase.co"* ]]; then
-            echo "::error::A connection string direta db.[ref].supabase.co é IPv6-only e não é acessível a partir dos runners do GitHub Actions."
-            echo "Por favor atualize o secret SUPABASE_DB_URL no GitHub para o modo Pooler (Session mode):"
-            echo "postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
+          # Validação se a URL for IPv6-only (pré-check)
+          if echo "$DATABASE_URL" | grep -q "db\..*\.supabase\.co"; then
+            echo "::error::A connection string aponta para 'db.[ref].supabase.co' (IPv6-only)."
+            echo "::error::Os runners do GitHub Actions são IPv4-only. Usa Session Pooler:"
+            echo "::error::postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
             exit 1
           fi
 
@@ -60,23 +60,27 @@ jobs:
           echo "A iniciar exportação do esquema public da base de dados..."
 
           # Exporta o esquema public sem donos nem privilégios específicos para portabilidade máxima
-          pg_dump "$DATABASE_URL" \
+          if ! pg_dump "$DATABASE_URL" \
             --schema=public \
             --no-owner \
             --no-privileges \
             --no-acl \
             --clean \
             --if-exists \
-            | gzip > "$BACKUP_FILE"
-
-          FILESIZE=$(stat -c%s "$BACKUP_FILE" 2>/dev/null || stat -f%z "$BACKUP_FILE" 2>/dev/null || wc -c < "$BACKUP_FILE")
-          if [ "$FILESIZE" -le 100 ]; then
-            echo "::error::O ficheiro de backup gerado tem apenas $FILESIZE bytes (conteúdo vazio). Verifique a ligação à base de dados."
+            | gzip > "$BACKUP_FILE"; then
+            echo "::error::pg_dump falhou ao exportar a base de dados (ver erros acima)"
             exit 1
           fi
 
-          ls -lh "$BACKUP_DIR"
-          echo "✅ Backup gerado com sucesso: $BACKUP_FILE"
+          # Validar o conteúdo descomprimido
+          DECOMPRESSED_LINES=$(gunzip -c "$BACKUP_FILE" | wc -l)
+          if [ "$DECOMPRESSED_LINES" -lt 10 ]; then
+            echo "::error::Backup vazio ou truncado ($DECOMPRESSED_LINES linhas descomprimidas)"
+            exit 1
+          fi
+
+          FILESIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
+          echo "✅ Backup gerado com sucesso: $BACKUP_FILE ($FILESIZE, $DECOMPRESSED_LINES linhas descomprimidas)"
 
       - name: Upload backup as artifact
         uses: actions/upload-artifact@v4

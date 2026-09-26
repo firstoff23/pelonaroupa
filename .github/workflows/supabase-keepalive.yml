@@ -27,8 +27,9 @@ jobs:
             exit 0
           fi
 
-          # Sanitiza a URL removendo eventual barra final
-          CLEAN_URL="${SUPABASE_URL%/}"
+          # Sanitiza a URL e a chave removendo eventuais aspas ou barras finais
+          CLEAN_URL=$(echo "$SUPABASE_URL" | tr -d '"' | tr -d "'" | sed 's:/*$::')
+          CLEAN_KEY=$(echo "$SUPABASE_ANON_KEY" | tr -d '"' | tr -d "'" | tr -d '[:space:]')
           TARGET_URL="${CLEAN_URL}/rest/v1/"
 
           echo "A enviar pedido keep-alive para ${CLEAN_URL}..."
@@ -36,8 +37,8 @@ jobs:
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             --max-time 30 \
             -H "User-Agent: AnimalMind-KeepAlive/1.0" \
-            -H "apikey: $SUPABASE_ANON_KEY" \
-            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "apikey: $CLEAN_KEY" \
+            -H "Authorization: Bearer $CLEAN_KEY" \
             "$TARGET_URL")
 
           echo "HTTP status recebido: $HTTP_STATUS"

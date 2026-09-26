@@ -38,8 +38,18 @@ jobs:
             exit 0
           fi
 
+          set -eo pipefail
+
           # Mascara a connection string completa contra vazamento acidental em logs
           echo "::add-mask::$DATABASE_URL"
+
+          # Valida se está a usar conexão direta (IPv6-only) em vez do pooler IPv4
+          if [[ "$DATABASE_URL" == *"@db."*".supabase.co"* ]]; then
+            echo "::error::A connection string direta db.[ref].supabase.co é IPv6-only e não é acessível a partir dos runners do GitHub Actions."
+            echo "Por favor atualize o secret SUPABASE_DB_URL no GitHub para o modo Pooler (Session mode):"
+            echo "postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
+            exit 1
+          fi
 
           TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)
           BACKUP_DIR="backups"
@@ -59,8 +69,9 @@ jobs:
             --if-exists \
             | gzip > "$BACKUP_FILE"
 
-          if [ ! -s "$BACKUP_FILE" ]; then
-            echo "::error::O ficheiro de backup gerado está vazio. Verifique as permissões da string de ligação."
+          FILESIZE=$(stat -c%s "$BACKUP_FILE" 2>/dev/null || stat -f%z "$BACKUP_FILE" 2>/dev/null || wc -c < "$BACKUP_FILE")
+          if [ "$FILESIZE" -le 100 ]; then
+            echo "::error::O ficheiro de backup gerado tem apenas $FILESIZE bytes (conteúdo vazio). Verifique a ligação à base de dados."
             exit 1
           fi
 

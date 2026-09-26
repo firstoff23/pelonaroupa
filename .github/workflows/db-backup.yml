@@ -18,15 +18,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify PostgreSQL client tools
+      - name: Install PostgreSQL 17 client tools
         run: |
-          if ! command -v pg_dump &> /dev/null; then
-            echo "pg_dump não encontrado por padrão; a instalar postgresql-client..."
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq postgresql-client
-          else
-            echo "✅ pg_dump já disponível no runner: $(pg_dump --version)"
+          # O runner ubuntu-latest traz pg_dump 15/16 por defeito.
+          # O Supabase usa PostgreSQL 17.6, e o pg_dump recusa
+          # fazer dump de um servidor mais recente que ele próprio.
+          # Instalar o cliente 17 do repositório oficial PGDG.
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends wget gnupg lsb-release ca-certificates
+
+          # Configurar chave e repositório oficial PGDG (modern signed-by keyring standard)
+          sudo install -d -m 0755 /etc/apt/keyrings
+          wget --quiet -O- https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor --yes -o /etc/apt/keyrings/postgresql.gpg
+
+          echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+
+          # Instalar cliente PostgreSQL 17
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends postgresql-client-17
+
+          # Adicionar binários PostgreSQL 17 ao PATH com prioridade
+          if [ -d "/usr/lib/postgresql/17/bin" ]; then
+            echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+            export PATH="/usr/lib/postgresql/17/bin:$PATH"
           fi
+
+          # Verificar a versão instalada
+          pg_dump --version
 
       - name: Dump database
         env:
@@ -88,4 +108,4 @@ jobs:
           name: db-backup-${{ github.run_number }}-${{ github.run_attempt }}
           path: backups/*.sql.gz
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
